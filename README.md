@@ -1,28 +1,22 @@
-<<<<<<< HEAD
-# be11-2nd-4dollarExit-TikTakTalk-FE
-=======
-# vue-project
+# be11-2nd-4dollarExit-TikTakTalk
 
-## Project setup
-```
-npm install
-```
+## Git Commit Convention
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+커밋 메시지 형식
 
-### Compiles and minifies for production
-```
-npm run build
-```
+### 태그 종류
 
-### Lints and fixes files
-```
-npm run lint
-```
+- **Feat** : 새로운 기능 추가
+- **Fix** : 버그 수정
+- **Docs** : 문서 수정
+- **Style** : 세미콜론 누락 등 코드 변경이 없는 경우
+- **Refactor** : 코드 리팩토링
+- **Test** : 테스트 코드 및 리팩토링 테스트 코드 추가
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
->>>>>>> 0459445 (first upload test)
+#### 커밋 메시지 작성 규칙
+
+1. **제목**은 간결하게 작성.
+2. **본문**에는 무엇을 변경했는지 또는 왜 변경했는지를 상세히 기록.
+
+---
+
