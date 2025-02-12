@@ -69,11 +69,11 @@
             </v-col>
         </v-row>
     </v-container>
-    <v-dialog v-model="trueOrFalse" max-width="400px">
+    <v-dialog v-model="trueOrFalse" max-width="400px" @keydown.enter="resetModal()">
         <v-card>
-            <v-card-title>
+            <v-card-text class="error-message">
                 {{errorMessage}}
-            </v-card-title>
+            </v-card-text>
             <v-card-actions>
                 <v-btn color="c0c1ff" @click="resetModal()">확인</v-btn>
             </v-card-actions>
@@ -122,3 +122,11 @@ export default {
     }
 }
 </script>
+<style scoped>
+    .error-message {
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        text-align: center;
+    }
+</style>
