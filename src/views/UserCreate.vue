@@ -122,11 +122,13 @@ export default {
     }
 }
 </script>
+
 <style scoped>
+    /* 에러 메시지가 너무 길 경우 짤려서 끝에 ...으로 표현되는것 전체가 나오도록 수정 */
     .error-message {
-        white-space: normal;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        text-align: center;
+        white-space: normal; /* 기본 줄바꿈 허용 */
+        word-wrap: break-word; /* 단어가 너무 길어도 자동 줄바꿈 */
+        overflow-wrap: break-word; /* 긴 단어도 줄바꿈 가능 */
+        text-align: center; /* 가운데 정렬 */
     }
 </style>
