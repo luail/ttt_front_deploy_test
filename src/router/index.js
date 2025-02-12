@@ -1,10 +1,9 @@
 import{createRouter,createWebHistory} from 'vue-router';
-import { tttRouter } from './tttRouters';
 
 const routes = [
 
 
- ...tttRouter,
+ 
 
 
 ]
