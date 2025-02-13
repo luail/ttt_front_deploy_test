@@ -35,7 +35,14 @@
                             required
                             />
                             <v-text-field
-                            label="phonNumber"
+                            label="passwordCheck"
+                            v-model="passwordCheck"
+                            type="password"
+                            prepend-icon="mdi-lock"
+                            required
+                            />
+                            <v-text-field
+                            label="phoneNumber"
                             v-model="phoneNumber"
                             prepend-icon="mdi-cellphone"
                             required
@@ -90,6 +97,7 @@ export default {
             email:"",
             loginId:"",
             password:"",
+            passwordCheck:"",
             phoneNumber:"",
             nickName:"",
             blogLink:"",
@@ -100,16 +108,23 @@ export default {
     },
     methods: {
         async create() {
-            try{
                 const data = {
                     name:this.name, email:this.email, 
-                    loginId:this.loginId, password:this.password, 
+                    loginId:this.loginId, password:this.password,
                     phoneNumber:this.phoneNumber, nickName:this.nickName, 
                     blogLink:this.blogLink, batch:this.batch
                 };
+                if(this.password != this.passwordCheck) {
+                    console.log(this.password)
+                    console.log(this.passwordCheck)
+                    this.errorMessage="password와 passwordCheck가 일치하지 않습니다."
+                    this.trueOrFalse=true;
+                    return
+                }
+            try{
                 await axios.post(`${process.env.VUE_APP_API_BASE_URL}/ttt/user/create`, data)
                 this.$router.push('/')
-            } catch(error) {
+            }  catch(error) {
                 console.log(error)
                 this.trueOrFalse=true
                 this.errorMessage = error.response.data.status_message
