@@ -24,7 +24,7 @@
                             <v-text-field
                             label="loginId"
                             v-model="loginId"
-                            prepend-icon="mdi-email"
+                            prepend-icon="mdi-login"
                             required
                             />
                             <v-text-field
@@ -37,25 +37,25 @@
                             <v-text-field
                             label="phonNumber"
                             v-model="phoneNumber"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-cellphone"
                             required
                             />
                             <v-text-field
                             label="nickName"
                             v-model="nickName"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-rename"
                             required
                             />
                             <v-text-field
                             label="blogLink"
                             v-model="blogLink"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-link-box-variant"
                             required
                             />
                             <v-text-field
                             label="batch"
                             v-model="batch"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-flag"
                             required
                             />
                             <v-row>

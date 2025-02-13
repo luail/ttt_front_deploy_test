@@ -1,4 +1,5 @@
 import UserCreate from "@/views/UserCreate.vue";
+import UserLogin from "@/views/UserLogin.vue";
 
 export const userRouter= [
     {
@@ -6,5 +7,9 @@ export const userRouter= [
         name:'UserCreate',
         component: UserCreate
     },
-
+    {
+        path:'/ttt/user/login',
+        name:'UserLogin',
+        component:UserLogin
+    }
 ]
