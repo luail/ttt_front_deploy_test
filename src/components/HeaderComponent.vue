@@ -10,7 +10,9 @@
                       <v-btn>리스트</v-btn>
                     </v-col>
                     <v-col>
-                      <v-btn>관리자</v-btn>
+                      <div v-if="userRole==='ADMIN'">
+                        <v-btn>관리자</v-btn>
+                      </div>
                     </v-col>
                     <v-col class="justify-end">
                       <v-btn v-if="!isLogin" :to="{path:'/ttt/user/create'}">회원가입</v-btn>
@@ -28,7 +30,7 @@
     export default{
       data(){
         return{
-          userInfo:null,
+          userRole:"",
           isLogin:false,
         }
       },
@@ -37,7 +39,7 @@
         if(token){
           const payload = jwtDecode(token);
           this.isLogin=true;
-          this.userInfo=payload;
+          this.userRole=payload.role;
         }
       },
       methods:{

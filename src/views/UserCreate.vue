@@ -107,7 +107,7 @@ export default {
                     phoneNumber:this.phoneNumber, nickName:this.nickName, 
                     blogLink:this.blogLink, batch:this.batch
                 };
-                await axios.post(`${process.env.VUE_APP_API_BASE_URL}/ttt/user/create`, data)
+                await axios.post(`${process.env.VUE_APP_API_BASE_URL}/user/create`, data)
                 this.$router.push('/')
             } catch(error) {
                 console.log(error)
