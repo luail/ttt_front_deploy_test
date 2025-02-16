@@ -15,15 +15,15 @@
                         <v-table>
                             <thead>
                                 <tr>
-                                    <th>방번호</th>
                                     <th>방제목</th>
+                                    <th>참여인원</th>
                                     <th>채팅</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="chat in chatRoomList" :key="chat.roomId">
-                                    <td>{{ chat.roomId }}</td>
                                     <td>{{ chat.roomName }}</td>
+                                    <td>{{ chat.chatPaticipantCount }}</td>
                                     <td>
                                         <v-btn color="primary" @click="joinChatRoom(chat.roomId)">
                                             참여하기
@@ -55,6 +55,16 @@
             </v-card>
         </v-dialog>
     </v-container>
+    <v-dialog v-model="trueOrFalse" max-width="400px" @keydown.enter="resetModal()">
+        <v-card>
+            <v-card-text class="error-message">
+                {{errorMessage}}
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="c0c1ff" @click="resetModal()">확인</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -69,6 +79,8 @@ export default {
             currentPage: 0,
             isLoading: false,
             isLastPage: false,
+            trueOrFalse: false,
+            errorMessage:""
         };
     },
     async created() {
@@ -78,15 +90,19 @@ export default {
     methods: {
         async joinChatRoom(roomId) {
             await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/${roomId}/join`);
-            this.$router.push(`/chatpage/${roomId}`);
+            this.$router.push(`/ttt/chatpage/${roomId}`);
         },
         async createChatRoom() {
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/create?roomName=${this.newRoomTitle}`, null);
-            this.showCreateRoomModal = false;
-            this.chatRoomList = []; // 목록 초기화 후 다시 불러오기
-            this.currentPage = 0;
-            this.isLastPage = false;
-            this.loadChatRoom();
+            try{
+                await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/create?roomName=${this.newRoomTitle}`, null);
+                this.showCreateRoomModal = false;
+                window.location.reload()
+            } catch(error) {
+                console.log(error)
+                this.trueOrFalse=true
+                this.errorMessage = error.response.data.status_message
+            }
+
         },
         async loadChatRoom() {
             try {
@@ -108,8 +124,10 @@ export default {
                 this.chatRoomList = [...this.chatRoomList, ...additionalData];
                 this.currentPage++;
                 this.isLoading = false;
-            } catch (e) {
-                console.error(e);
+            } catch (error) {
+                console.log(error);
+                this.trueOrFalse=true
+                this.errorMessage = error.response.data.status_message
             }
         },
         scrollPagination() {
@@ -117,7 +135,19 @@ export default {
             if (isBottom) {
                 this.loadChatRoom();
             }
+        },
+        resetModal() {
+            this.trueOrFalse=false
         }
     }
 };
 </script>
+<style scoped>
+    /* 에러 메시지가 너무 길 경우 짤려서 끝에 ...으로 표현되는것 전체가 나오도록 수정 */
+    .error-message {
+        white-space: normal; /* 기본 줄바꿈 허용 */
+        word-wrap: break-word; /* 단어가 너무 길어도 자동 줄바꿈 */
+        overflow-wrap: break-word; /* 긴 단어도 줄바꿈 가능 */
+        text-align: center; /* 가운데 정렬 */
+    }
+</style>
