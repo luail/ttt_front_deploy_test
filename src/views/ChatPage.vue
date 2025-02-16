@@ -11,9 +11,9 @@
                             <div 
                              v-for="(msg, index) in messages"
                              :key="index"
-                             :class="['chat-message', msg.sendernickName ===this.sendernickName ? 'sent' : 'received' ]"
+                             :class="['chat-message', msg.senderNickName ===this.senderNickName ? 'sent' : 'received' ]"
                             >
-                                <strong>{{ msg.sendernickName }}: </strong> {{ msg.message }}
+                                <strong>{{ msg.senderNickName }}: </strong> {{ msg.message }}
                             </div>
                         </div>
                         <v-text-field
@@ -33,9 +33,9 @@
 </template>
 
 <script>
-import SockJS from 'sockjs-client';
 import Stomp from 'webstomp-client';
 import axios from 'axios';
+import SockJS from 'sockjs-client';
 
 export default{
     data(){
@@ -44,12 +44,12 @@ export default{
             newMessage: "",
             stompClient: null,
             token: "",
-            sendernickName: null,
+            senderNickName: null,
             roomId: null,
         }
     },
     async created(){
-        this.sendernickName = localStorage.getItem("nickName");
+        this.senderNickName = localStorage.getItem("nickName");
         this.roomId = this.$route.params.roomId;
         const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
         this.messages = response.data.result;
@@ -86,7 +86,7 @@ export default{
         sendMessage(){
             if(this.newMessage.trim() === "")return;
             const message = {
-                sendernickName: this.sendernickName,
+                senderNickName: this.senderNickName,
                 message: this.newMessage
             }
             this.stompClient.send(`/publish/${this.roomId}`, JSON.stringify(message));
