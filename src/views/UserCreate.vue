@@ -24,7 +24,7 @@
                             <v-text-field
                             label="loginId"
                             v-model="loginId"
-                            prepend-icon="mdi-email"
+                            prepend-icon="mdi-login"
                             required
                             />
                             <v-text-field
@@ -35,27 +35,34 @@
                             required
                             />
                             <v-text-field
-                            label="phonNumber"
-                            v-model="phoneNumber"
+                            label="passwordCheck"
+                            v-model="passwordCheck"
+                            type="password"
                             prepend-icon="mdi-lock"
+                            required
+                            />
+                            <v-text-field
+                            label="phoneNumber"
+                            v-model="phoneNumber"
+                            prepend-icon="mdi-cellphone"
                             required
                             />
                             <v-text-field
                             label="nickName"
                             v-model="nickName"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-rename"
                             required
                             />
                             <v-text-field
                             label="blogLink"
                             v-model="blogLink"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-link-box-variant"
                             required
                             />
                             <v-text-field
                             label="batch"
                             v-model="batch"
-                            prepend-icon="mdi-lock"
+                            prepend-icon="mdi-flag"
                             required
                             />
                             <v-row>
@@ -90,6 +97,7 @@ export default {
             email:"",
             loginId:"",
             password:"",
+            passwordCheck:"",
             phoneNumber:"",
             nickName:"",
             blogLink:"",
@@ -100,16 +108,24 @@ export default {
     },
     methods: {
         async create() {
-            try{
                 const data = {
                     name:this.name, email:this.email, 
-                    loginId:this.loginId, password:this.password, 
+                    loginId:this.loginId, password:this.password,
                     phoneNumber:this.phoneNumber, nickName:this.nickName, 
                     blogLink:this.blogLink, batch:this.batch
                 };
-                await axios.post(`${process.env.VUE_APP_API_BASE_URL}/ttt/user/create`, data)
+
+                if(this.password != this.passwordCheck) {
+                    console.log(this.password)
+                    console.log(this.passwordCheck)
+                    this.errorMessage="password와 passwordCheck가 일치하지 않습니다."
+                    this.trueOrFalse=true;
+                    return
+                }
+            try{
+                await axios.post(`${process.env.VUE_APP_API_BASE_URL}/user/create`, data)
                 this.$router.push('/')
-            } catch(error) {
+            }  catch(error) {
                 console.log(error)
                 this.trueOrFalse=true
                 this.errorMessage = error.response.data.status_message

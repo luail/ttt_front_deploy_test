@@ -3,22 +3,22 @@
         <v-row>
             <!-- 사이드바 -->
             <v-col cols="1">
-                <v-navigation-drawer permanent class="sidebar" width="180">
-                    <v-list>
-                        <v-list-item v-for="(c, index) in categoryList" :key="index">
-                            <v-list-item-content>
-                                <v-list-item-title class="font-weight-bold">{{ c }}</v-list-item-title>
-                            </v-list-item-content>
-                        </v-list-item>
-                    </v-list>
-                </v-navigation-drawer>
-            </v-col>
+          <v-navigation-drawer permanent class="sidebar" width="180">
+            <v-list>
+              <v-list-item v-for="(c, index) in categoryList" :key="index" @click="selectedBoard(c.categoryId)" class="clickable-item">
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-bold" >{{c.categoryName}}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-navigation-drawer>
+        </v-col>
 
             <!-- 상단 배너 -->
-            <v-row>
-                 <v-col>
-                     <div class="ad-banner">
-                      BEYOND SW CAMP와 함께 성장 가능성 있는 개발자로 취업하세요.
+            <v-row justify="center">
+                 <v-col cols="12">
+                    <div class="ad-banner">
+                      <img :src="require('@/assets/tttad.png')" alt="" class="banner-img">
                     </div>
                  </v-col>
             </v-row>
@@ -28,12 +28,48 @@
                 <!-- 상단 메뉴 -->
                 <v-row class="mb-5 align-center">
                     <v-col>
-                        <h2 class="text-h4 font-weight-bold">전체 게시판</h2>
+                        <h2 class="text-h4 font-weight-bold">{{ boardTitle }}</h2>
                     </v-col>
+
+           <!-- 게시물 검색창 -->
+          <v-col cols="6">
+                <v-row align="center">
+                    <!-- 검색 옵션 선택 -->
+                    <v-col cols="3">
+                         <v-select
+                          v-model="searchType"
+                          :items="searchOptions"
+                          item-title="text"
+                          item-value="value"
+                          outlined
+                          dense
+                         ></v-select>
+                         </v-col>
+                            <!-- 검색 입력창 -->
+                        <v-col cols="7">
+                             <v-text-field
+                                    v-model="searchKeyword"
+                                    label="검색어 입력"
+                                    outlined
+                                    dense
+                                    clearable
+                            ></v-text-field>
+                        </v-col>
+
+                    <!-- 검색 버튼 -->
+                            <v-col cols="2">
+                                <v-btn color="primary" class="text-white font-weight-bold" @click="searchPosts">
+                                    검색
+                                </v-btn>
+                            </v-col>
+                        </v-row>
+                    </v-col>
+                  <!-- 글 작성하기 버튼 -->
                     <v-col class="text-right">
-                        <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 작성하기</v-btn>
+                        <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 글쓰기</v-btn>
                     </v-col>
                 </v-row>
+
 
                 <!-- 게시글 카드 리스트 -->
                 <v-row>
@@ -104,33 +140,88 @@ export default {
         return {
             postList: [],
             categoryList: [],
-            page: 1
+            page: 1,
+            boardTitle:"",
+            searchType:"optional",
+            searchOptions:[{text:"선택", value:"optional"},{text:"제목", value:"title"},{text:"내용",value:"contents"}],
+            searchKeyword:"",
+          
         }
     },
     async created() {
         try {
             // 게시글 데이터 불러오기
-            const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/ttt/post/findAll`);
-            this.postList = response.data.result.content;
-            console.log(this.postList)
+            await this.changeBoard();
 
             // 카테고리 리스트 불러오기
-            const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/ttt/category/all`);
+            const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
             this.categoryList = sideBarResponse.data.result;
+            console.log(this.categoryList)
 
         } catch (error) {
             console.error('데이터 로드 실패:', error);
         }
     },
+
+
+        watch:{ //현재 url에서 boardId가 바뀌면, 그 동작을 감지하고 changeBoard함수를 실행하여 해당 게시판의 데이터를 다시 불러오는 기능을 실행
+            '$route.params.boardId':async function () {
+                await this.changeBoard();
+                
+            }
+        },
+
+
     methods: {
+        //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
+        async changeBoard(){
+
+            const boardId = this.$route.params.boardId || "all";//현재 url에서 boardId값을 가져옴 없다면 all로 설정
+            let url = boardId === "all" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll` : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}`;
+            const response = await axios.get(url);
+            this.postList = response.data.result.content;
+
+            if(boardId === "all"){
+                this.boardTitle = '전체게시판';
+            } else{
+                const selectedCategory = this.categoryList.find(c=>c.categoryId === parseInt(boardId));
+                this.boardTitle = selectedCategory ? selectedCategory.categoryName : "게시판";
+            }
+        },
+        //게시물 누르면 해당 상세게시물페이지로 이동
         goToDetailPost(postId) {
             this.$router.push(`/ttt/post/${postId}`);
         },
+        //작성하기 버튼 누르면 작성페이지로 이동
         createPost() {
-            this.$router.push('/post/create');
+            this.$router.push('/ttt/post/create');
         },
+        //날짜 데이터 형식 변화
         formatDate(date) {
             return new Date(date).toLocaleDateString('ko-KR');
+        },
+        //사이드 바에서 게시판 눌러이동
+        async selectedBoard(boardId){
+            this.$router.push(`/ttt/post/list/${boardId}`);
+        },
+        //게시물 검색
+        async searchPosts(){
+            this.postList = [];
+
+            try{
+                let params = {};
+            if(this.searchType === "title"){
+                params.title = this.searchKeyword;
+            } else if(this.searchType === "contents"){
+                params.contents = this.searchKeyword;
+            }
+            console.log(params)
+            const response =  await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/find`,{params});
+            this.postList = response.data.result.content;
+
+            }catch(error){
+                console.log("검색요청 실패",error);
+            }
         }
     }
 }
@@ -143,20 +234,32 @@ export default {
 }
 
 .ad-banner {
-  height: 150px;
-  background-color: #4b3f72;
-  color: white;
+  width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 1.2em;
-  font-weight: bold;
-  border-radius: 50px;
-  margin: 20px;
-  margin-left: 0px; /* 왼쪽 마진 추가 */
-  margin-right: 90px; /* 오른쪽 마진 최소화 */
+  align-items: center;
+  margin: 0 auto; /* 좌우 여백 자동 조정 */
 }
 
+.banner-img {
+  width: 1500px; /* 전체 너비를 차지하도록 설정 */
+  height: 350px; /* 원본 비율 유지 */
+  display: block; /* 블록 요소로 설정하여 중앙 정렬 */
+  border-radius: 40px;
+  margin-top: 0px;
+  margin-right: 100px;
+  margin-left:100px;
+  margin-bottom: 40px;
+}
+
+.clickable-item {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.clickable-item:hover {
+  background-color: #f0f0f0;
+}
 
 .post-card {
     
