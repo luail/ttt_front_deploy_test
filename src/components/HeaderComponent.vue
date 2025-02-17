@@ -7,6 +7,9 @@
                         <v-btn>커뮤니티</v-btn>
                     </v-col>
                     <v-col>
+                        <v-btn :to="{path:'/ttt/chat/list'}">오픈채팅방</v-btn>
+                    </v-col>
+                    <v-col>
                       <v-btn>리스트</v-btn>
                     </v-col>
                     <v-col>

@@ -68,7 +68,7 @@ export default{
         connectWebsocket(){
             if(this.stompClient && this.stompClient.connected) return;
             // sockjs는 websocket을 내장한 향상된 js 라이브러리. http엔드포인트 사용.
-            const sockJs = new SockJS(`${process.env.VUE_APP_API_BASE_URL}/connect`)
+            const sockJs = new SockJS(`http://localhost:8080/connect`)
             this.stompClient = Stomp.over(sockJs);
             this.token = localStorage.getItem("token");
             this.stompClient.connect({
@@ -83,15 +83,26 @@ export default{
                 }
             )
         },
-        sendMessage(){
-            if(this.newMessage.trim() === "")return;
-            const message = {
-                senderNickName: this.senderNickName,
-                message: this.newMessage
-            }
-            this.stompClient.send(`/publish/${this.roomId}`, JSON.stringify(message));
-            this.newMessage = ""
-        },
+        sendMessage() {
+    if (this.newMessage.trim() === "") return;
+
+    const message = {
+        senderNickName: this.senderNickName,
+        message: this.newMessage
+    };
+
+    console.log("📤 전송할 메시지:", message);
+
+    if (this.stompClient && this.stompClient.connected) {
+        console.log("✅ STOMP 연결 상태 확인됨");
+        this.stompClient.send(`/publish/${this.roomId}`, JSON.stringify(message));
+        console.log("✅ 메시지 전송 성공!");
+    } else {
+        console.error("❌ STOMP 클라이언트가 연결되지 않음");
+    }
+
+    this.newMessage = "";
+},
         scrollToBottom(){
             this.$nextTick(()=>{
                 const chatBox = this.$el.querySelector(".chat-box");
