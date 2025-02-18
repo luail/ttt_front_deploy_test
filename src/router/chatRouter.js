@@ -1,6 +1,5 @@
 import ChatPage from "@/views/ChatPage.vue";
 import GroupChattingList from "@/views/GroupChattingList.vue";
-import MyChatPage from "@/views/MyChatPage.vue";
 
 export const chatRouter= [
     {
@@ -9,14 +8,17 @@ export const chatRouter= [
         component: GroupChattingList
     },
     {
-        path:'/ttt/chatpage/:roomId',
+        path:'/ttt/chatpage',
         name:'ChatPage',
         component: ChatPage
     },
     {
-        path:'/ttt/my/chat/page',
-        name:'MyChatPage',
-        component: MyChatPage
+        path:'/ttt/chatpage/:roomId',
+        name:'ChatRoomPage',
+        component: ChatPage
     },
-    
+    {
+        path:'/ttt/my/chat/page',
+        redirect: { name: 'ChatPage' }
+    }
 ]
