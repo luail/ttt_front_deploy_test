@@ -79,10 +79,17 @@
               <span class="comment-rank">{{ comment.rankingPointOfCommentAuthor }}</span>
               <div class="comment-time">{{ formatDate(comment.createdTime) }}</div>
               <div v-if="comment.loginIdOfCommentAuthor === userId" class="comment-actions">
-                <v-btn color="blue" class="text-white" @click="editComment(comment.commentId)">수정</v-btn>
+                <v-btn color="blue" class="text-white" @click="editComment(comment)">수정</v-btn>
                 <v-btn color="red" class="text-white ml-2" @click="deleteComment(comment.commentId)">삭제</v-btn>
               </div>
-              <div class="comment-text">{{ comment.contents }}
+            <!-- 수정 중인 댓글이면 입력창 표시 -->
+            <div v-if="editingCommentId == comment.commentId">
+              <v-textarea v-model="editingCommentContent" dense auto-grow></v-textarea>
+              <v-btn color="blue" class="text-white" @click="updateComment(comment.commentId)">수정</v-btn>
+              <v-btn color="blue" class="text-white" @click="cancelEdit()">취소</v-btn>
+            </div>
+            <!-- 수정 누른 댓글이 아니라면 기존처럼 표시 -->
+              <div v-else class="comment-text">{{ comment.contents }}
               <div class="again-comment" @click="toggleReply(comment.commentId)">+댓글등록</div>
               </div>
 
@@ -141,6 +148,9 @@ export default {
       newReply:'',
       isAuthor:false, //글작성자와 본인이 동일한지 따지는 boolean객체->글 수정,삭제버튼 보이게 하기 위해
       isAuthorOfComment:false,
+      originalComment:'',
+      editingCommentId: null, // 수정중인 댓글ID
+      editingCommentContent:'' // 수정중인 댓글의 내용
     
     }
     
@@ -229,8 +239,28 @@ export default {
             }return
         },
         //댓글 수정
-        editComment(){
-
+        editComment(comment){
+         this.editingCommentId = comment.commentId //null값이 었던 editingCommentId에 값이 부여되고 댓글 아이디와 일치하는 조건이 true가 되면서 댓글 수정창이 열림
+         this.editingCommentContent = comment.contents 
+        },
+        //  댓글 수정 제출
+        async updateComment(commentId){
+          const updatedComment={
+              contents : this.editingCommentContent
+            }
+        try{
+          await axios.patch(`${process.env.VUE_APP_API_BASE_URL}/comment/update/${commentId}`,updatedComment);
+          this.editingCommentId =null;
+          this.editingCommentContent = ''; //다시 원상복구
+          this.refreshPost() //수정 완료했으니 댓글리스트를 새로 갱신
+        } catch(error){
+          console.log("댓글수정실패",error)
+        }
+        },
+        // 댓글 수정 제출 취소
+        cancelEdit(){
+        this.editingCommentId = null, 
+        this.editingCommentContent= ' ' 
         },
         //댓글 삭제
         async deleteComment(commentId){
@@ -245,6 +275,12 @@ export default {
           }
         },
 
+        async refreshPost(){
+          const thisPostId = this.$route.params.id
+          const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/detail/${thisPostId}`);
+          this.thisPost = response.data.result;
+        },
+       
         //대댓글 삭제
         async deleteComment2(commentId){
           const rechek = confirm("정말로 삭제하시겠습니까?");

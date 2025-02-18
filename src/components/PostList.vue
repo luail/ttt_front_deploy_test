@@ -123,9 +123,10 @@
                 <!-- 페이지네이션 -->
                 <v-pagination 
                     v-model="page" 
-                    :length="10" 
+                    :length="totalPages" 
                     color="primary"
                     class="mt-5"
+                    @update:modelValue="fetchPage"
                 ></v-pagination>
             </v-col>
         </v-row>
@@ -140,7 +141,10 @@ export default {
         return {
             postList: [],
             categoryList: [],
-            page: 1,
+            page: 1, //페이지 처리
+            size:20, //페이지 처리
+            totalPages:1, //페이지 처리
+            totalElements:0, //페이지 처리
             boardTitle:"",
             searchType:"optional",
             searchOptions:[{text:"선택", value:"optional"},{text:"제목", value:"title"},{text:"내용",value:"contents"}],
@@ -166,8 +170,8 @@ export default {
 
         watch:{ //현재 url에서 boardId가 바뀌면, 그 동작을 감지하고 changeBoard함수를 실행하여 해당 게시판의 데이터를 다시 불러오는 기능을 실행
             '$route.params.boardId':async function () {
-                await this.changeBoard();
-                
+                this.page =1; //새로운 게시판을 클릭하면 첫 페이지로 가야하니까
+                await this.changeBoard();   
             }
         },
 
@@ -177,15 +181,23 @@ export default {
         async changeBoard(){
 
             const boardId = this.$route.params.boardId || "all";//현재 url에서 boardId값을 가져옴 없다면 all로 설정
-            let url = boardId === "all" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll` : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}`;
-            const response = await axios.get(url);
-            this.postList = response.data.result.content;
-
+            let url = boardId === "all" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
+                                        : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
+            try{
+                const response = await axios.get(url);
+                console.log(response)
+                this.postList = response.data.result.content;
+                this.totalPages = response.data.result.totalPages;
+                this.totalElements = response.data.result.totalElements;
+            }catch(error){
+                console.log("게시글 로딩 실패",error)
+            }
             if(boardId === "all"){
                 this.boardTitle = '전체게시판';
             } else{
                 const selectedCategory = this.categoryList.find(c=>c.categoryId === parseInt(boardId));
                 this.boardTitle = selectedCategory ? selectedCategory.categoryName : "게시판";
+                
             }
         },
         //게시물 누르면 해당 상세게시물페이지로 이동
@@ -206,6 +218,7 @@ export default {
         },
         //게시물 검색
         async searchPosts(){
+            this.page =1; //검색시 페이지 초기화
             this.postList = [];
 
             try{
@@ -222,9 +235,19 @@ export default {
             }catch(error){
                 console.log("검색요청 실패",error);
             }
+        },
+        //페이지 변경
+        async fetchPage(newPage){
+            this.page = newPage
+            await this.changeBoard();
         }
+
+
+
+
     }
-}
+    }
+
 </script>
 
 <style scoped>
