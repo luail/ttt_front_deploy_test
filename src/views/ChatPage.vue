@@ -18,7 +18,7 @@
                                 >
                                     <v-list-item-content>
                                         <v-list-item-title class="chat-room-name">
-                                            {{ chat.roomName }}
+                                            {{ getChatRoomName(senderNickName, chat.roomName) }}
                                         </v-list-item-title>
                                         <v-list-item-subtitle v-if="chat.unReadCount > 0" class="unread-count">
                                             읽지 않은 메시지: {{ chat.unReadCount }}
@@ -45,7 +45,7 @@
             <v-col cols="12" md="7" class="chat-main-column">
                 <v-card class="chat-card" elevation="0">
                     <v-card-title class="chat-room-header">
-                        {{ currentChatRoom ? currentChatRoom.roomName : '채팅방을 선택해주세요' }}
+                        {{ getChatRoomName(senderNickName, currentChatRoom ? currentChatRoom.roomName : '채팅방을 선택해주세요') }}
                     </v-card-title>
                     <div class="chat-content-wrapper">
                         <div class="chat-box" ref="chatBox">
@@ -57,6 +57,7 @@
                                 <div class="message-content">
                                     <strong>{{ msg.senderNickName }}</strong>
                                     <p class="message-text">{{ msg.message }}</p>
+                                    <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -104,11 +105,17 @@ export default{
     async created(){
         this.senderNickName = localStorage.getItem("nickName");
         this.roomId = this.$route.params.roomId;
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
-        this.messages = response.data.result;
+        
+        // roomId가 있을 때만 채팅 히스토리와 웹소켓 연결을 실행
+        if (this.roomId) {
+            const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
+            this.messages = response.data.result;
+            this.connectWebsocket();
+        }
+        
+        // 채팅방 목록은 항상 가져옴
         const chatListResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
         this.chatList = chatListResponse.data.result;
-        this.connectWebsocket();
     },
     // 사용자가 현재 라우트에서 다른 라우트로 이동하려고 할때 호출되는 훅함수
     beforeRouteLeave(to, from, next) {
@@ -176,17 +183,30 @@ export default{
         async enterChatRoom(roomId) {
             if (this.roomId !== roomId) {
                 try {
-                    this.disconnectWebSocket();
+                    // 기존 웹소켓 연결이 있다면 먼저 끊기
+                    if (this.roomId) {
+                        this.disconnectWebSocket();
+                    }
+                    
                     this.roomId = roomId;
                     this.currentChatRoom = this.chatList.find(chat => chat.roomId === roomId);
                     
+                    // 새로운 채팅방의 히스토리 가져오기
                     const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/history/${roomId}`);
                     this.messages = response.data.result;
+                    
+                    // 읽지 않은 메시지 처리
+                    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/${roomId}/read`);
+                    // chatList에서 해당 채팅방의 unReadCount를 0으로 업데이트
+                    if (this.currentChatRoom) {
+                        this.currentChatRoom.unReadCount = 0;
+                    }
+                    
+                    // 새로운 웹소켓 연결
                     this.connectWebsocket();
                     this.scrollToBottom();
                 } catch (error) {
                     console.error('채팅방 입장 실패:', error);
-                    this.$router.push('/ttt/mychatpage');
                 }
             }
         },
@@ -206,7 +226,27 @@ export default{
                 console.error('채팅방 나가기 실패:', error);
                 // 에러 처리 필요시 추가
             }
-        }
+        },
+        getChatRoomName(currentUser, roomName) {
+            if (roomName.includes('-')) {
+                const [user1, user2] = roomName.split('-');
+                
+                return currentUser === user1 ? user2 : user1;
+            }
+            
+            return roomName;
+        },
+        formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            const hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? '오후' : '오전';
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+            
+            return `${ampm} ${formattedHours}:${formattedMinutes}`;
+        },
     },
     mounted() {
         this.scrollToBottom();
@@ -218,9 +258,29 @@ export default{
 </script>
 <style scoped>
 .chat-container {
-    max-width: 1400px !important;
-    margin: 0 auto;
-    padding: 24px;
+    display: flex;
+    height: 100vh;
+    background-color: #f7f7f7;
+}
+
+.chat-list {
+    width: 300px;
+    background-color: #ffffff;
+    margin: 16px;
+    margin-right: 8px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.chat-room {
+    flex: 1;
+    background-color: #ffffff;
+    margin: 16px;
+    margin-left: 8px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
 }
 
 .chat-row {
@@ -232,7 +292,7 @@ export default{
 
 .chat-list-column {
     padding: 20px;
-    border-right: 1px solid rgba(107, 41, 229, 0.1);  /* 포인트 컬러의 연한 구분선 */
+    border-right: 1px solid rgba(107, 41, 229, 0.1);
     position: relative;
 }
 
@@ -248,20 +308,20 @@ export default{
         transparent,
         rgba(107, 41, 229, 0.2),
         transparent
-    );  /* 그라데이션 효과의 구분선 */
+    );
 }
 
 .chat-main-column {
     padding: 20px;
-    background: rgba(248, 249, 250, 0.5);  /* 매우 연한 배경색 */
+    background: rgba(248, 249, 250, 0.5);
     border-top-right-radius: 16px;
     border-bottom-right-radius: 16px;
 }
 
 .chat-card, .chat-list-card {
     height: calc(100vh - 140px);
-    background: transparent;  /* 카드 배경을 투명하게 */
-    box-shadow: none;  /* 카드 그림자 제거 */
+    background: transparent;
+    box-shadow: none;
 }
 
 .chat-list-card {
@@ -269,12 +329,11 @@ export default{
 }
 
 .chat-box {
-    background-color: white;  /* 채팅 영역 배경색 */
+    background-color: white;
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);  /* 미세한 그림자 */
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
 }
 
-/* 채팅방 목록 스타일 개선 */
 .v-list {
     background: transparent;
     padding: 8px;
@@ -400,7 +459,6 @@ export default{
     transform: translateY(-1px);
 }
 
-/* 스크롤바 스타일링 */
 .chat-box::-webkit-scrollbar {
     width: 6px;
 }
@@ -414,7 +472,6 @@ export default{
     border-radius: 3px;
 }
 
-/* 스크롤바 스타일링 */
 .chat-rooms::-webkit-scrollbar {
     width: 6px;
 }
@@ -465,11 +522,18 @@ export default{
     z-index: 1;
 }
 
-.message-input {
-    margin-bottom: 12px;
+.message-time {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+    display: block;
 }
 
-.send-button {
-    height: 44px;
+.sent .message-time {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.received .message-time {
+    color: #666;
 }
 </style>
