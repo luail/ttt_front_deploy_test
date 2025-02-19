@@ -27,6 +27,26 @@
                                 </v-col>
                             </v-row>
                         </v-form>
+
+                        <!-- oauth 로그인 -->
+                        <v-divider class="my-4"></v-divider>
+                        <v-row>
+                            <v-col cols="6" class="d-flex justify-center">
+                                <img 
+                                  src="@/assets/google_login.png" 
+                                  style="max-height: 40px; width: auto;"
+                                  @click="googleLogin"
+                                />
+                            </v-col>
+                            <!-- <v-col cols="6" class="d-flex justify-center">
+                                <img 
+                                  src="@/assets/kakao_login.png" 
+                                  style="max-height: 40px; width: auto;"
+                                  @click="kakaoLogin"
+                                />
+                            </v-col> -->
+                        </v-row>
+
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -53,7 +73,13 @@ export default {
             loginId:"",
             password:"",
             errorMessage:"",
-            trueOrFalse:false
+            trueOrFalse:false,
+
+            googleOAuthUrl: "https://accounts.google.com/o/oauth2/auth", // Google OAuth URL
+            googleClientId: "906300369324-bj1gkpi8ltlkr4jjq40pq8orl90ulvbg.apps.googleusercontent.com", // Google Cloud Console에서 생성한 Client ID
+            googleRedirectUri: "http://localhost:3000/oauth/google/redirect", // Google API에 등록된 Redirect URI
+            // https://www.googleapis.com/auth/userinfo.email 또는 email로 사용가능
+            googleScope: "openid email profile", // openid와 picture는 기본적으로 제공. email은 요청시 별도의 console설정없이도 제공
         }
     },
     methods: {
@@ -78,7 +104,15 @@ export default {
         },
         resetModal() {
             this.trueOrFalse = false
-        }
+        },
+        googleLogin() {
+            const auth_url = `${this.googleOAuthUrl}?client_id=${this.googleClientId}&redirect_uri=${this.googleRedirectUri}&response_type=code&scope=${this.googleScope}`;
+            window.location.href = auth_url;
+        },
+        googleLoginServer(){
+            // 이 요청은 서버를통해 OAuth 제공자(Google)로 이동하므로, 서버로부터 jwt토큰을 받을때 리다이렉트 방식으로 밖에 받을수 없음.
+            window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        },
     }
 }
 </script>
