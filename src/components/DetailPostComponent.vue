@@ -45,14 +45,26 @@
           <v-divider></v-divider>
         
           <v-card-text class="post-content">
-            {{ thisPost.contents }}
+            <!-- quill-editor로 작성했기때문에 html요소를 그대로 읽어와야하므로 v-html태그로 읽는다 -->
+             <div v-html="thisPost.contents"></div>
+
+            <!-- 사용자가 올린 이미지 리스트 -->
+            <v-row>
+              <v-col v-for="(image, index) in thisPost.attachmentsUrl" :key="index" cols="4">
+                <v-img 
+                  :src="image" 
+                  class="uploaded-image"
+                  contain
+                />
+              </v-col>
+            </v-row>
           </v-card-text>
           <v-card-actions class="like-container">
-            <v-btn icon class="like-btn" @click="toggleLike()">
-              <v-icon v-if="thisPost.liked">mdi-thumb-up</v-icon>
-              <v-icon v-else>mdi-thumb-up-outline</v-icon>
-            </v-btn>
-            <div class="like-count">{{ thisPost.likesCount }}</div>
+          <v-btn icon class="like-btn" @click="toggleLike()">
+          <v-icon v-if="thisPost.liked">mdi-thumb-up</v-icon>
+          <v-icon v-else>mdi-thumb-up-outline</v-icon>
+          </v-btn>
+          <div class="like-count">{{ thisPost.likesCount }}</div>
           </v-card-actions>
        
 
@@ -160,7 +172,8 @@ export default {
  async created() {
      // 카테고리 리스트 불러오기
      const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
-            this.categoryList = sideBarResponse.data.result;
+     const beforeCategoryList= sideBarResponse.data.result;       
+     this.categoryList = [{categoryName: "전체게시판", categoryId:0},...beforeCategoryList] 
 
       //상세 게시글 데이터 불러오기
       const thisPostId = this.$route.params.id;
@@ -188,8 +201,9 @@ export default {
             return new Date(date).toLocaleDateString('ko-KR');
         },
       //왼쪽 사이드바 게시판 이동
-        async selectedBoard(boardId){
-            this.$router.push(`/ttt/post/list/${boardId}`);
+       selectedBoard(boardId){  
+        this.$router.push(`/ttt/post/list/${boardId}`);
+
         },
 
       // 좋아요 누르면, 아이콘 색깔, 좋아요 개수 변화

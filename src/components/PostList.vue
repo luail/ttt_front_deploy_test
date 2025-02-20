@@ -7,7 +7,7 @@
             <v-list>
               <v-list-item v-for="(c, index) in categoryList" :key="index" @click="selectedBoard(c.categoryId)" class="clickable-item">
                 <v-list-item-content>
-                  <v-list-item-title class="font-weight-bold" >{{c.categoryName}}</v-list-item-title>
+                  <v-list-item-title class="font-weight-bold">{{c.categoryName}}</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
@@ -18,7 +18,9 @@
             <v-row justify="center">
                  <v-col cols="12">
                     <div class="ad-banner">
+                    <a href="https://www.inflearn.com/users/1014633/@bradkim" target="_blank">
                       <img :src="require('@/assets/tttad.png')" alt="" class="banner-img">
+                    </a>
                     </div>
                  </v-col>
             </v-row>
@@ -28,42 +30,47 @@
                 <!-- 상단 메뉴 -->
                 <v-row class="mb-5 align-center">
                     <v-col>
-                        <h2 class="text-h4 font-weight-bold">{{ boardTitle }}</h2>
+                        <h2 class="text-h3 font-weight-bold" style="margin-left: 140px;">{{ boardTitle }}</h2>
                     </v-col>
 
            <!-- 게시물 검색창 -->
-          <v-col cols="6">
-                <v-row align="center">
+            <v-col cols="6">
+                <v-row align="center" class="search-container">
                     <!-- 검색 옵션 선택 -->
                     <v-col cols="3">
-                         <v-select
-                          v-model="searchType"
-                          :items="searchOptions"
-                          item-title="text"
-                          item-value="value"
-                          outlined
-                          dense
-                         ></v-select>
-                         </v-col>
-                            <!-- 검색 입력창 -->
-                        <v-col cols="7">
-                             <v-text-field
-                                    v-model="searchKeyword"
-                                    label="검색어 입력"
-                                    outlined
-                                    dense
-                                    clearable
-                            ></v-text-field>
-                        </v-col>
+                        <v-select
+                            v-model="searchType"
+                            :items="searchOptions"
+                            item-title="text"
+                            item-value="value"
+                            solo
+                            rounded
+                            hide-details
+                            class="search-select"
+                        ></v-select>
+                    </v-col>
+
+                    <!-- 검색 입력창 -->
+                    <v-col cols="7">
+                        <v-text-field
+                            v-model="searchKeyword"
+                            label="검색어 입력"
+                            solo
+                            rounded
+                            hide-details
+                            clearable
+                            class="search-input"
+                        ></v-text-field>
+                    </v-col>
 
                     <!-- 검색 버튼 -->
-                            <v-col cols="2">
-                                <v-btn color="primary" class="text-white font-weight-bold" @click="searchPosts">
-                                    검색
-                                </v-btn>
-                            </v-col>
-                        </v-row>
+                    <v-col cols="2" class="d-flex justify-center">
+                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts">
+                            <v-icon left>mdi-magnify</v-icon> 검색
+                        </v-btn>
                     </v-col>
+                </v-row>
+            </v-col>
                   <!-- 글 작성하기 버튼 -->
                     <v-col class="text-right">
                         <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 글쓰기</v-btn>
@@ -72,53 +79,53 @@
 
 
                 <!-- 게시글 카드 리스트 -->
-                <v-row>
-                    <v-col v-for="post in postList" :key="post.postId" cols="12">
-                        <v-card class="mb-4 post-card" @click="goToDetailPost(post.postId)">
-                            <v-card-text>
-                                <v-row no-gutters class="align-center">
-                                    <!-- 프로필 이미지 -->
-                                    <v-col cols="1" class="d-flex justify-center align-center">
-                                        <img 
-                                            :src="post.authorImage || require('@/assets/basicProfileImage.png')" 
-                                            class="rounded-circle" 
-                                            style="width: 60px; height: 60px; object-fit: cover;"
-                                        />
-                                    </v-col>
+                    <v-row>
+                        <v-col v-for="post in postList" :key="post.postId" cols="12">
+                            <v-card class="mb-4 post-card" @click="goToDetailPost(post.postId)">
+                                <v-card-text>
+                                    <!-- 첫 번째 줄: 프로필 이미지 & 닉네임 -->
+                                    <v-row no-gutters class="align-center">
+                                        <v-col cols="auto" class="d-flex align-center">
+                                            <img 
+                                                :src="post.authorImage || require('@/assets/basicProfileImage.png')" 
+                                                class="rounded-square" 
+                                            />
+                                        </v-col>        
+                                        <v-col class="user-info">
+                                            <div class="nickname">{{ post.authorNickName }}</div>
+                                            <div class="date">{{ formatDate(post.createdTime) }}</div>
+                                        </v-col>
+                                        
+                                    </v-row>
 
-                                    <!-- 게시물 내용 -->
-                                    <v-col cols="11" class="pl-2">
-                                        <!-- 게시물 제목 -->
-                                        <div class="text-h5 mt-1">{{ post.title }}</div>
-                                        <!-- 작성자 이름 -->
-                                        <div class="font-weight-bold text-body-3">{{ post.authorNickName }}</div>
-                                        <!-- 게시물 내용 -->
-                                        <div class="text-body-2 text--secondary">{{ post.content }}</div>
+                                    <!-- 두 번째 줄: 게시물 제목 -->
+                                    <v-row no-gutters>
+                                        <v-col>
+                                            <div class="post-title">
+                                                {{ post.title }}
+                                            </div>
+                                        </v-col>
+                                    </v-row>
 
-                                        <!-- 태그 리스트 -->
-                                        <div class="mt-3">
-                                            <v-chip 
-                                                v-for="(tag, i) in post.tags" 
-                                                :key="i" 
-                                                color="grey lighten-3" 
-                                                class="mr-2"
-                                            >
-                                                {{ tag }}
-                                            </v-chip>
-                                        </div>
+                                    <!-- 세 번째 줄: 게시물 내용 미리보기 -->
+                                    <v-row no-gutters>
+                                        <v-col>
+                                            <div class="text-preview">
+                                                {{ truncatedContent(removeHtmlTags(post.contents), 100) }}
+                                            </div>
+                                        </v-col>
+                                    </v-row>
 
-                                        <!-- 게시물 메타정보 (댓글, 좋아요) -->
-                                        <div class="mt-4 d-flex align-center">
-                                            <v-icon class="mr-2">mdi-thumb-up-outline</v-icon> {{ post.likesCount }}
-                                            <v-icon class="ml-5 mr-2">mdi-comment-outline</v-icon> {{ post.countOfComment }}
-                                            <div class="ml-auto">{{ formatDate(post.createdTime) }}</div>
-                                        </div>
-                                    </v-col>
-                                </v-row>
-                            </v-card-text>
-                        </v-card>
-                    </v-col>
-                </v-row>
+                                    <!-- 네 번째 줄: 게시물 메타정보 (댓글, 좋아요) -->
+                                    <v-row no-gutters class="mt-4 align-center">
+                                        <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }}
+                                        <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }}
+                                        <div class="ml-auto">{{ formatDate(post.createdTime) }}</div>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-col>
+                    </v-row>
 
                 <!-- 페이지네이션 -->
                 <v-pagination 
@@ -159,8 +166,20 @@ export default {
 
             // 카테고리 리스트 불러오기
             const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
-            this.categoryList = sideBarResponse.data.result;
+            const beforeCategoryList=sideBarResponse.data.result;
+            this.categoryList = [{categoryName: "전체게시판", categoryId:0},...beforeCategoryList]
             console.log(this.categoryList)
+
+            //게시글 타이틀 가지고오기
+            const boardId = this.$route.params.boardId
+            if(boardId === '0'){
+                this.boardTitle = '전체게시판';
+            } else{
+                const selectedCategory = this.categoryList.find(c=>c.categoryId === parseInt(boardId));
+                console.log(selectedCategory)
+                this.boardTitle = selectedCategory ? selectedCategory.categoryName : "게시판";
+                
+            }
 
         } catch (error) {
             console.error('데이터 로드 실패:', error);
@@ -174,15 +193,15 @@ export default {
                 await this.changeBoard();   
             }
         },
-
-
+    
     methods: {
         //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
         async changeBoard(){
 
-            const boardId = this.$route.params.boardId || "all";//현재 url에서 boardId값을 가져옴 없다면 all로 설정
-            let url = boardId === "all" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
-                                        : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
+            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 없다면 all로 설정\
+            console.log(boardId)
+            let url = boardId === "0" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
+                                    : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
             try{
                 const response = await axios.get(url);
                 console.log(response)
@@ -192,10 +211,11 @@ export default {
             }catch(error){
                 console.log("게시글 로딩 실패",error)
             }
-            if(boardId === "all"){
+            if(boardId === '0'){
                 this.boardTitle = '전체게시판';
             } else{
                 const selectedCategory = this.categoryList.find(c=>c.categoryId === parseInt(boardId));
+                console.log(selectedCategory)
                 this.boardTitle = selectedCategory ? selectedCategory.categoryName : "게시판";
                 
             }
@@ -240,11 +260,22 @@ export default {
         async fetchPage(newPage){
             this.page = newPage
             await this.changeBoard();
-        }
-
-
-
-
+        },
+        //게시물 본문 미리보기
+        truncatedContent(text, length) {
+      if (!text) return ""; // text가 undefined일 경우 빈 문자열 반환
+      return text.length > length ? text.slice(0, length) + "..." : text;
+    },
+       //퀼 편집기로 만들어진 html문자열을 dom객체로 변환하고 텍스트 콘텐츠만 가지고 오는 것
+        removeHtmlTags(text){
+            if(text){
+                const doc = new DOMParser().parseFromString(text,"text/html");
+                return doc.body.textContent || ""; //html태그 제거하고 텍스트만 가지고 오는 명령어
+            } else{
+                return"";
+            }
+        },
+    
     }
     }
 
@@ -265,14 +296,20 @@ export default {
 }
 
 .banner-img {
-  width: 1500px; /* 전체 너비를 차지하도록 설정 */
+  width: 1400px; /* 전체 너비를 차지하도록 설정 */
   height: 350px; /* 원본 비율 유지 */
   display: block; /* 블록 요소로 설정하여 중앙 정렬 */
   border-radius: 40px;
   margin-top: 0px;
   margin-right: 100px;
-  margin-left:100px;
+  margin-left: 70px;
   margin-bottom: 40px;
+}
+
+.banner-img:hover {
+    box-shadow: 0 10px 20px rgba(4, 221, 109, 0.841);
+    transform: translateY(-10px);
+ 
 }
 
 .clickable-item {
@@ -281,28 +318,101 @@ export default {
 }
 
 .clickable-item:hover {
-  background-color: #f0f0f0;
+    box-shadow: 0 5px 10px rgba(251, 251, 251, 0.966);
+    transform: translateY(-5px);
 }
 
 .post-card {
-    
-    margin-left: 140px; /* 왼쪽 마진 추가 */
+    margin-left: 140px; /* 왼쪽 마진 */
     margin-right: 0px; /* 오른쪽 마진 최소화 */
+    margin-bottom: 25px; /* 게시물 카드 간격 증가 */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     border-radius: 25px;
+    padding: 30px 20px; /* 상하 여백 늘려서 카드 크기 키우기 */
+    transition: 0.3s;
 }
 
-.rounded-circle {
-    border-radius: 50%;
-    border: 2px solid #ccc;
+.post-card:hover {
+    box-shadow: 0 10px 20px rgba(242, 13, 169, 0.3);
+    transform: translateY(-10px);
+}
+
+.post-title{
+    margin-top: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+
+}
+
+.text-preview {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}
+
+
+.rounded-square {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px; /* 모서리를 둥글게 */
+  object-fit: cover;
+  border: 2px solid #ddd; /* 테두리 추가 (선택 사항) */
 }
 
 .text-right {
     text-align: right;
 }
 
-.v-list-item {
-    text-align: left;
-    padding-left: 20px;
+.profile-container {
+  display: flex;
+  align-items: flex-end;  /* 수정: center에서 flex-end로 변경하여 하단 정렬 */
+  gap: 10px;
 }
+
+.user-info {
+  display: flex;
+  flex-direction: column;  /* 수정: row에서 column으로 변경하여 세로 배치 */
+  gap: 4px;  /* 간격 조정 */
+  margin-left: 10px;
+  margin-top: 30px;
+}
+
+.nickname {
+  font-size: 20px;
+  font-weight: bold;  /* 닉네임을 더 강조하기 위해 추가 */
+}
+
+.date {
+  font-size: 15px;  /* 날짜 텍스트 크기를 약간 작게 조정 */
+  color: #666;  /* 날짜 색상을 좀 더 연하게 설정 */
+}
+
+.search-container {
+  background-color: white;  /* 부드러운 배경색 */
+  padding: 10px 15px;
+  border-radius: 15px;  /* 전체적으로 둥근 스타일 */
+}
+
+.search-select {
+  background-color: white;
+  border-radius: 10px;
+}
+
+.search-input {
+  background-color: white;
+  border-radius: 10px;
+}
+
+.search-btn {
+  height: 50px;
+  font-size: 16px;
+  border-radius: 10px;  /* 버튼도 둥글게 */
+}
+
 </style>
