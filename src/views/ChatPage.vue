@@ -14,6 +14,7 @@
                                     v-for="chat in chatList"
                                     :key="chat.roomId"
                                     :class="{'active-chat': chat.roomId === roomId}"
+                                    
                                     @click="enterChatRoom(chat.roomId)"
                                 >
                                     <v-list-item-content>
@@ -49,17 +50,26 @@
                     </v-card-title>
                     <div class="chat-content-wrapper">
                         <div class="chat-box" ref="chatBox">
-                            <div 
-                                v-for="(msg, index) in messages"
-                                :key="index"
-                                :class="['chat-message', msg.senderNickName === this.senderNickName ? 'sent' : 'received' ]"
-                            >
-                                <div class="message-content">
-                                    <strong>{{ msg.senderNickName }}</strong>
-                                    <p class="message-text">{{ msg.message }}</p>
-                                    <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
+                            <template v-for="(msg, index) in messages" :key="`msg-group-${index}`">
+                                <!-- 날짜 구분선 -->
+                                <div 
+                                    v-if="shouldShowDateDivider(msg, messages[index-1])"
+                                    class="date-divider"
+                                >
+                                    <span>{{ formatDate(msg.sendTime) }}</span>
                                 </div>
-                            </div>
+                                
+                                <!-- 채팅 메시지 -->
+                                <div 
+                                    :class="['chat-message', msg.senderNickName === senderNickName ? 'sent' : 'received']"
+                                >
+                                    <div class="message-content">
+                                        <strong>{{ msg.senderNickName }}</strong>
+                                        <p class="message-text">{{ msg.message }}</p>
+                                        <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                         <div class="input-area">
                             <v-text-field
@@ -314,6 +324,17 @@ export default{
             const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
             
             return `${ampm} ${formattedHours}:${formattedMinutes}`;
+        },
+        shouldShowDateDivider(currentMsg, prevMsg) {
+            if (!currentMsg || !prevMsg) return false;
+            const currentDate = new Date(currentMsg.sendTime).toDateString();
+            const prevDate = new Date(prevMsg.sendTime).toDateString();
+            return currentDate !== prevDate;
+        },
+        formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString();
         },
     },
     mounted() {
@@ -683,5 +704,32 @@ export default{
     0% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.05); opacity: 0.8; }
     100% { transform: scale(1); opacity: 1; }
+}
+
+.date-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.date-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.08);
+    z-index: -1;
+}
+
+.date-divider span {
+    background-color: #F8FAFC;
+    padding: 4px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #64748B;
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 </style>
