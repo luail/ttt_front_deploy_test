@@ -21,6 +21,9 @@
                 <v-btn>관리자</v-btn>
               </div>
             </v-col>
+            <v-col>
+              <v-btn v-if="isLogin" :to="{path:'/ttt/user/myInformation'}">마이페이지</v-btn>
+            </v-col>
             <v-col class="justify-end">
               <v-btn v-if="!isLogin" :to="{path:'/ttt/user/create'}">회원가입</v-btn>
               <v-btn v-if="!isLogin" :to="{path:'/ttt/user/login'}">로그인</v-btn>
