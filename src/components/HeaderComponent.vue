@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar class="header-container" flat height="auto">
+    <v-app-bar class="header-container">
       <v-container class="py-2">
         <v-row align="center" no-gutters>
           <!-- 로고 -->
