@@ -5,12 +5,12 @@ import PostUpdate from "@/views/PostUpdate.vue";
 
 export const postRouter = [
 
-    {
-        path:'/ttt/post/list/all',
-        name:PostList,
-        component:PostList
+    // {
+    //     path:'/ttt/post/list/all',
+    //     name:PostList,
+    //     component:PostList
 
-    },
+    // },
     {
         path:'/ttt/post/:id',
         name:DetailPostComponent,

@@ -36,13 +36,13 @@
           <v-divider></v-divider>
 
           <!-- 본문 작성 -->
-          <v-card-text style="min-height: 500px">
+          <v-card-text>
             <quill-editor
               ref="quillEditor"
               :disabled="false"
               :value="content"
               :options="editorOptions"
-              @text-change="onEditorChange"
+              @input="onEditorChange"
               @ready="onEditorReady"
               @drop="handleImageDrop"
             />
@@ -50,7 +50,7 @@
 
           <!-- 제출 버튼 -->
           <v-card-actions>
-            <v-btn color="purple" class="secondary" @click="postCreate()">제출</v-btn>
+            <v-btn color="yellow" class="secondary" @click="postCreate()">제출</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -84,7 +84,6 @@ export default {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'], // 텍스트 스타일
             [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 리스트
-            [{ size: ["small", false, "large", "huge"] }],
             [{color:[]},{background:[]}],
             ['link', 'image'], // 링크, 이미지
             [{ 'align': [] }], // 정렬 옵션
@@ -101,7 +100,6 @@ export default {
     ]
       },
       content:"",
-      attachments:[],
      
     }
   },
@@ -138,18 +136,9 @@ export default {
         formData.append("title", this.title);
         formData.append("contents", this.content);
         formData.append("postCategoryId", this.selectedCategoryId);
-        console.log(this.title);
-        console.log(this.content);
-        console.log(this.selectedCategoryId);
-
-        if(this.attachments && this.attachments.length > 0){
-          this.attachments.forEach(file=>{
-            formData.append("attachments",file);
-            console.log(this.file)
-          })
-        }
-       
-   
+        console.log(this.content)
+        console.log(this.title)
+ 
         const response = await axios.post(
           `${process.env.VUE_APP_API_BASE_URL}/post/create`, 
           formData, 
@@ -170,27 +159,24 @@ export default {
     onEditorChange(){
       if(this.editorInstance){
         this.content = this.editorInstance.root.innerHTML;
+        console.log(this.content);
       } else{
         console.warn("Editor instance is not ready yet")
       }
     },
 
     handleImageDrop(event) {
-      // 퀼에디터의 드롭 동작을 인식하기 위해 기본 드롭동작을 막음
-      event.preventDefault();
       const file = event.dataTransfer.files[0];
-      this.attachments.push(file);
-      console.log(this.attachments)
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        const imageUrl = e.target.result; //Base64 인코딩된 이미지 데이터
-        const editor = this.$refs.quillEditor.getQuill(); //Quill에디터 가져오기
-        const range = editor.getSelection(); //현재 커서 위치 가져오기
+        const imageUrl = e.target.result;
+        const editor = this.$refs.quillEditor.getEditor();
+        const range = editor.getSelection();
         editor.insertEmbed(range.index, 'image', imageUrl);
       };
-      reader.readAsDataURL(file);//파일을 Base64로 변환하여 Quill에디터에 직접 삽입할 수 있도록함
+      reader.readAsDataURL(file);
     }
   }
 }
@@ -200,8 +186,6 @@ export default {
 .page-container {
   margin: 0 30px;
 }
-
-
 
 .sidebar {
   background-color: #f4f4f4;
@@ -215,10 +199,10 @@ export default {
   padding: 20px;
 }
 
-/* Quill Editor 스타일 외부 라이브러리이므로 스타일이 적용이안되 브이 딥명령어 이용*/
-::v-deep .ql-editor {
-  min-height: 800px;
-  font-size: 25px;
+/* Quill Editor 스타일 */
+.ql-editor {
+  min-height: 1500px;
+  font-size: 16px;
 
 }
 
