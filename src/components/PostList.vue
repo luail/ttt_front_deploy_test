@@ -49,7 +49,7 @@
                             class="search-select"
                         ></v-select>
                     </v-col>
-
+                   
                     <!-- 검색 입력창 -->
                     <v-col cols="7">
                         <v-text-field
@@ -76,7 +76,6 @@
                         <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 글쓰기</v-btn>
                     </v-col>
                 </v-row>
-
 
                 <!-- 게시글 카드 리스트 -->
                     <v-row>
@@ -131,7 +130,7 @@
                 <v-pagination 
                     v-model="page" 
                     :length="totalPages" 
-                    color="primary"
+                    color="purple"
                     class="mt-5"
                     @update:modelValue="fetchPage"
                 ></v-pagination>
@@ -142,6 +141,12 @@
 
 <script>
 import axios from 'axios';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ko';
+
+dayjs.extend(relativeTime);
+dayjs.locale('ko');
 
 export default {
     data() {
@@ -229,8 +234,13 @@ export default {
             this.$router.push('/ttt/post/create');
         },
         //날짜 데이터 형식 변화
-        formatDate(date) {
-            return new Date(date).toLocaleDateString('ko-KR');
+        formatDate(dateArray) {
+            //이거는 createdTime이 배열값으로 들어오는지 확인하는 유효성 검사
+            if(!dateArray || dateArray.length < 6 ) return '';
+            //자바스크립트가 1월 부터 시작하는 것을 0월부터 인덱스로 인식해서 그걸 처리하는 값
+            const formattedDate = dayjs(`${dateArray[0]}-${dateArray[1].toString().padStart(2, '0')}-${dateArray[2].toString().padStart(2, '0')}T${dateArray[3].toString().padStart(2, '0')}:${dateArray[4].toString().padStart(2, '0')}:${dateArray[5].toString().padStart(2, '0')}`);
+            //24시간 이내면 몇시간전 이래 표시되고, 하루가 지나면 날짜로 표시됨
+            return dayjs().diff(formattedDate,'hour')<24 ? formattedDate.fromNow() : formattedDate.format('YYYY-MM-DD');
         },
         //사이드 바에서 게시판 눌러이동
         async selectedBoard(boardId){
@@ -251,6 +261,8 @@ export default {
             console.log(params)
             const response =  await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/find`,{params});
             this.postList = response.data.result.content;
+            this.totalPages = response.data.result.totalPages; // 페이지네이션 업데이트!
+            this.totalElements = response.data.result.totalElements;
 
             }catch(error){
                 console.log("검색요청 실패",error);

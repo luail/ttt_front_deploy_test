@@ -33,7 +33,7 @@
               <img :src="thisPost.profileImageOfAuthor|| require('@/assets/basicProfileImage.png')" class="author-img"/>
               <div>
                 <strong>{{ thisPost.authorNickName }}</strong>
-                <v-icon class="ml-2" @click="gotoChat(thisPost.postUserId)">mdi-forum-outline</v-icon>
+                <v-icon v-if ="!isAuthor" class="ml-2" @click="gotoChat(thisPost.postUserId)">mdi-forum-outline</v-icon>
                 <div class="post-meta">
                   <span class="author-rank">랭킹포인트 : {{ thisPost.rankingPointOfAuthor }}</span><br>
                   {{ formatDate(thisPost.createdTime) }}
@@ -168,18 +168,7 @@
             </div>
                     <!-- 수정 누른 댓글이 아니라면 기존처럼 표시(수정이 완료되면 기존처럼 보임) -->
               <div v-else class="comment-text">{{ grandchild.contents }}
-              <div class="again-comment" @click="toggleReply(grandchild.commentId)">+댓글등록</div> 
               </div>
-
-              <!-- 댓글에 달린 대댓글에 다시 댓글을 달려면 생기는 창 -->
-              <div v-if="replyCommentVisible[grandchild.commentId]" class="reply-section">
-                                <v-textarea 
-                                  v-model="newReply3" 
-                                  placeholder="대댓글을 입력하세요"
-                                  outlined dense auto-grow
-                                ></v-textarea>
-                                <v-btn color="primary" class="mt-2" @click="createNewReply2(grandchild.commentId)">대댓글 등록</v-btn>
-                              </div>  
                   </div>
                 </div>
               </div>
@@ -197,6 +186,12 @@
 <script>
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ko';
+
+dayjs.extend(relativeTime);
+dayjs.locale('ko');
 
 export default {
   data() {
@@ -252,8 +247,13 @@ export default {
 
   methods: {
       //프로필 이미지에 보이는 날짜 형식 수정
-      formatDate(date) {
-            return new Date(date).toLocaleDateString('ko-KR');
+      formatDate(dateArray) {
+           //이거는 createdTime이 배열값으로 들어오는지 확인하는 유효성 검사
+           if(!dateArray || dateArray.length < 6 ) return '';
+            //자바스크립트가 1월 부터 시작하는 것을 0월부터 인덱스로 인식해서 그걸 처리하는 값
+            const formattedDate = dayjs(`${dateArray[0]}-${dateArray[1].toString().padStart(2, '0')}-${dateArray[2].toString().padStart(2, '0')}T${dateArray[3].toString().padStart(2, '0')}:${dateArray[4].toString().padStart(2, '0')}:${dateArray[5].toString().padStart(2, '0')}`);
+            //24시간 이내면 몇시간전 이래 표시되고, 하루가 지나면 날짜로 표시됨
+            return dayjs().diff(formattedDate,'hour')<24 ? formattedDate.fromNow() : formattedDate.format('YYYY-MM-DD');
         },
       //왼쪽 사이드바 게시판 이동
        selectedBoard(boardId){  
