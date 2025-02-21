@@ -2,7 +2,7 @@ import{createRouter,createWebHistory} from 'vue-router';
 import { userRouter } from './userRouter';
 import { chatRouter } from './chatRouter';
 import { postRouter } from './postRouter';
-import UserMyInformation from '@/views/UserMyInformation.vue'
+import UserMyInformation from '@/views/MyPage/UserMyInformation.vue';
 
 const routes = [
     ...userRouter,
