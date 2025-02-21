@@ -2,7 +2,9 @@ import GoogleRedirect from "@/views/GoogleRedirect.vue";
 import UserCreate from "@/views/UserCreate.vue";
 import UserList from "@/views/UserList.vue";
 import UserLogin from "@/views/UserLogin.vue";
-import UserMyInformation from "@/views/UserMyInformation.vue";
+import UserMyInformation from "@/views/MyPage/UserMyInformation.vue";
+import MyPagePost from "@/views/MyPage/MyPagePost.vue";
+import MyPageLikes from "@/views/MyPage/MyPageLikes.vue";
 
 export const userRouter= [
     {
@@ -29,5 +31,15 @@ export const userRouter= [
         path: '/oauth/google/redirect',
         name: 'GoogleRedirect',
         component: GoogleRedirect
+    },
+    {
+        path: '/ttt/user/mypagepost',
+        name: 'MyPagePost',
+        component: MyPagePost
+    },
+    {
+        path: '/ttt/user/mypagelikes',
+        name: 'MyPageLikes',
+        component: MyPageLikes
     },
 ]
