@@ -22,7 +22,7 @@
               <!-- 카테고리 선택 -->
               <v-select
                 v-model="selectedCategoryId"
-                :items="categoryList"
+                :items="beforeCategoryList"
                 item-title="categoryName"
                 item-value="categoryId"
                 label="게시판을 선택하세요"
@@ -73,6 +73,7 @@ export default {
   },
   data() {
     return {
+      beforeCategoryList: [],
       categoryList: [],
       selectedCategoryId: '',
       title: '',
@@ -110,8 +111,8 @@ export default {
     this.contents ="";
     try {
       const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
-      const beforeCategoryList= sideBarResponse.data.result;       
-      this.categoryList = [{categoryName: "전체게시판", categoryId:0},...beforeCategoryList]
+      this.beforeCategoryList= sideBarResponse.data.result;       
+      this.categoryList = [{categoryName: "전체게시판", categoryId:0},...this.beforeCategoryList]
     } catch (error) {
       console.error('카테고리 불러오기 실패:', error);
     }
@@ -161,7 +162,7 @@ export default {
         console.log('게시물 생성 실패:', error);
       }
     },
-    // 에디터가 준비되었을 때 인스터늣 저장
+    // 에디터가 준비되었을 때 인스턴스 저장
     onEditorReady(editor){
       this.editorInstance = editor;
       console.log("Quill Editor is ready!", this.editorInstance);
@@ -175,22 +176,28 @@ export default {
       }
     },
 
-    handleImageDrop(event) {
+    async handleImageDrop(event) {
       // 퀼에디터의 드롭 동작을 인식하기 위해 기본 드롭동작을 막음
       event.preventDefault();
       const file = event.dataTransfer.files[0];
-      this.attachments.push(file);
-      console.log(this.attachments)
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target.result; //Base64 인코딩된 이미지 데이터
-        const editor = this.$refs.quillEditor.getQuill(); //Quill에디터 가져오기
-        const range = editor.getSelection(); //현재 커서 위치 가져오기
-        editor.insertEmbed(range.index, 'image', imageUrl);
-      };
-      reader.readAsDataURL(file);//파일을 Base64로 변환하여 Quill에디터에 직접 삽입할 수 있도록함
+      const formData = new FormData();
+      formData.append("attachments",file);
+
+      try{
+       const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/post/drag-image`,formData,
+        {headers:{"Content-Type":"multipart/form-data"}}
+      );
+        console.log(response);
+        const imageUrl = response.data.result;
+        const editor = this.$refs.quillEditor.getQuill();
+        const range = editor.getSelection();
+        editor.insertEmbed(range.index,"image",imageUrl);
+      
+      }catch(error){
+        console.log("드래그 이미지업로드 실패",error);
+      }
     }
   }
 }
@@ -221,5 +228,13 @@ export default {
   font-size: 25px;
 
 }
+
+::v-deep .ql-editor img {
+  max-width: 100%;  /* 화면을 벗어나지 않도록 설정 */
+  height: auto;  /* 비율 유지하면서 자동 조정 */
+  display: block;  /* 블록 요소로 변경 (여백 조정) */
+  margin: 0 auto;  /* 중앙 정렬 */
+}
+
 
 </style>
