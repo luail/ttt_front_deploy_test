@@ -63,8 +63,16 @@
                                 <div 
                                     :class="['chat-message', msg.senderNickName === senderNickName ? 'sent' : 'received']"
                                 >
+                                    <!-- 받은 메시지일 때만 프로필 이미지 표시 -->
+                                    <div v-if="msg.senderNickName !== senderNickName" class="profile-image">
+                                        <img 
+                                            :src="msg.senderImagePath || require('@/assets/basicProfileImage.png')"
+                                            :alt="msg.senderNickName"
+                                            class="rounded-square"
+                                        >
+                                    </div>
                                     <div class="message-content">
-                                        <strong>{{ msg.senderNickName }}</strong>
+                                        <strong v-if="msg.senderNickName !== senderNickName">{{ msg.senderNickName }}</strong>
                                         <p class="message-text">{{ msg.message }}</p>
                                         <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
                                     </div>
@@ -442,55 +450,78 @@ export default{
 }
 
 .chat-message {
-    margin-bottom: 20px;
-    max-width: 75%;
-    width: fit-content;
+    display: flex;
+    align-items: flex-start;
+    margin: 12px 0;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.chat-message.sent {
+    flex-direction: row-reverse;
+}
+
+.profile-image {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    margin-right: 4px;
+    margin-top: 4px;
+}
+
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     position: relative;
-    padding: 16px 20px;
-    border-radius: 16px;
-    font-size: 0.95rem;
-    line-height: 1.5;
 }
 
-.sent {
-    margin-left: auto;
-}
-
-.sent .message-content {
-    background-color: #2563EB;
-    color: white;
-    border-bottom-right-radius: 4px;
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
-}
-
-.received .message-content {
-    background-color: #F1F5F9;
-    color: #1E293B;
-    border-bottom-left-radius: 4px;
-}
-
-.sent strong {
-    color: rgba(255, 255, 255, 0.9);
+.message-content strong {
     font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 6px;
-    display: block;
-}
-
-.received strong {
-    color: #2563EB;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 6px;
-    display: block;
+    color: #64748B;
 }
 
 .message-text {
-    margin: 0;
-    line-height: 1.6;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 400px;
+    word-break: break-word;
+}
+
+.sent .message-text {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 16px 0 16px 16px;
+}
+
+.received .message-text {
+    background-color: #F1F5F9;
+    border-radius: 0 16px 16px 16px;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #94A3B8;
+    position: absolute;
+    bottom: -18px;
+    white-space: nowrap;
+}
+
+.sent .message-time {
+    right: 0;
+}
+
+.received .message-time {
+    left: 0;
 }
 
 .input-area {
@@ -537,25 +568,27 @@ export default{
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
 }
 
-.chat-box::-webkit-scrollbar,
-.chat-rooms::-webkit-scrollbar {
+.chat-box {
+    height: calc(100vh - 280px);
+    overflow-y: auto;
+    padding: 24px;
+    background-color: white;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.03);
+}
+
+.chat-box::-webkit-scrollbar {
     width: 6px;
 }
 
-.chat-box::-webkit-scrollbar-track,
-.chat-rooms::-webkit-scrollbar-track {
+.chat-box::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.chat-box::-webkit-scrollbar-thumb,
-.chat-rooms::-webkit-scrollbar-thumb {
-    background-color: rgba(37, 99, 235, 0.2);
+.chat-box::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
     border-radius: 3px;
-}
-
-.chat-box::-webkit-scrollbar-thumb:hover,
-.chat-rooms::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(37, 99, 235, 0.3);
 }
 
 .chat-room-header {
@@ -573,30 +606,6 @@ export default{
     height: calc(100vh - 200px);
     display: flex;
     flex-direction: column;
-}
-
-.chat-box {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px;
-    background-color: white;
-    border-radius: 16px;
-    margin-bottom: 0;
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.03);
-}
-
-.message-time {
-    font-size: 0.8rem;
-    margin-top: 6px;
-    display: block;
-}
-
-.sent .message-time {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.received .message-time {
-    color: #64748B;
 }
 
 /* 나가기 모달 스타일 */
