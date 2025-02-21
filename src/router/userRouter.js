@@ -1,4 +1,5 @@
 import GoogleRedirect from "@/views/GoogleRedirect.vue";
+import KakaoRedirect from "@/views/KakaoRedirect.vue";
 import UserCreate from "@/views/UserCreate.vue";
 import UserList from "@/views/UserList.vue";
 import UserLogin from "@/views/UserLogin.vue";
@@ -41,5 +42,10 @@ export const userRouter= [
         path: '/ttt/user/mypagelikes',
         name: 'MyPageLikes',
         component: MyPageLikes
+    },
+    {
+        path: '/oauth/kakao/redirect',
+        name: 'KakaoRedirect',
+        component: KakaoRedirect
     },
 ]

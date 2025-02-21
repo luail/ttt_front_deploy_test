@@ -14,6 +14,7 @@
                                     v-for="chat in chatList"
                                     :key="chat.roomId"
                                     :class="{'active-chat': chat.roomId === roomId}"
+                                    
                                     @click="enterChatRoom(chat.roomId)"
                                 >
                                     <v-list-item-content>
@@ -31,7 +32,7 @@
                                             icon="mdi-exit-to-app"
                                             variant="text"
                                             color="error"
-                                            @click.stop="leaveChatRoom(chat.roomId)"
+                                            @click.stop="openLeaveModal(chat.roomId)"
                                         ></v-btn>
                                     </template>
                                 </v-list-item>
@@ -49,17 +50,34 @@
                     </v-card-title>
                     <div class="chat-content-wrapper">
                         <div class="chat-box" ref="chatBox">
-                            <div 
-                                v-for="(msg, index) in messages"
-                                :key="index"
-                                :class="['chat-message', msg.senderNickName === this.senderNickName ? 'sent' : 'received' ]"
-                            >
-                                <div class="message-content">
-                                    <strong>{{ msg.senderNickName }}</strong>
-                                    <p class="message-text">{{ msg.message }}</p>
-                                    <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
+                            <template v-for="(msg, index) in messages" :key="`msg-group-${index}`">
+                                <!-- 날짜 구분선 -->
+                                <div 
+                                    v-if="shouldShowDateDivider(msg, messages[index-1])"
+                                    class="date-divider"
+                                >
+                                    <span>{{ formatDate(msg.sendTime) }}</span>
                                 </div>
-                            </div>
+                                
+                                <!-- 채팅 메시지 -->
+                                <div 
+                                    :class="['chat-message', msg.senderNickName === senderNickName ? 'sent' : 'received']"
+                                >
+                                    <!-- 받은 메시지일 때만 프로필 이미지 표시 -->
+                                    <div v-if="msg.senderNickName !== senderNickName" class="profile-image">
+                                        <img 
+                                            :src="msg.senderImagePath || require('@/assets/basicProfileImage.png')"
+                                            :alt="msg.senderNickName"
+                                            class="rounded-square"
+                                        >
+                                    </div>
+                                    <div class="message-content">
+                                        <strong v-if="msg.senderNickName !== senderNickName">{{ msg.senderNickName }}</strong>
+                                        <p class="message-text">{{ msg.message }}</p>
+                                        <span class="message-time">{{ formatTime(msg.sendTime) }}</span>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                         <div class="input-area">
                             <v-text-field
@@ -81,6 +99,40 @@
                 </v-card>
             </v-col>
         </v-row>
+
+        <!-- 채팅방 나가기 확인 모달 -->
+        <v-dialog v-model="showLeaveModal" max-width="400">
+            <v-card class="leave-modal">
+                <v-card-text class="leave-modal-content">
+                    <div class="leave-icon-wrapper">
+                        <v-icon class="leave-icon" color="error" size="32">mdi-exit-to-app</v-icon>
+                    </div>
+                    <h3 class="leave-title">채팅방 나가기</h3>
+                    <p class="leave-description">
+                        정말로 나갈거에요? 🥺<br>
+                        다른 삼티들이 슬퍼할 거예요 😢
+                    </p>
+                </v-card-text>
+                <v-card-actions class="leave-actions">
+                    <v-btn
+                        variant="outlined"
+                        color="grey-darken-1"
+                        class="cancel-button"
+                        @click="showLeaveModal = false"
+                    >
+                        취소
+                    </v-btn>
+                    <v-btn
+                        color="error"
+                        class="leave-button"
+                        @click="confirmLeave"
+                        :loading="isLeaving"
+                    >
+                        나가기
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </v-container>
 </template>
 
@@ -100,6 +152,9 @@ export default{
             roomId: null,
             chatList: [],
             currentChatRoom: null,
+            showLeaveModal: false,
+            tempRoomId: null,
+            isLeaving: false,
         }
     },
     async created(){
@@ -174,7 +229,15 @@ export default{
             });
         },
         async disconnectWebSocket(){
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/${this.roomId}/read`);
+            // 읽음 처리는 채팅방이 존재할 때만 수행
+            if (this.roomId && this.currentChatRoom) {
+                try {
+                    await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/${this.roomId}/read`);
+                } catch (error) {
+                    console.log('읽음 처리 실패:', error);
+                }
+            }
+            
             if(this.stompClient && this.stompClient.connected){
                 this.stompClient.unsubscribe(`/topic/${this.roomId}`);
                 this.stompClient.disconnect();
@@ -210,21 +273,44 @@ export default{
                 }
             }
         },
+        openLeaveModal(roomId) {
+            this.tempRoomId = roomId;
+            this.showLeaveModal = true;
+        },
+        async confirmLeave() {
+            try {
+                this.isLeaving = true;
+                await this.leaveChatRoom(this.tempRoomId);
+                this.showLeaveModal = false;
+            } catch (error) {
+                console.error('채팅방 나가기 실패:', error);
+            } finally {
+                this.isLeaving = false;
+                this.tempRoomId = null;
+            }
+        },
         async leaveChatRoom(roomId) {
             try {
+                // 웹소켓 연결을 먼저 끊습니다
+                if (this.roomId === roomId) {
+                    this.disconnectWebSocket();
+                }
+                
+                // 채팅방 나가기 API 호출
                 await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/${roomId}/leave`);
                 this.chatList = this.chatList.filter(chat => chat.roomId !== roomId);
                 
                 // 현재 보고 있는 채팅방을 나갔다면 첫 번째 채팅방으로 이동
                 if (this.roomId === roomId && this.chatList.length > 0) {
                     this.enterChatRoom(this.chatList[0].roomId);
-                } else if (this.chatList.length === 0) {
-                    // 채팅방이 없다면 채팅방 목록 페이지로 이동
-                    this.$router.push('/ttt/mychatpage');
+                } else {
+                    // 채팅방이 없더라도 현재 페이지에 머무름
+                    this.roomId = null;
+                    this.currentChatRoom = null;
+                    this.messages = [];
                 }
             } catch (error) {
                 console.error('채팅방 나가기 실패:', error);
-                // 에러 처리 필요시 추가
             }
         },
         getChatRoomName(currentUser, roomName) {
@@ -247,6 +333,17 @@ export default{
             
             return `${ampm} ${formattedHours}:${formattedMinutes}`;
         },
+        shouldShowDateDivider(currentMsg, prevMsg) {
+            if (!currentMsg || !prevMsg) return false;
+            const currentDate = new Date(currentMsg.sendTime).toDateString();
+            const prevDate = new Date(prevMsg.sendTime).toDateString();
+            return currentDate !== prevDate;
+        },
+        formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString();
+        },
     },
     mounted() {
         this.scrollToBottom();
@@ -258,41 +355,25 @@ export default{
 </script>
 <style scoped>
 .chat-container {
-    display: flex;
-    height: 100vh;
-    background-color: #f7f7f7;
-}
-
-.chat-list {
-    width: 300px;
-    background-color: #ffffff;
-    margin: 16px;
-    margin-right: 8px;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-}
-
-.chat-room {
-    flex: 1;
-    background-color: #ffffff;
-    margin: 16px;
-    margin-left: 8px;
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
+    max-width: 1200px !important;
+    margin: 0 auto;
+    padding: 40px;
+    background: #F8FAFC;
+    min-height: 100vh;
 }
 
 .chat-row {
     gap: 24px;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(37, 99, 235, 0.06);
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
 .chat-list-column {
-    padding: 20px;
-    border-right: 1px solid rgba(107, 41, 229, 0.1);
+    padding: 24px;
+    border-right: 1px solid rgba(37, 99, 235, 0.08);
     position: relative;
 }
 
@@ -306,157 +387,195 @@ export default{
     background: linear-gradient(
         to bottom,
         transparent,
-        rgba(107, 41, 229, 0.2),
+        rgba(37, 99, 235, 0.15),
         transparent
     );
 }
 
 .chat-main-column {
-    padding: 20px;
-    background: rgba(248, 249, 250, 0.5);
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
+    padding: 24px;
+    background: #FAFBFF;
+    border-top-right-radius: 24px;
+    border-bottom-right-radius: 24px;
 }
 
 .chat-card, .chat-list-card {
-    height: calc(100vh - 140px);
+    height: calc(100vh - 160px);
     background: transparent;
     box-shadow: none;
 }
 
-.chat-list-card {
-    border-radius: 12px;
-}
-
-.chat-box {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
-}
-
 .v-list {
     background: transparent;
-    padding: 8px;
+    padding: 12px;
 }
 
 .v-list-item {
-    margin-bottom: 8px;
-    border-radius: 12px;
+    margin-bottom: 12px;
+    border-radius: 16px;
     transition: all 0.2s ease;
+    border: 1px solid rgba(37, 99, 235, 0.08);
+    padding: 16px 20px;
 }
 
 .v-list-item:hover {
-    background-color: rgba(107, 41, 229, 0.05);
+    background-color: #F8FAFC;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
 }
 
 .active-chat {
-    background-color: rgba(107, 41, 229, 0.1) !important;
-    border-left: 3px solid #6B29E5;
+    background-color: rgba(37, 99, 235, 0.08) !important;
+    border-left: 3px solid #2563EB;
+    transform: translateX(2px);
 }
 
 .chat-room-name {
+    font-size: 1.1rem;
     font-weight: 500;
-    color: #333;
+    color: #1E293B;
+    margin-bottom: 6px;
 }
 
 .unread-count {
-    color: #6B29E5;
-    font-size: 0.8rem;
+    color: #2563EB;
+    font-size: 0.9rem;
     margin-top: 4px;
 }
 
 .chat-rooms {
-    height: calc(100vh - 200px);
+    height: calc(100vh - 220px);
     overflow-y: auto;
+    padding-right: 8px;
 }
 
 .chat-message {
-    margin-bottom: 20px;
-    max-width: 75%;
-    width: fit-content;
+    display: flex;
+    align-items: flex-start;
+    margin: 12px 0;
+    gap: 8px;
+    margin-bottom: 24px;
 }
 
-.message-content {
-    position: relative;
-    padding: 12px 16px;
-    border-radius: 16px;
-    font-size: 0.95rem;
-    line-height: 1.5;
+.chat-message.sent {
+    flex-direction: row-reverse;
 }
 
-.sent {
-    margin-left: auto;
+.profile-image {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    margin-right: 4px;
+    margin-top: 4px;
 }
 
-.sent .message-content {
-    background-color: #6B29E5;
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-
-.received .message-content {
-    background-color: white;
-    border-bottom-left-radius: 4px;
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.sent strong {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-    display: block;
+.message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
 }
 
-.received strong {
-    color: #6B29E5;
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-    display: block;
+.message-content strong {
+    font-size: 0.9rem;
+    color: #64748B;
 }
 
 .message-text {
-    margin: 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 400px;
+    word-break: break-word;
+}
+
+.sent .message-text {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 16px 0 16px 16px;
+}
+
+.received .message-text {
+    background-color: #F1F5F9;
+    border-radius: 0 16px 16px 16px;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #94A3B8;
+    position: absolute;
+    bottom: -18px;
+    white-space: nowrap;
+}
+
+.sent .message-time {
+    right: 0;
+}
+
+.received .message-time {
+    left: 0;
 }
 
 .input-area {
-    padding: 16px 20px;
+    position: sticky;
+    bottom: 0;
+    padding: 20px;
     background: white;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid rgba(37, 99, 235, 0.08);
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 -4px 16px rgba(37, 99, 235, 0.03);
 }
 
 .message-input {
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .message-input :deep(.v-field) {
-    border-radius: 25px !important;
-    background-color: #f8f9fa;
+    border-radius: 16px !important;
+    background-color: #F8FAFC;
     border: 1px solid transparent;
     transition: all 0.2s ease;
 }
 
 .message-input :deep(.v-field--focused) {
-    border-color: #6B29E5 !important;
+    border-color: #2563EB !important;
     background-color: white;
-}
-
-.message-input :deep(.v-field__outline) {
-    display: none !important;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
 }
 
 .send-button {
-    height: 44px;
-    font-size: 0.95rem;
+    height: 48px;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: 0.5px;
-    background-color: #6B29E5 !important;
-    border-radius: 12px;
+    background-color: #2563EB !important;
+    border-radius: 16px;
     transition: all 0.2s ease;
+    text-transform: none;
 }
 
 .send-button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+    background-color: #1D4ED8 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
+}
+
+.chat-box {
+    height: calc(100vh - 280px);
+    overflow-y: auto;
+    padding: 24px;
+    background-color: white;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.03);
 }
 
 .chat-box::-webkit-scrollbar {
@@ -468,72 +587,158 @@ export default{
 }
 
 .chat-box::-webkit-scrollbar-thumb {
-    background-color: rgba(107, 41, 229, 0.2);
-    border-radius: 3px;
-}
-
-.chat-rooms::-webkit-scrollbar {
-    width: 6px;
-}
-
-.chat-rooms::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.chat-rooms::-webkit-scrollbar-thumb {
-    background-color: rgba(107, 41, 229, 0.2);
+    background: #CBD5E1;
     border-radius: 3px;
 }
 
 .chat-room-header {
     text-align: center;
-    padding: 16px 0;
-    font-weight: 500;
-    color: #333;
-    border-bottom: 1px solid rgba(107, 41, 229, 0.1);
-    margin-bottom: 8px;
+    padding: 20px 0;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #1E293B;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.08);
+    margin-bottom: 16px;
 }
 
 .chat-content-wrapper {
     position: relative;
-    height: calc(100vh - 180px);
+    height: calc(100vh - 200px);
     display: flex;
     flex-direction: column;
 }
 
-.chat-box {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 12px;
-    margin-bottom: 0;
+/* 나가기 모달 스타일 */
+.leave-modal {
+    border-radius: 24px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
-.input-area {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    border-radius: 0 0 12px 12px;
+.leave-modal-content {
+    padding: 32px 32px 24px;
+    text-align: center;
+}
+
+.leave-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: pulse 2s infinite;
+}
+
+.leave-icon {
+    animation: shake 0.5s ease-in-out;
+}
+
+.leave-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1E293B;
+    margin-bottom: 16px;
+}
+
+.leave-description {
+    color: #64748B;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.leave-actions {
+    padding: 16px 32px 32px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.cancel-button, .leave-button {
+    min-width: 120px;
+    height: 44px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: none;
+    border-radius: 12px;
+    letter-spacing: 0.3px;
+}
+
+.cancel-button {
+    background-color: #F8FAFC !important;
+}
+
+.leave-button {
+    background: linear-gradient(to right, #EF4444, #DC2626) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.leave-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.leave-button:hover::after {
+    left: 100%;
+}
+
+.leave-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(239, 68, 68, 0.2);
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.date-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
     z-index: 1;
 }
 
-.message-time {
-    font-size: 0.75rem;
-    color: #999;
-    margin-top: 4px;
-    display: block;
+.date-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.08);
+    z-index: -1;
 }
 
-.sent .message-time {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.received .message-time {
-    color: #666;
+.date-divider span {
+    background-color: #F8FAFC;
+    padding: 4px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #64748B;
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 </style>
