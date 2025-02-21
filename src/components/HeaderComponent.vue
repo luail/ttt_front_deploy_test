@@ -277,7 +277,7 @@
   }
 </script>
 
-<style>
+<style scoped>
 .header-container {
   background-color: white !important;
   border-bottom: 2px solid #6200ea !important;
