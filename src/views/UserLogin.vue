@@ -1,7 +1,7 @@
 <template>
-    <v-container>
-        <v-row justify="center">
-            <v-col cols="12" sm="2" md="4">
+    <v-container class="fill-height">
+        <v-row justify="center" align="center">
+            <v-col cols="12" sm="6" md="4">
                 <v-card>
                     <v-card-title class="text-h5 text-center">
                         로그인
@@ -21,31 +21,33 @@
                             prepend-icon="mdi-lock"
                             required
                             />
-                            <v-row>
-                                <v-col cols="12">
-                                    <v-btn color="#c0c1ff" block @click="doLogin()" @keyup.enter="doLogin()">로그인</v-btn>
-                                </v-col>
-                            </v-row>
+                            <div class="d-flex justify-center">
+                                <v-btn 
+                                    color="#c0c1ff" 
+                                    block
+                                    class="mb-4"
+                                    @click="doLogin()" 
+                                    @keyup.enter="doLogin()"
+                                >
+                                    로그인
+                                </v-btn>
+                            </div>
                         </v-form>
 
                         <!-- oauth 로그인 -->
-                        <v-divider class="my-4"></v-divider>
-                        <v-row>
-                            <v-col cols="6" class="d-flex justify-center">
-                                <img 
-                                  src="@/assets/google_login.png" 
-                                  style="max-height: 40px; width: auto;"
-                                  @click="googleLogin"
-                                />
-                            </v-col>
-                            <v-col cols="6" class="d-flex justify-center">
-                                <img 
-                                  src="@/assets/kakao_login.png" 
-                                  style="max-height: 40px; width: auto;"
-                                  @click="kakaoLogin"
-                                />
-                            </v-col>
-                        </v-row>
+                        <v-divider class="mb-4"></v-divider>
+                        <div class="d-flex justify-center gap-4">
+                            <img 
+                                src="@/assets/google_login.png" 
+                                class="oauth-btn"
+                                @click="googleLogin"
+                            />
+                            <img 
+                                src="@/assets/kakao_login.png" 
+                                class="oauth-btn"
+                                @click="kakaoLogin"
+                            />
+                        </div>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -131,5 +133,29 @@ export default {
   word-wrap: break-word; /* 단어가 너무 길어도 자동 줄바꿈 */
   overflow-wrap: break-word; /* 긴 단어도 줄바꿈 가능 */
   text-align: center; /* 가운데 정렬 */
+}
+
+/* 컨테이너가 전체 높이를 사용하도록 설정 */
+.fill-height {
+    height: 100vh;
+}
+
+.oauth-btn {
+    height: 40px;
+    width: auto;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.oauth-btn:hover {
+    transform: scale(1.05);
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.gap-4 {
+    gap: 16px;
 }
 </style>
