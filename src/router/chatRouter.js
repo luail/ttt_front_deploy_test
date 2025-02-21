@@ -8,9 +8,17 @@ export const chatRouter= [
         component: GroupChattingList
     },
     {
-        path:'/ttt/chatpage/:roomId',
+        path:'/ttt/chatpage',
         name:'ChatPage',
         component: ChatPage
     },
-    
+    {
+        path:'/ttt/chatpage/:roomId',
+        name:'ChatRoomPage',
+        component: ChatPage
+    },
+    {
+        path:'/ttt/my/chat/page',
+        redirect: { name: 'ChatPage' }
+    }
 ]

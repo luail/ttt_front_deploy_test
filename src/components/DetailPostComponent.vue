@@ -33,7 +33,7 @@
               <img :src="thisPost.profileImageOfAuthor|| require('@/assets/basicProfileImage.png')" class="author-img"/>
               <div>
                 <strong>{{ thisPost.authorNickName }}</strong>
-                <v-icon class="ml-2" @click="gotoChat()">mdi-forum-outline</v-icon>
+                <v-icon class="ml-2" @click="gotoChat(thisPost.postUserId)">mdi-forum-outline</v-icon>
                 <div class="post-meta">
                   <span class="author-rank">랭킹포인트 : {{ thisPost.rankingPointOfAuthor }}</span><br>
                   {{ formatDate(thisPost.createdTime) }}
@@ -446,7 +446,8 @@ export default {
         }
          } ,
 
-    //댓글에 달린 대댓글에 달린 대댓글 작성하기ㅠ
+
+         //댓글에 달린 대댓글에 달린 대댓글 작성하기ㅠ
       async createNewReply2(commentId){
         try{
           const idOfthisPost = this.$route.params.id
@@ -460,7 +461,16 @@ export default {
         }catch(error){
           console.log("대댓글 달기 실패", error)
         }
-         } 
+         },
+         async gotoChat(otherUserId) {
+        console.log(this.post)
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/private/create?otherUserId=${otherUserId}`) 
+        const roomId = response.data.result;
+        this.$router.push(`/ttt/chatpage/${roomId}`)
+      } 
+
+
+
 
 
         }  
