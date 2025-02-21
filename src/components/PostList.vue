@@ -65,7 +65,7 @@
 
                     <!-- 검색 버튼 -->
                     <v-col cols="2" class="d-flex justify-center">
-                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts">
+                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts()">
                             <v-icon left>mdi-magnify</v-icon> 검색
                         </v-btn>
                     </v-col>
@@ -331,6 +331,7 @@ export default {
     padding: 30px 20px; /* 상하 여백 늘려서 카드 크기 키우기 */
     transition: 0.3s;
 }
+
 
 .post-card:hover {
     box-shadow: 0 10px 20px rgba(242, 13, 169, 0.3);

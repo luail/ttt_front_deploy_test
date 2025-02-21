@@ -462,6 +462,7 @@ export default {
           console.log("대댓글 달기 실패", error)
         }
          },
+         
          async gotoChat(otherUserId) {
         console.log(this.post)
         const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/private/create?otherUserId=${otherUserId}`) 
