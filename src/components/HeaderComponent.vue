@@ -134,7 +134,7 @@
 
                   <v-card min-width="200" class="profile-menu">
                     <v-list>
-                      <v-list-item to="/user/my-information">
+                      <v-list-item to="/ttt/user/myInformation">
                         <template v-slot:prepend>
                           <v-icon>mdi-account-circle</v-icon>
                         </template>
