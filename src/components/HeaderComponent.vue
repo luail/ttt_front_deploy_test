@@ -138,6 +138,7 @@
 
 <script>
 import { jwtDecode } from "jwt-decode";
+import { EventSourcePolyfill } from 'event-source-polyfill';
 
 export default {
   data() {
@@ -146,7 +147,9 @@ export default {
       isLoggedIn: false,
       hoveredMenu: null,
       profileImageUrl: null,
-      profileMenu: false
+      profileMenu: false,
+      eventSource: null,
+      reconnectTimeout: null
     }
   },
   created() {
@@ -156,12 +159,84 @@ export default {
       this.isLoggedIn = true;
       this.userRole = payload.role;
       this.fetchProfileImage(payload.userId);
+      
+      // 토큰이 있을 때만 SSE 연결 및 알림 권한 요청
+      this.connectSSE();
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  },
+  unmounted() {
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
   },
   methods: {
+    connectSSE() {
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+
+      const token = localStorage.getItem('token');
+      
+      const options = {
+        heartbeatTimeout: 120000,  // 2분으로 설정 (서버 설정과 동일)
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      this.eventSource = new EventSourcePolyfill('http://localhost:8080/subscribe', options);
+
+      this.eventSource.onopen = () => {
+        console.log('SSE 연결됨');
+      };
+
+      this.eventSource.addEventListener('connect', (e) => {
+        console.log('SSE Connected:', e.data);
+      });
+
+      this.eventSource.addEventListener('chat-message', (e) => {
+        console.log('새 메시지 수신:', e.data);
+        const chatMessage = JSON.parse(e.data);
+        
+        if (Notification.permission === 'granted') {
+          new Notification('새로운 메시지가 있습니다', {
+            body: `${chatMessage.senderNickName}: ${chatMessage.message}`,
+            icon: chatMessage.senderImagePath || require('@/assets/basicProfileImage.png')
+          });
+        }
+      });
+
+      this.eventSource.onerror = (error) => {
+        console.error('SSE Error:', error);
+        this.eventSource.close();
+        
+        setTimeout(() => {
+          console.log('SSE 재연결 시도');
+          this.connectSSE();
+        }, 3000);
+      };
+    },
+    disconnectSSE() {
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+    },
     doLogout() {
-      localStorage.clear();
-      window.location.href = '/';
+        // SSE 연결 종료
+        if (this.eventSource) {
+            this.eventSource.close();
+            this.eventSource = null;
+        }
+        
+        // 기존 로그아웃 로직
+        localStorage.clear();
+        window.location.href = '/';
     },
     async fetchProfileImage(userId) {
       try {
