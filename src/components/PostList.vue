@@ -30,7 +30,7 @@
                 <!-- 상단 메뉴 -->
                 <v-row class="mb-5 align-center">
                     <v-col>
-                        <h2 class="text-h3 font-weight-bold" style="margin-left: 140px;">{{ boardTitle }}</h2>
+                        <h2 class="text-h5 font-weight-bold" style="margin-left: 140px;">{{ boardTitle }}</h2>
                     </v-col>
 
            <!-- 게시물 검색창 -->
@@ -117,8 +117,10 @@
 
                                     <!-- 네 번째 줄: 게시물 메타정보 (댓글, 좋아요) -->
                                     <v-row no-gutters class="mt-4 align-center">
-                                        <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }}
-                                        <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }}
+                                        <span class="mr-1" style="font-size: 20px;">👍 {{ post.likesCount }}</span>
+                                        <!-- <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }} -->
+                                        <span class="ml-4" style="font-size: 20px;">💬 {{ post.countOfComment }}</span>
+                                        <!-- <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }} -->
                                         <div class="ml-auto">{{ formatDate(post.createdTime) }}</div>
                                     </v-row>
                                 </v-card-text>
@@ -203,7 +205,7 @@ export default {
         //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
         async changeBoard(){
 
-            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 없다면 all로 설정\
+            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 
             console.log(boardId)
             let url = boardId === "0" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
                                     : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
@@ -309,12 +311,11 @@ export default {
 
 .banner-img {
   width: 1400px; /* 전체 너비를 차지하도록 설정 */
-  height: 350px; /* 원본 비율 유지 */
+  height: 300px; /* 원본 비율 유지 */
   display: block; /* 블록 요소로 설정하여 중앙 정렬 */
-  border-radius: 40px;
-  margin-top: 0px;
+  margin-top: -40px;
   margin-right: 100px;
-  margin-left: 70px;
+  margin-left: -60px;
   margin-bottom: 40px;
 }
 
@@ -340,7 +341,6 @@ export default {
     margin-bottom: 25px; /* 게시물 카드 간격 증가 */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     border-radius: 25px;
-    padding: 30px 20px; /* 상하 여백 늘려서 카드 크기 키우기 */
     transition: 0.3s;
 }
 
@@ -371,9 +371,9 @@ export default {
 
 
 .rounded-square {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px; /* 모서리를 둥글게 */
+  width: 60px;
+  height: 60px;
+  border-radius: 50px; /* 모서리를 둥글게 */
   object-fit: cover;
   border: 2px solid #ddd; /* 테두리 추가 (선택 사항) */
 }
@@ -399,6 +399,7 @@ export default {
 .nickname {
   font-size: 20px;
   font-weight: bold;  /* 닉네임을 더 강조하기 위해 추가 */
+  margin-top:-20px;
 }
 
 .date {
