@@ -83,9 +83,10 @@
 
           <!-- 우측 메뉴 -->
           <v-col cols="4" class="d-flex justify-end align-center">
-            <!-- 채팅 아이콘 (로그인 상태일 때만 표시) -->
-            <v-btn v-if="isLoggedIn" icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea">
-              <v-icon>mdi-message-outline</v-icon>
+            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea">
+              <v-icon>
+                {{ hasUnreadMessages ? 'mdi-message-badge-outline' : 'mdi-message-outline' }}
+              </v-icon>
             </v-btn>
 
             <!-- 로그인 상태 -->
@@ -152,6 +153,11 @@ export default {
       reconnectTimeout: null
     }
   },
+  computed: {
+    hasUnreadMessages() {
+        return this.$store.state.chatList.some(chat => chat.unReadCount > 0);
+    }
+  },
   created() {
     const token = localStorage.getItem('token');
     if (token) {
@@ -201,14 +207,24 @@ export default {
       });
 
       this.eventSource.addEventListener('chat-message', (e) => {
-        console.log('새 메시지 수신:', e.data);
         const chatMessage = JSON.parse(e.data);
         
+        // store에 새 메시지 알림 (이 부분이 누락되었었네요!)
+        this.$store.dispatch('handleNewMessage', chatMessage);
+        
         if (Notification.permission === 'granted') {
-          new Notification('새로운 메시지가 있습니다', {
+          const notification = new Notification('TikTakTalk', {
             body: `${chatMessage.senderNickName}: ${chatMessage.message}`,
-            icon: chatMessage.senderImagePath || require('@/assets/basicProfileImage.png')
+            icon: chatMessage.senderImagePath || require('@/assets/basicProfileImage.png'),
+            tag: 'chat-message',
+            silent: false,
+            dir: 'auto',
+            timestamp: Date.now()
           });
+
+          setTimeout(() => {
+            notification.close();
+          }, 3000);
         }
       });
 
