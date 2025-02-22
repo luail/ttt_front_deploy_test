@@ -140,6 +140,7 @@
 <script>
 import { jwtDecode } from "jwt-decode";
 import { EventSourcePolyfill } from 'event-source-polyfill';
+import axios from 'axios';
 
 export default {
   data() {
@@ -158,7 +159,7 @@ export default {
         return this.$store.state.chatList.some(chat => chat.unReadCount > 0);
     }
   },
-  created() {
+  async created() {
     const token = localStorage.getItem('token');
     if (token) {
       const payload = jwtDecode(token);
@@ -166,7 +167,15 @@ export default {
       this.userRole = payload.role;
       this.fetchProfileImage(payload.userId);
       
-      // 토큰이 있을 때만 SSE 연결 및 알림 권한 요청
+      // 채팅방 목록 초기화
+      try {
+        const chatListResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
+        this.$store.dispatch('setChatList', chatListResponse.data.result);
+      } catch (error) {
+        console.error('채팅방 목록 로드 실패:', error);
+      }
+      
+      // SSE 연결
       this.connectSSE();
       if (Notification.permission === 'default') {
         Notification.requestPermission();
@@ -209,7 +218,6 @@ export default {
       this.eventSource.addEventListener('chat-message', (e) => {
         const chatMessage = JSON.parse(e.data);
         
-        // store에 새 메시지 알림 (이 부분이 누락되었었네요!)
         this.$store.dispatch('handleNewMessage', chatMessage);
         
         if (Notification.permission === 'granted') {

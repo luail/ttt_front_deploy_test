@@ -165,15 +165,26 @@ export default{
         this.senderNickName = localStorage.getItem("nickName");
         this.roomId = this.$route.params.roomId;
         
+        // 채팅방 목록 먼저 가져오기
+        const chatListResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
+        
         if (this.roomId) {
-            this.$store.dispatch('setCurrentRoom', this.roomId);
+            // 채팅방 목록에서 현재 채팅방 정보 찾기
+            const chatList = chatListResponse.data.result;
+            this.currentChatRoom = chatList.find(chat => chat.roomId === Number(this.roomId));
+            
+            // 채팅 히스토리 가져오기
             const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
             this.messages = response.data.result;
             this.connectWebsocket();
+            
+            // 채팅 히스토리를 불러온 후 nextTick을 사용하여 DOM 업데이트 후 스크롤
+            this.$nextTick(() => {
+                this.scrollToBottom();
+            });
         }
         
-        // 채팅방 목록 가져오기
-        const chatListResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
+        // 채팅방 목록 저장
         this.$store.dispatch('setChatList', chatListResponse.data.result.sort((a, b) => b.unReadCount - a.unReadCount));
     },
     // 사용자가 현재 라우트에서 다른 라우트로 이동하려고 할때 호출되는 훅함수
