@@ -83,9 +83,10 @@
 
           <!-- 우측 메뉴 -->
           <v-col cols="4" class="d-flex justify-end align-center">
-            <!-- 채팅 아이콘 (로그인 상태일 때만 표시) -->
-            <v-btn v-if="isLoggedIn" icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea">
-              <v-icon>mdi-message-outline</v-icon>
+            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea">
+              <v-icon>
+                {{ hasUnreadMessages ? 'mdi-message-badge-outline' : 'mdi-message-outline' }}
+              </v-icon>
             </v-btn>
 
             <!-- 로그인 상태 -->
@@ -138,6 +139,8 @@
 
 <script>
 import { jwtDecode } from "jwt-decode";
+import { EventSourcePolyfill } from 'event-source-polyfill';
+import axios from 'axios';
 
 export default {
   data() {
@@ -146,22 +149,118 @@ export default {
       isLoggedIn: false,
       hoveredMenu: null,
       profileImageUrl: null,
-      profileMenu: false
+      profileMenu: false,
+      eventSource: null,
+      reconnectTimeout: null
     }
   },
-  created() {
+  computed: {
+    hasUnreadMessages() {
+        return this.$store.state.chatList.some(chat => chat.unReadCount > 0);
+    }
+  },
+  async created() {
     const token = localStorage.getItem('token');
     if (token) {
       const payload = jwtDecode(token);
       this.isLoggedIn = true;
       this.userRole = payload.role;
       this.fetchProfileImage(payload.userId);
+      
+      // 채팅방 목록 초기화
+      try {
+        const chatListResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
+        this.$store.dispatch('setChatList', chatListResponse.data.result);
+      } catch (error) {
+        console.error('채팅방 목록 로드 실패:', error);
+      }
+      
+      // SSE 연결
+      this.connectSSE();
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+  },
+  unmounted() {
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
   },
   methods: {
+    connectSSE() {
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+
+      const token = localStorage.getItem('token');
+      
+      const options = {
+        heartbeatTimeout: 120000,  // 2분으로 설정 (서버 설정과 동일)
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      };
+
+      this.eventSource = new EventSourcePolyfill('http://localhost:8080/subscribe', options);
+
+      this.eventSource.onopen = () => {
+        console.log('SSE 연결됨');
+      };
+
+      this.eventSource.addEventListener('connect', (e) => {
+        console.log('SSE Connected:', e.data);
+      });
+
+      this.eventSource.addEventListener('chat-message', (e) => {
+        const chatMessage = JSON.parse(e.data);
+        
+        this.$store.dispatch('handleNewMessage', chatMessage);
+        
+        if (Notification.permission === 'granted') {
+          const notification = new Notification('TikTakTalk', {
+            body: `${chatMessage.senderNickName}: ${chatMessage.message}`,
+            icon: chatMessage.senderImagePath || require('@/assets/basicProfileImage.png'),
+            tag: 'chat-message',
+            silent: false,
+            dir: 'auto',
+            timestamp: Date.now()
+          });
+
+          setTimeout(() => {
+            notification.close();
+          }, 3000);
+        }
+      });
+
+      this.eventSource.onerror = (error) => {
+        console.error('SSE Error:', error);
+        this.eventSource.close();
+        
+        setTimeout(() => {
+          console.log('SSE 재연결 시도');
+          this.connectSSE();
+        }, 3000);
+      };
+    },
+    disconnectSSE() {
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+    },
     doLogout() {
-      localStorage.clear();
-      window.location.href = '/';
+        // SSE 연결 종료
+        if (this.eventSource) {
+            this.eventSource.close();
+            this.eventSource = null;
+        }
+        
+        // 기존 로그아웃 로직
+        localStorage.clear();
+        window.location.href = '/';
     },
     async fetchProfileImage(userId) {
       try {

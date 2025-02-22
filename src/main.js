@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify'
+import store from './store'
 import '@mdi/font/css/materialdesignicons.css'
 import axios from 'axios'
 
@@ -18,7 +19,6 @@ axios.interceptors.request.use(
     error => {
         return Promise.reject(error);
     }
-
 )
 
 axios.interceptors.response.use(
@@ -40,9 +40,9 @@ axios.interceptors.response.use(
         }
         return Promise.reject(error)
     }
-
 )
 
 app.use(vuetify)
 app.use(router)
+app.use(store)
 app.mount('#app')
