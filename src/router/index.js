@@ -9,7 +9,7 @@ const routes = [
     ...postRouter,
     ...chatRouter,
     {
-        path:'/ttt/home',
+        path:'/ttt',
         name:'HomePage',
         component:HomePage
     }

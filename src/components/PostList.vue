@@ -117,9 +117,10 @@
 
                                     <!-- 네 번째 줄: 게시물 메타정보 (댓글, 좋아요) -->
                                     <v-row no-gutters class="mt-4 align-center">
-                                        <span class="mr-1" style="font-size: 20px;">👍 {{ post.likesCount }}</span>
+                                        <span class="mr-1" style="font-size: 15px;">👀 {{ post.viewCount }}</span>
+                                        <span class="mr-1" style="font-size: 15px;">👍 {{ post.likesCount }}</span>
                                         <!-- <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }} -->
-                                        <span class="ml-4" style="font-size: 20px;">💬 {{ post.countOfComment }}</span>
+                                        <span class="ml-1" style="font-size: 15px;">💬 {{ post.countOfComment }}</span>
                                         <!-- <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }} -->
                                         <div class="ml-auto">{{ formatDate(post.createdTime) }}</div>
                                     </v-row>
