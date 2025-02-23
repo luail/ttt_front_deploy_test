@@ -120,6 +120,7 @@
                           <span class="mx-2">•</span>
                           <span>{{ formatDate(post.createdTime) }}</span>
                           <span class="stats">
+                            <span class="ml-2">👀 {{ post.viewCount }}</span>
                             <span class="ml-2">👍 {{ post.likesCount }}</span>
                             <span class="ml-2">💬 {{ post.countOfComment }}</span>
                           </span>
@@ -147,6 +148,7 @@
                           <span class="mx-2">•</span>
                           <span>{{ formatDate(post.createdTime) }}</span>
                           <span class="stats">
+                            <span class="ml-2">👀 {{ post.viewCount }}</span>
                             <span class="ml-2">👍 {{ post.likesCount }}</span>
                             <span class="ml-2">💬 {{ post.countOfComment }}</span>
                           </span>
@@ -177,6 +179,7 @@
                           <span class="mx-2">•</span>
                           <span>{{ formatDate(post.createdTime) }}</span>
                           <span class="stats">
+                            <span class="ml-2">👀 {{ post.viewCount }}</span>
                             <span class="ml-2">👍 {{ post.likesCount }}</span>
                             <span class="ml-2">💬 {{ post.countOfComment }}</span>
                           </span>
@@ -204,6 +207,7 @@
                           <span class="mx-2">•</span>
                           <span>{{ formatDate(post.createdTime) }}</span>
                           <span class="stats">
+                            <span class="ml-2">👀 {{ post.viewCount }}</span>
                             <span class="ml-2">👍 {{ post.likesCount }}</span>
                             <span class="ml-2">💬 {{ post.countOfComment }}</span>
                           </span>
