@@ -43,14 +43,17 @@
                             />
                             <!-- 전화번호 입력 -->
                                 <v-text-field
-                                label="전화번호"
+                                label="phone number"
                                 v-model="phoneNumber"
                                 prepend-icon="mdi-phone"
                                 :disabled="isVerified"
                                 required
+                                :hint="showHint ? `- 빼고 입력해주세요.` : ''"
+                                persistent-hint
+                                @input="showHint = !phoneNumber"
                                 />
                                 <v-btn @click="sendAuthCode" :disabled="authSent || isVerified" color="primary">
-                                인증번호 요청
+                                인증요청
                                 </v-btn>
 
                                 <!-- 인증번호 입력 (전송 후 표시) -->
@@ -63,7 +66,7 @@
                                     required
                                 />
                                 <v-btn @click="verifyAuthCode" :disabled="isVerified" color="success">
-                                    인증 확인
+                                인증확인
                                 </v-btn>
                                 </div>
 
@@ -126,6 +129,7 @@ export default {
             authSent: false,  // 인증번호 요청 여부
             isVerified: false,  // 인증 성공 여부
             verifyError: false,  // 인증 실패 여부
+            showHint: true, // 힌트 표시 여부
             nickName:"",
             blogLink:"",
             batch:"",
@@ -171,14 +175,26 @@ export default {
         },
         // 인증번호 요청
         async sendAuthCode() {
-            console.log(this.phoneNumber)
-        try {
-            const response = await axios.post("http://localhost:8080/sms/send-auth", {phoneNumber: this.phoneNumber});
-            console.log("인증번호 전송 결과:", response.data);
-            this.authSent = true; // 인증번호 입력란 활성화
-        } catch (error) {
-            console.error("인증번호 요청 실패", error);
-        }
+            console.log(this.phoneNumber);
+
+            // 전화번호가 없거나 하이픈(-)이 포함된 경우 alert 처리
+            if (!this.phoneNumber.trim()) {
+                alert("전화번호를 입력해주세요.");
+                return;
+            }
+            if (this.phoneNumber.includes("-")) {
+                alert("전화번호에 '-'를 제거해주세요.");
+                return;
+            }
+
+            try {
+                const response = await axios.post("http://localhost:8080/sms/send-auth", { phoneNumber: this.phoneNumber });
+                console.log("인증번호 전송 결과:", response.data);
+                this.authSent = true; // 인증번호 입력란 활성화
+            } catch (error) {
+                console.error("인증번호 요청 실패", error);
+                alert("인증번호 요청에 실패했습니다. 다시 시도해주세요.");
+            }
         },
 
         // 인증번호 검증

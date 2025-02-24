@@ -17,19 +17,6 @@
                 <v-table class="custom-table">
                   <tbody>
                     <tr>
-                      <th>phoneNumber</th>
-                      <td>
-                        <v-text-field
-                          class="readonly-field"
-                          hide-details
-                          style="height: 50px"
-                          v-model="userDetail.phoneNumber"
-                          readonly
-                          dense
-                        ></v-text-field>
-                      </td>
-                    </tr>
-                    <tr>
                       <th>email</th>
                       <td>
                         <v-text-field
@@ -55,6 +42,19 @@
                         <v-text-field
                           v-model="editData.blogLink"
                           @input="checkChanges"
+                          dense
+                        ></v-text-field>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>phoneNumber</th>
+                      <td>
+                        <v-text-field
+                          class="readonly-field"
+                          hide-details
+                          style="height: 50px"
+                          v-model="userDetail.phoneNumber"
+                          readonly
                           dense
                         ></v-text-field>
                       </td>
