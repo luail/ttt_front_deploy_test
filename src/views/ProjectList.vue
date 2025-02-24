@@ -49,7 +49,7 @@
                       hide-details
                   ></v-checkbox>
                 </th>
-                <th class="sortable-header" @click="sortByBatch" >기수</th>
+                <th class="sortable-header" @click="sortByBatch">기수</th>
                 <th>팀명</th>
                 <th>프로젝트 유형</th>
                 <th>서비스명</th>
@@ -92,7 +92,12 @@
                 <td>{{ project.projectType }}</td>
                 <td>{{ project.serviceName }}</td>
                 <td>
-                  <v-icon v-if="formatUrl(project.link)" class="link-icon" @click="openLinkInNewTab(formatUrl(project.link))" prepend-icon="mdi-link-box-variant-outline">
+                  <v-icon
+                      v-if="formatUrl(project.link)"
+                      class="link-icon"
+                      @click="openLinkInNewTab(formatUrl(project.link))"
+                      prepend-icon="mdi-link-box-variant-outline"
+                  >
                     mdi-link-box-variant-outline
                   </v-icon>
                 </td>
@@ -172,28 +177,39 @@ export default {
     }
   },
   methods: {
+    // 검색어와 검색 옵션에 따른 파라미터 반환
+    getSearchParams() {
+      const trimmedKeyword = this.searchKeyword?.trim() || '';
+      let params = {};
+      if (trimmedKeyword) {
+        if (this.searchType === "batch") {
+          params.batch = trimmedKeyword;
+        } else if (this.searchType === "projectType") {
+          params.projectType = trimmedKeyword;
+        } else if (this.searchType === "serviceName") {
+          params.serviceName = trimmedKeyword;
+        }
+      }
+      return params;
+    },
     async fetchProjects() {
       if (this.isLoading || this.isLastPage) return;
       this.isLoading = true;
       try {
         let params = {
           size: this.pageSize,
-          page: this.currentPage
+          page: this.currentPage,
+          ...this.getSearchParams()
         };
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/find`, { params });
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/find`, {params});
+        const newProjects = response.data.result.content.map(project => ({
+          ...project,
+          primaryFeatureList: project.primaryFeatureList || []
+        }));
         if (this.currentPage === 0) {
-          this.projectList = response.data.result.content.map(project => ({
-            ...project,
-            primaryFeatureList: project.primaryFeatureList || []
-          }));
+          this.projectList = newProjects;
         } else {
-          this.projectList = [
-            ...this.projectList,
-            ...response.data.result.content.map(project => ({
-              ...project,
-              primaryFeatureList: project.primaryFeatureList || []
-            }))
-          ];
+          this.projectList = [...this.projectList, ...newProjects];
         }
         this.currentPage++;
         this.isLastPage = response.data.result.last;
@@ -203,11 +219,9 @@ export default {
         this.isLoading = false;
       }
     },
-
     toggleAll() {
       this.selectedProjects = this.selectAll ? this.filteredProjects.map(project => project.id) : [];
     },
-
     async deleteSelectedProjects() {
       if (!confirm(`${this.selectedProjects.length}개의 프로젝트를 삭제하시겠습니까?`)) return;
       try {
@@ -226,7 +240,6 @@ export default {
         alert("삭제에 실패했습니다.");
       }
     },
-
     openEditDialog() {
       if (this.selectedProjects.length !== 1) {
         alert("수정을 위해서는 하나의 프로젝트만 선택해야 합니다.");
@@ -234,51 +247,38 @@ export default {
       }
       this.editDialogVisible = true;
     },
-
     getSelectedProject() {
       const selectedId = this.selectedProjects[0];
       return this.projectList.find(project => project.id === selectedId) || {};
     },
-
     handleProjectUpdated() {
       this.editDialogVisible = false;
       this.selectedProjects = [];
       this.selectAll = false;
-      // 전체 목록을 리셋하고 새로 불러오기
+      // 전체 목록 초기화 후 새로 불러오기
       this.projectList = [];
       this.currentPage = 0;
       this.isLastPage = false;
       this.fetchProjects();
     },
-
     async searchProjects() {
+      // 검색 시 상태 초기화
       this.projectList = [];
       this.selectedProjects = [];
       this.selectAll = false;
       this.currentPage = 0;
       this.isLastPage = false;
-
       const trimmedKeyword = this.searchKeyword?.trim() || '';
       if (!trimmedKeyword) {
         return this.fetchProjects();
       }
-
       try {
         let params = {
           size: this.pageSize,
-          page: this.currentPage
+          page: this.currentPage,
+          ...this.getSearchParams()
         };
-        let apiEndpoint = `${process.env.VUE_APP_API_BASE_URL}/project/find`;
-
-        if (this.searchType === "batch") {
-          params.batch = trimmedKeyword;
-        } else if (this.searchType === "projectType") {
-          params.projectType = trimmedKeyword;
-        } else if (this.searchType === "serviceName") {
-          params.serviceName = trimmedKeyword;
-        }
-
-        const response = await axios.get(apiEndpoint, {params});
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/find`, {params});
         this.projectList = response.data.result.content.map(project => ({
           ...project,
           primaryFeatureList: project.primaryFeatureList || []
@@ -289,32 +289,27 @@ export default {
         console.log("검색 실패", e);
       }
     },
-
     formatUrl(url) {
       if (!url || url.trim() === "") return null;
       return url.startsWith('http://') || url.startsWith('https://') ? url : "https://" + url;
     },
-
     toggleFeature(featureName) {
       this.selectedFeature = this.selectedFeature === featureName ? null : featureName;
     },
-
     scrollPagination() {
       const isBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 200;
       if (isBottom && !this.isLoading && !this.isLastPage) {
         this.fetchProjects();
       }
     },
-
     checkAdminStatus() {
       const role = localStorage.getItem('role');
       this.isAdmin = role === "ADMIN";
     },
-
     goToProjectCreate() {
       this.$router.replace(`/ttt/project/create`);
     },
-    openLinkInNewTab(url){
+    openLinkInNewTab(url) {
       if (url) window.open(url, '_blank');
     },
     sortByBatch() {
@@ -325,7 +320,7 @@ export default {
         this.sortDirection = 'asc';
         this.projectList.sort((a, b) => a.batch - b.batch);
       }
-    },
+    }
   }
 };
 </script>
@@ -336,7 +331,8 @@ export default {
   color: black !important;
   font-weight: bold;
 }
-.sortable-header{
+
+.sortable-header {
   cursor: pointer;
 }
 </style>
