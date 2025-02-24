@@ -162,7 +162,7 @@ export default {
             try{
                 if(this.isVerified){
                     await axios.post(`${process.env.VUE_APP_API_BASE_URL}/user/create`, data)
-                    this.$router.push('/')
+                    this.$router.push('/ttt/user/login')
                 }else{
                     alert("다시요")
                 }

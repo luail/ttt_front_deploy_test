@@ -97,6 +97,11 @@
               >
             </v-card-actions>
           </v-card>
+          <!-- 탈퇴 버튼 -->
+          <v-card-actions >
+              <v-btn color="grey" @click="userDelete()"
+                >회원탈퇴></v-btn>
+          </v-card-actions>
         </v-col>
       </v-row>
     </v-container>
@@ -163,6 +168,26 @@
           alert("프로필 수정 중 오류가 발생했습니다.");
         }
       },
+      async userDelete() {
+      try {
+          const confirmDelete = confirm("정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.");
+          if (!confirmDelete) return;
+
+          const response = await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/user/deleteMember`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },});
+
+        if (response.status === 200) {
+          alert("회원 탈퇴가 완료되었습니다.");
+          localStorage.clear(); // 로컬 스토리지 삭제
+          window.location.href = '/'; // 메인 페이지로 이동
+        }
+        } catch (error) {
+          console.error("회원 탈퇴 실패:", error);
+          alert("회원 탈퇴 중 오류가 발생했습니다.");
+        }
+      }
     },
   };
   </script>

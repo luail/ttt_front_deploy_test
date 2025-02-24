@@ -25,7 +25,7 @@
                       <v-col cols="auto">
                         <v-avatar size="40">
                           <img
-                            :src="myLikePost.profileImageOfAuthor || require('@/assets/basicProfileImage.png')"
+                            :src="myLikePost.authorImage || require('@/assets/basicProfileImage.png')"
                             class="profile-img"
                           />
                         </v-avatar>
@@ -96,7 +96,7 @@ export default {
       // 유저 정보 가져오기 (게시글 리스트에서 첫 번째 게시글의 유저 정보 활용)
       if (this.likePost.length > 0) {
         this.userDetail = {
-          profileImageOfAuthor: this.likePost[0].profileImageOfAuthor || "",
+          AuthorImage: this.likePost[0].authorImage || "",
           authorNickName: this.likePost[0].authorNickName || "익명",
         };
       }
