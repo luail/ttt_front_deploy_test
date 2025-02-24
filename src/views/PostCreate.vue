@@ -97,13 +97,13 @@ export default {
         },
         formats: [
         'bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block',
-        'header', 'list', 'bullet', 'script', 'indent', 'direction', 
+        'header', 'list', 'bullet', 'script', 'indent', 'direction',
         'size', 'color', 'background', 'link', 'image', 'align', 'ordered', 'clean'
     ]
       },
       content:"",
       attachments:[],
-     
+
     }
   },
   
@@ -111,7 +111,7 @@ export default {
     this.contents ="";
     try {
       const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
-      this.beforeCategoryList= sideBarResponse.data.result;       
+      this.beforeCategoryList= sideBarResponse.data.result;
       this.categoryList = [{categoryName: "전체게시판", categoryId:0},...this.beforeCategoryList]
     } catch (error) {
       console.error('카테고리 불러오기 실패:', error);
@@ -129,7 +129,7 @@ export default {
 
   methods: {
     // 사이드게시판 이동
-    selectedBoard(boardId){  
+    selectedBoard(boardId){
         this.$router.push(`/ttt/post/list/${boardId}`);
         },
 
@@ -149,11 +149,11 @@ export default {
             console.log(this.file)
           })
         }
-       
-   
+
+
         const response = await axios.post(
-          `${process.env.VUE_APP_API_BASE_URL}/post/create`, 
-          formData, 
+          `${process.env.VUE_APP_API_BASE_URL}/post/create`,
+          formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
         console.log("게시물 생성 성공:", response.data);
@@ -194,7 +194,7 @@ export default {
         const editor = this.$refs.quillEditor.getQuill();
         const range = editor.getSelection();
         editor.insertEmbed(range.index,"image",imageUrl);
-      
+
       }catch(error){
         console.log("드래그 이미지업로드 실패",error);
       }
