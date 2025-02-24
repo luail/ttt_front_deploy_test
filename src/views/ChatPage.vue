@@ -420,48 +420,62 @@ export default{
     box-shadow: none;
 }
 
-.v-list {
-    background: transparent;
-    padding: 12px;
-}
-
-.v-list-item {
-    margin-bottom: 12px;
-    border-radius: 16px;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(37, 99, 235, 0.08);
+.chat-list-header {
     padding: 16px 20px;
-}
-
-.v-list-item:hover {
-    background-color: #F8FAFC;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
-}
-
-.active-chat {
-    background-color: rgba(37, 99, 235, 0.08) !important;
-    border-left: 3px solid #2563EB;
-    transform: translateX(2px);
-}
-
-.chat-room-name {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #1E293B;
-    margin-bottom: 6px;
-}
-
-.unread-count {
-    color: #2563EB;
-    font-size: 0.9rem;
-    margin-top: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    font-weight: 600;
 }
 
 .chat-rooms {
-    height: calc(100vh - 220px);
+    padding: 0;
+    height: calc(100vh - 160px);
     overflow-y: auto;
-    padding-right: 8px;
+    padding-bottom: 40px;
+}
+
+.v-list {
+    padding: 0 !important;
+    padding-bottom: 40px !important;
+    background: transparent;
+}
+
+.chat-room-item {
+    min-height: 44px !important;  /* 높이 조정 */
+    padding: 10px 16px !important;  /* 상하 패딩 줄임 */
+    margin: 0 !important;  /* 마진 완전 제거 */
+    border-radius: 0 !important;  /* 라운드 제거 */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);  /* 얇은 구분선 */
+    transition: all 0.2s ease;
+}
+
+.chat-room-item:hover {
+    background-color: #F4F1FA;
+}
+
+.active-chat {
+    background-color: #F4F1FA !important;
+    border-left: 3px solid #9155FD;
+}
+
+.chat-room-name {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.2;  /* 줄 높이 조정 */
+}
+
+.unread-count {
+    color: #9155FD;
+    font-size: 0.85rem;
+    margin-left: 4px;
+}
+
+/* Vuetify 기본 스타일 오버라이드 */
+:deep(.v-list-item__content) {
+    padding: 0 !important;
+}
+
+:deep(.v-list-item__title) {
+    font-size: inherit !important;
 }
 
 .chat-message {
@@ -755,5 +769,27 @@ export default{
     font-size: 0.8rem;
     color: #64748B;
     border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chat-rooms::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-rooms::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-rooms::-webkit-scrollbar-thumb {
+    background: #E2E8F0;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.chat-rooms::-webkit-scrollbar-thumb:hover {
+    background: #9155FD;
+}
+
+.chat-rooms::-webkit-scrollbar-thumb:active {
+    background: #7934F3;
 }
 </style>
