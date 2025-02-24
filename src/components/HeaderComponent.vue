@@ -5,80 +5,89 @@
         <v-row align="center" no-gutters>
           <!-- 로고 -->
           <v-col cols="2">
-            <router-link to="/" class="text-decoration-none">
+            <router-link to="/ttt" class="text-decoration-none">
               <h1 class="logo">TTT</h1>
             </router-link>
           </v-col>
 
           <!-- 메인 메뉴 -->
           <v-col cols="6">
-            <v-menu open-on-hover offset-y>
-              <template v-slot:activator="{ props }">
-                <v-row no-gutters>
-                  <v-col cols="3">
+            <v-row no-gutters>
+              <v-col cols="3">
+                <v-menu open-on-hover offset-y>
+                  <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
                       :class="{ 'active-menu': hoveredMenu === 'community' }"
                       @mouseover="hoveredMenu = 'community'"
                       @mouseleave="hoveredMenu = null">
                       커뮤니티
                     </v-btn>
-                  </v-col>
-                  <v-col cols="3">
+                  </template>
+                  <v-card class="dropdown-menu" flat>
+                    <v-list>
+                      <v-list-item to="/ttt/post/list/0">전체게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/1">자유게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/2">정보게시판</v-list-item>
+                    </v-list>
+                  </v-card>
+                </v-menu>
+              </v-col>
+
+              <v-col cols="3">
+                <v-menu open-on-hover offset-y>
+                  <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
                       :class="{ 'active-menu': hoveredMenu === 'chat' }"
                       @mouseover="hoveredMenu = 'chat'"
                       @mouseleave="hoveredMenu = null">
                       오픈채팅
                     </v-btn>
-                  </v-col>
-                  <v-col cols="3">
+                  </template>
+                  <v-card class="dropdown-menu" flat>
+                    <v-list>
+                      <v-list-item to="/ttt/chat/list">오픈채팅리스트</v-list-item>
+                    </v-list>
+                  </v-card>
+                </v-menu>
+              </v-col>
+
+              <v-col cols="3">
+                <v-menu open-on-hover offset-y>
+                  <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
                       :class="{ 'active-menu': hoveredMenu === 'list' }"
                       @mouseover="hoveredMenu = 'list'"
                       @mouseleave="hoveredMenu = null">
                       리스트
                     </v-btn>
-                  </v-col>
-                  <v-col cols="3" v-if="userRole === 'ADMIN'">
+                  </template>
+                  <v-card class="dropdown-menu" flat>
+                    <v-list>
+                      <v-list-item to="/ttt/project/find">프로젝트</v-list-item>
+                    </v-list>
+                  </v-card>
+                </v-menu>
+              </v-col>
+
+              <v-col cols="3" v-if="userRole === 'ADMIN'">
+                <v-menu open-on-hover offset-y>
+                  <template v-slot:activator="{ props }">
                     <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
                       :class="{ 'active-menu': hoveredMenu === 'admin' }"
                       @mouseover="hoveredMenu = 'admin'"
                       @mouseleave="hoveredMenu = null">
                       관리자
                     </v-btn>
-                  </v-col>
-                </v-row>
-              </template>
-
-              <!-- 드롭다운 메뉴 -->
-              <v-card class="dropdown-menu" flat>
-                <v-row no-gutters>
-                  <v-col cols="3">
-                    <v-list>
-                      <v-list-item to="/ttt/post/list/0">전체게시판</v-list-item>
-                      <v-list-item to="/ttt/post/list/1">자유게시판</v-list-item>
-                      <v-list-item to="/ttt/post/list/2">정보게시판</v-list-item>
-                    </v-list>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-list>
-                      <v-list-item to="/ttt/chat/list">오픈채팅리스트</v-list-item>
-                    </v-list>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-list>
-                      <v-list-item to="/ttt/project/find">프로젝트</v-list-item>
-                    </v-list>
-                  </v-col>
-                  <v-col cols="3" v-if="userRole === 'ADMIN'">
+                  </template>
+                  <v-card class="dropdown-menu" flat>
                     <v-list>
                       <v-list-item to="/ttt/blog/list">블로그</v-list-item>
                       <v-list-item to="/ttt/user/list">회원목록조회</v-list-item>
                     </v-list>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </v-menu>
+                  </v-card>
+                </v-menu>
+              </v-col>
+            </v-row>
           </v-col>
 
           <!-- 우측 메뉴 -->
@@ -312,6 +321,7 @@ export default {
 .dropdown-menu {
   margin-top: 8px;
   min-width: 100%;
+  left: 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
