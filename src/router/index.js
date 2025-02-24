@@ -7,7 +7,6 @@ const routes = [
     ...userRouter,
     ...postRouter,
     ...chatRouter,
-    
 ]
 
 

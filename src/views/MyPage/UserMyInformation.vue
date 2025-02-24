@@ -1,6 +1,6 @@
 <template>
-    <v-container>
-      <v-row>
+    <v-container class="fill-height">
+      <v-row class="justify-center align-center" style="height: 100%">
         <!-- 왼쪽 프로필 카드 (분리된 컴포넌트) -->
         <UserProfileCard
           :avatar="userDetail.avatar"
@@ -167,3 +167,8 @@
   };
   </script>
   
+  <style scoped>
+  .fill-height {
+    min-height: calc(100vh - 64px); /* 헤더 높이를 고려하여 조정 */
+  }
+  </style>

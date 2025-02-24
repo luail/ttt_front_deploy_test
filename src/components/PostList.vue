@@ -30,7 +30,7 @@
                 <!-- 상단 메뉴 -->
                 <v-row class="mb-5 align-center">
                     <v-col>
-                        <h2 class="text-h3 font-weight-bold" style="margin-left: 140px;">{{ boardTitle }}</h2>
+                        <h2 class="text-h5 font-weight-bold" style="margin-left: 140px;">{{ boardTitle }}</h2>
                     </v-col>
 
            <!-- 게시물 검색창 -->
@@ -49,7 +49,7 @@
                             class="search-select"
                         ></v-select>
                     </v-col>
-
+                   
                     <!-- 검색 입력창 -->
                     <v-col cols="7">
                         <v-text-field
@@ -65,7 +65,7 @@
 
                     <!-- 검색 버튼 -->
                     <v-col cols="2" class="d-flex justify-center">
-                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts">
+                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts()">
                             <v-icon left>mdi-magnify</v-icon> 검색
                         </v-btn>
                     </v-col>
@@ -76,7 +76,6 @@
                         <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 글쓰기</v-btn>
                     </v-col>
                 </v-row>
-
 
                 <!-- 게시글 카드 리스트 -->
                     <v-row>
@@ -118,8 +117,11 @@
 
                                     <!-- 네 번째 줄: 게시물 메타정보 (댓글, 좋아요) -->
                                     <v-row no-gutters class="mt-4 align-center">
-                                        <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }}
-                                        <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }}
+                                        <span class="mr-1" style="font-size: 15px;">👀 {{ post.viewCount }}</span>
+                                        <span class="mr-1" style="font-size: 15px;">👍 {{ post.likesCount }}</span>
+                                        <!-- <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }} -->
+                                        <span class="ml-1" style="font-size: 15px;">💬 {{ post.countOfComment }}</span>
+                                        <!-- <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }} -->
                                         <div class="ml-auto">{{ formatDate(post.createdTime) }}</div>
                                     </v-row>
                                 </v-card-text>
@@ -131,7 +133,7 @@
                 <v-pagination 
                     v-model="page" 
                     :length="totalPages" 
-                    color="primary"
+                    color="purple"
                     class="mt-5"
                     @update:modelValue="fetchPage"
                 ></v-pagination>
@@ -142,6 +144,12 @@
 
 <script>
 import axios from 'axios';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ko';
+
+dayjs.extend(relativeTime);
+dayjs.locale('ko');
 
 export default {
     data() {
@@ -198,7 +206,7 @@ export default {
         //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
         async changeBoard(){
 
-            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 없다면 all로 설정\
+            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 
             console.log(boardId)
             let url = boardId === "0" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
                                     : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
@@ -229,8 +237,13 @@ export default {
             this.$router.push('/ttt/post/create');
         },
         //날짜 데이터 형식 변화
-        formatDate(date) {
-            return new Date(date).toLocaleDateString('ko-KR');
+        formatDate(dateArray) {
+            //이거는 createdTime이 배열값으로 들어오는지 확인하는 유효성 검사
+            if(!dateArray || dateArray.length < 6 ) return '';
+            //자바스크립트가 1월 부터 시작하는 것을 0월부터 인덱스로 인식해서 그걸 처리하는 값
+            const formattedDate = dayjs(`${dateArray[0]}-${dateArray[1].toString().padStart(2, '0')}-${dateArray[2].toString().padStart(2, '0')}T${dateArray[3].toString().padStart(2, '0')}:${dateArray[4].toString().padStart(2, '0')}:${dateArray[5].toString().padStart(2, '0')}`);
+            //24시간 이내면 몇시간전 이래 표시되고, 하루가 지나면 날짜로 표시됨
+            return dayjs().diff(formattedDate,'hour')<24 ? formattedDate.fromNow() : formattedDate.format('YYYY-MM-DD');
         },
         //사이드 바에서 게시판 눌러이동
         async selectedBoard(boardId){
@@ -251,6 +264,8 @@ export default {
             console.log(params)
             const response =  await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/find`,{params});
             this.postList = response.data.result.content;
+            this.totalPages = response.data.result.totalPages; // 페이지네이션 업데이트!
+            this.totalElements = response.data.result.totalElements;
 
             }catch(error){
                 console.log("검색요청 실패",error);
@@ -297,12 +312,11 @@ export default {
 
 .banner-img {
   width: 1400px; /* 전체 너비를 차지하도록 설정 */
-  height: 350px; /* 원본 비율 유지 */
+  height: 300px; /* 원본 비율 유지 */
   display: block; /* 블록 요소로 설정하여 중앙 정렬 */
-  border-radius: 40px;
-  margin-top: 0px;
+  margin-top: -40px;
   margin-right: 100px;
-  margin-left: 70px;
+  margin-left: -60px;
   margin-bottom: 40px;
 }
 
@@ -328,9 +342,9 @@ export default {
     margin-bottom: 25px; /* 게시물 카드 간격 증가 */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     border-radius: 25px;
-    padding: 30px 20px; /* 상하 여백 늘려서 카드 크기 키우기 */
     transition: 0.3s;
 }
+
 
 .post-card:hover {
     box-shadow: 0 10px 20px rgba(242, 13, 169, 0.3);
@@ -358,9 +372,9 @@ export default {
 
 
 .rounded-square {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px; /* 모서리를 둥글게 */
+  width: 60px;
+  height: 60px;
+  border-radius: 50px; /* 모서리를 둥글게 */
   object-fit: cover;
   border: 2px solid #ddd; /* 테두리 추가 (선택 사항) */
 }
@@ -386,6 +400,7 @@ export default {
 .nickname {
   font-size: 20px;
   font-weight: bold;  /* 닉네임을 더 강조하기 위해 추가 */
+  margin-top:-20px;
 }
 
 .date {
