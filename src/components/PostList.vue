@@ -182,19 +182,25 @@ export default {
     methods: {
         //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
         async changeBoard(){
-
-            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 
-            console.log(boardId)
-            let url = boardId === "0" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
-                                    : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
-            try{
+            const boardId = this.$route.params.boardId;
+            let url = boardId === "0" 
+                ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
+                : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
+            
+            try {
                 const response = await axios.get(url);
-                console.log(response)
-                this.postList = response.data.result.content;
+                console.log("API Response:", response.data.result.content); // 응답 데이터 확인
+                
+                // 게시글 데이터 매핑
+                this.postList = response.data.result.content.map(post => ({
+                    ...post,
+                    contents: post.contents || post.content || '', // contents 또는 content 필드 확인
+                }));
+                
                 this.totalPages = response.data.result.totalPages;
                 this.totalElements = response.data.result.totalElements;
-            }catch(error){
-                console.log("게시글 로딩 실패",error)
+            } catch(error) {
+                console.log("게시글 로딩 실패", error);
             }
             if(boardId === '0'){
                 this.boardTitle = '전체게시판';
@@ -256,17 +262,14 @@ export default {
         },
         //게시물 본문 미리보기
         truncatedContent(text, length) {
-      if (!text) return ""; // text가 undefined일 경우 빈 문자열 반환
-      return text.length > length ? text.slice(0, length) + "..." : text;
-    },
-       //퀼 편집기로 만들어진 html문자열을 dom객체로 변환하고 텍스트 콘텐츠만 가지고 오는 것
-        removeHtmlTags(text){
-            if(text){
-                const doc = new DOMParser().parseFromString(text,"text/html");
-                return doc.body.textContent || ""; //html태그 제거하고 텍스트만 가지고 오는 명령어
-            } else{
-                return"";
-            }
+            if (!text) return ""; 
+            return text.length > length ? text.slice(0, length) + "..." : text;
+        },
+        //퀼 편집기로 만들어진 html문자열을 dom객체로 변환하고 텍스트 콘텐츠만 가지고 오는 것
+        removeHtmlTags(text) {
+            if (!text) return "";
+            const doc = new DOMParser().parseFromString(text, "text/html");
+            return doc.body.textContent || "";
         },
         getRankIcon(points) {
             if (!points) return '🌱'; // 포인트가 없는 경우 새싹
