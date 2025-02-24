@@ -4,8 +4,8 @@
       <!-- 프로필 섹션 -->
       <div class="profile-container">
         <!-- 프로필 이미지 (아바타) -->
-        <v-avatar size="200">
-          <img :src="profileImageUrl || defaultImage" />
+        <v-avatar size="222" class="avatar">
+          <v-img :src="profileImageUrl || defaultImage" contain style="width: 100%; height: 100%; object-fit: contain; object-position: center;" />
         </v-avatar>
         <!-- 파일 선택 input (숨김) -->
         <input type="file" ref="fileInput" style="display: none" @change="onFileSelected" />
@@ -156,6 +156,7 @@ export default {
 /* 프로필 스타일 */
 .profile-container {
   text-align: center;
+  object-position: center;
 }
 /* 버튼 스타일 */
 .profile-info {
