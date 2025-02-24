@@ -1,143 +1,115 @@
 <template>
-    <v-container fluid>
+    <v-container fluid class="main-container">
+        <!-- 사이드바 -->
         <v-row>
-            <!-- 사이드바 -->
-            <v-col cols="1">
-          <v-navigation-drawer permanent class="sidebar" width="180">
-            <v-list>
-              <v-list-item v-for="(c, index) in categoryList" :key="index" @click="selectedBoard(c.categoryId)" class="clickable-item">
-                <v-list-item-content>
-                  <v-list-item-title class="font-weight-bold">{{c.categoryName}}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-navigation-drawer>
-        </v-col>
-
-            <!-- 상단 배너 -->
-            <v-row justify="center">
-                 <v-col cols="12">
-                    <div class="ad-banner">
-                    <a href="https://www.inflearn.com/users/1014633/@bradkim" target="_blank">
-                      <img :src="require('@/assets/tttad.png')" alt="" class="banner-img">
-                    </a>
+            <v-col cols="2">
+                <div class="category-sidebar">
+                    <div class="category-title">카테고리</div>
+                    <div 
+                        v-for="(c, index) in categoryList" 
+                        :key="index" 
+                        @click="selectedBoard(c.categoryId)"
+                        class="category-item"
+                        :class="{ 'active': c.categoryId === currentCategoryId }"
+                    >
+                        {{ c.categoryName }}
                     </div>
-                 </v-col>
-            </v-row>
-           
-            <!-- 게시물 리스트 -->
-            <v-col cols="11" class="pl-0">
-                <!-- 상단 메뉴 -->
-                <v-row class="mb-5 align-center">
-                    <v-col>
-                        <h2 class="text-h5 font-weight-bold" style="margin-left: 140px;">{{ boardTitle }}</h2>
-                    </v-col>
-
-           <!-- 게시물 검색창 -->
-            <v-col cols="6">
-                <v-row align="center" class="search-container">
-                    <!-- 검색 옵션 선택 -->
-                    <v-col cols="3">
-                        <v-select
-                            v-model="searchType"
-                            :items="searchOptions"
-                            item-title="text"
-                            item-value="value"
-                            solo
-                            rounded
-                            hide-details
-                            class="search-select"
-                        ></v-select>
-                    </v-col>
-
-                    <!-- 검색 입력창 -->
-                    <v-col cols="7">
-                        <v-text-field
-                            v-model="searchKeyword"
-                            label="검색어 입력"
-                            solo
-                            rounded
-                            hide-details
-                            clearable
-                            class="search-input"
-                        ></v-text-field>
-                    </v-col>
-
-                    <!-- 검색 버튼 -->
-                    <v-col cols="2" class="d-flex justify-center">
-                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts">
-                            <v-icon left>mdi-magnify</v-icon> 검색
-                        </v-btn>
-                    </v-col>
-                </v-row>
+                </div>
             </v-col>
-                  <!-- 글 작성하기 버튼 -->
-                    <v-col class="text-right">
-                        <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 글쓰기</v-btn>
-                    </v-col>
-                </v-row>
 
+            <v-col cols="8">
+                <!-- 상단 배너 -->
+                <div class="banner-container">
+                    <a href="https://www.inflearn.com/users/1014633/@bradkim" target="_blank">
+                        <img :src="require('@/assets/tttad.png')" alt="" class="banner-img">
+                    </a>
+                </div>
 
-                <!-- 게시글 카드 리스트 -->
-                    <v-row>
-                        <v-col v-for="post in postList" :key="post.postId" cols="12">
-                            <v-card class="mb-4 post-card" @click="goToDetailPost(post.postId)">
-                                <v-card-text>
-                                    <!-- 첫 번째 줄: 프로필 이미지 & 닉네임 -->
-                                    <v-row no-gutters class="align-center">
-                                        <v-col cols="auto" class="d-flex align-center">
-                                            <img 
-                                                :src="post.authorImage || require('@/assets/basicProfileImage.png')" 
-                                                class="rounded-square" 
-                                            />
-                                        </v-col>        
-                                        <v-col class="user-info">
-                                            <div class="nickname">{{ post.authorNickName }}</div>
-                                            <div class="date">{{ formatDate(post.createdTime) }}</div>
-                                        </v-col>
-                                        
-                                    </v-row>
+                <!-- 게시판 헤더 -->
+                <div class="board-header">
+                    <h2 class="board-title">{{ boardTitle }}</h2>
+                    
+                    <div class="search-area">
+                        <select v-model="searchType" class="search-select">
+                            <option v-for="option in searchOptions" 
+                                    :key="option.value" 
+                                    :value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                        <input 
+                            v-model="searchKeyword"
+                            type="text"
+                            placeholder="검색어를 입력하세요"
+                            class="search-input"
+                            @keyup.enter="searchPosts"
+                        >
+                        <button @click="searchPosts" class="search-btn">
+                            검색
+                        </button>
+                    </div>
 
-                                    <!-- 두 번째 줄: 게시물 제목 -->
-                                    <v-row no-gutters>
-                                        <v-col>
-                                            <div class="post-title">
-                                                {{ post.title }}
-                                            </div>
-                                        </v-col>
-                                    </v-row>
+                    <button @click="createPost" class="write-btn">
+                        <v-icon small color="white">mdi-pencil</v-icon>
+                        글쓰기
+                    </button>
+                </div>
 
-                                    <!-- 세 번째 줄: 게시물 내용 미리보기 -->
-                                    <v-row no-gutters>
-                                        <v-col>
-                                            <div class="text-preview">
-                                                {{ truncatedContent(removeHtmlTags(post.contents), 100) }}
-                                            </div>
-                                        </v-col>
-                                    </v-row>
+                <!-- 게시글 목록 -->
+                <div class="post-list">
+                    <div v-for="post in postList" 
+                         :key="post.postId" 
+                         class="post-item"
+                         @click="goToDetailPost(post.postId)">
+                        <div class="post-header">
+                            <div class="author-info">
+                                <img 
+                                    :src="post.authorImage || require('@/assets/basicProfileImage.png')"
+                                    class="author-image"
+                                >
+                                <span class="author-name">
+                                    {{ post.authorNickName }}
+                                    <span class="rank-icon" :title="getRankTitle(post.authorRankingPoint)">
+                                        {{ getRankIcon(post.authorRankingPoint) }}
+                                    </span>
+                                </span>
+                                <span class="post-date">{{ formatDate(post.createdTime) }}</span>
+                            </div>
+                        </div>
 
-                                    <!-- 네 번째 줄: 게시물 메타정보 (댓글, 좋아요) -->
-                                    <v-row no-gutters class="mt-4 align-center">
-                                        <span class="mr-1" style="font-size: 15px;">👀 {{ post.viewCount }}</span>
-                                        <span class="mr-1" style="font-size: 15px;">👍 {{ post.likesCount }}</span>
-                                        <!-- <v-icon class="mr-1" style="font-size: 25px;">mdi-thumb-up-outline</v-icon> {{ post.likesCount }} -->
-                                        <span class="ml-1" style="font-size: 15px;">💬 {{ post.countOfComment }}</span>
-                                        <!-- <v-icon class="ml-4 mr-1" style="font-size: 25px;">mdi-comment-outline</v-icon> {{ post.countOfComment }} -->
-                                        <div class="ml-auto">{{ formatDate(post.createdTime) }}</div>
-                                    </v-row>
-                                </v-card-text>
-                            </v-card>
-                        </v-col>
-                    </v-row>
+                        <div class="post-content">
+                            <h3 class="post-title">{{ post.title }}</h3>
+                            <p class="post-preview">{{ truncatedContent(removeHtmlTags(post.contents), 100) }}</p>
+                        </div>
+
+                        <div class="post-footer">
+                            <div class="post-stats">
+                                <span>👀 {{ post.viewCount }}</span>
+                                <span>👍 {{ post.likesCount }}</span>
+                                <span>💬 {{ post.countOfComment }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- 페이지네이션 -->
-                <v-pagination 
+                <v-pagination
                     v-model="page"
                     :length="totalPages"
-                    color="purple"
-                    class="mt-5"
                     @update:modelValue="fetchPage"
+                    class="pagination"
                 ></v-pagination>
+            </v-col>
+
+            <!-- 새로 추가하는 오른쪽 배너 (2칸) -->
+            <v-col cols="2" class="sidebar-col">
+                <div class="sticky-sidebar">
+                    <div class="ad-banner">
+                        <a href="https://www.inflearn.com/users/1014633/@bradkim" target="_blank">
+                            <img :src="require('@/assets/verticalbanner2.png')" alt="" class="banner-img2">
+                        </a>
+                    </div>
+                </div>
             </v-col>
         </v-row>
     </v-container>
@@ -157,15 +129,19 @@ export default {
         return {
             postList: [],
             categoryList: [],
-            page: 1, //페이지 처리
-            size:20, //페이지 처리
-            totalPages:1, //페이지 처리
-            totalElements:0, //페이지 처리
-            boardTitle:"",
-            searchType:"optional",
-            searchOptions:[{text:"선택", value:"optional"},{text:"제목", value:"title"},{text:"내용",value:"contents"}],
-            searchKeyword:"",
-          
+            page: 1,
+            size: 20,
+            totalPages: 1,
+            totalElements: 0,
+            boardTitle: "",
+            searchType: "optional",
+            searchOptions: [
+                {text: "선택", value: "optional"},
+                {text: "제목", value: "title"},
+                {text: "내용", value: "contents"}
+            ],
+            searchKeyword: "",
+            currentCategoryId: 0
         }
     },
     async created() {
@@ -207,7 +183,7 @@ export default {
         //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
         async changeBoard(){
 
-            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴
+            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 
             console.log(boardId)
             let url = boardId === "0" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
                                     : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
@@ -291,152 +267,289 @@ export default {
                 return"";
             }
         },
-  handleProjectUpdated(updatedProject){
-          this.editDialogVisible = false;
-          this.selectedProjects = [];
-          this.selectAll = false;
-
-          this.projectList = this.projectList.map(project =>
-          project.id === updatedProject.id ? updatedProject : project);
-          this.$forceUpdate();
-  }
+        getRankIcon(points) {
+            if (!points) return '🌱'; // 포인트가 없는 경우 새싹
+            if (points >= 500) return '🏆'; // 금메달
+            if (points >= 300) return '🥈'; // 은메달
+            if (points >= 100) return '🥉'; // 동메달
+            return '🌱'; // 새싹
+        },
+        getRankTitle(points) {
+            if (!points) return '새싹';
+            if (points >= 500) return '골드 등급';
+            if (points >= 300) return '실버 등급';
+            if (points >= 100) return '브론즈 등급';
+            return '새싹';
+        }
     }
     }
 
 </script>
 
 <style scoped>
-.sidebar {
-    background-color: #f5f5f5;
-    border-right: 1px solid #ccc;
+.main-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 20px;
 }
 
-.ad-banner {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto; /* 좌우 여백 자동 조정 */
+/* 카테고리 사이드바 */
+.category-sidebar {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: -webkit-sticky;  /* Safari 지원 */
+    position: sticky;
+    top: 64px;                /* 상단에서의 간격 */
+    height: fit-content;
+    z-index: 10;
+}
+
+.category-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #7c3aed;
+}
+
+.category-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    transition: all 0.2s;
+}
+
+.category-item:hover {
+    background: #f8f9fa;
+    color: #7c3aed;
+}
+
+.category-item.active {
+    background: #7c3aed;
+    color: white;
+}
+
+/* 배너 */
+.banner-container {
+    margin-bottom: 30px;
 }
 
 .banner-img {
-  width: 1400px; /* 전체 너비를 차지하도록 설정 */
-  height: 300px; /* 원본 비율 유지 */
-  display: block; /* 블록 요소로 설정하여 중앙 정렬 */
-  margin-top: -40px;
-  margin-right: 100px;
-  margin-left: -60px;
-  margin-bottom: 40px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.banner-img:hover {
-    box-shadow: 0 10px 20px rgba(4, 221, 109, 0.841);
-    transform: translateY(-10px);
- 
+/* 게시판 헤더 */
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-.clickable-item {
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.clickable-item:hover {
-    box-shadow: 0 5px 10px rgba(251, 251, 251, 0.966);
-    transform: translateY(-5px);
-}
-
-.post-card {
-    margin-left: 140px; /* 왼쪽 마진 */
-    margin-right: 0px; /* 오른쪽 마진 최소화 */
-    margin-bottom: 25px; /* 게시물 카드 간격 증가 */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    border-radius: 25px;
-    padding: 30px 20px; /* 상하 여백 늘려서 카드 크기 키우기 */
-    transition: 0.3s;
-}
-
-
-.post-card:hover {
-    box-shadow: 0 10px 20px rgba(242, 13, 169, 0.3);
-    transform: translateY(-10px);
-}
-
-.post-title{
-    margin-top: 20px;
-    font-size: 30px;
-    font-weight: bold;
+.board-title {
+    font-size: 24px;
+    font-weight: 600;
     color: #333;
-
 }
 
-.text-preview {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: #666;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90%;
-}
-
-
-.rounded-square {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px; /* 모서리를 둥글게 */
-  object-fit: cover;
-  border: 2px solid #ddd; /* 테두리 추가 (선택 사항) */
-}
-
-.text-right {
-    text-align: right;
-}
-
-.profile-container {
-  display: flex;
-  align-items: flex-end;  /* 수정: center에서 flex-end로 변경하여 하단 정렬 */
-  gap: 10px;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;  /* 수정: row에서 column으로 변경하여 세로 배치 */
-  gap: 4px;  /* 간격 조정 */
-  margin-left: 10px;
-  margin-top: 30px;
-}
-
-.nickname {
-  font-size: 20px;
-  font-weight: bold;  /* 닉네임을 더 강조하기 위해 추가 */
-}
-
-.date {
-  font-size: 15px;  /* 날짜 텍스트 크기를 약간 작게 조정 */
-  color: #666;  /* 날짜 색상을 좀 더 연하게 설정 */
-}
-
-.search-container {
-  background-color: white;  /* 부드러운 배경색 */
-  padding: 10px 15px;
-  border-radius: 15px;  /* 전체적으로 둥근 스타일 */
+/* 검색 영역 */
+.search-area {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    max-width: 600px;
+    margin: 0 20px;
 }
 
 .search-select {
-  background-color: white;
-  border-radius: 10px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
 }
 
 .search-input {
-  background-color: white;
-  border-radius: 10px;
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.search-btn, .write-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
 .search-btn {
-  height: 50px;
-  font-size: 16px;
-  border-radius: 10px;  /* 버튼도 둥글게 */
+    background: #7c3aed;
+    color: white;
 }
 
+.write-btn {
+    background: #7c3aed;
+    color: white;
+}
+
+.search-btn:hover, .write-btn:hover {
+    opacity: 0.9;
+}
+
+/* 게시글 목록 */
+.post-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.post-item {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.post-item:hover {
+    background: #f8f9fa;
+}
+
+.post-header {
+    margin-bottom: 12px;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.author-image {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.author-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.post-date {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.post-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.post-preview {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.post-footer {
+    margin-top: 12px;
+}
+
+.post-stats {
+    display: flex;
+    gap: 16px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* 페이지네이션 */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 10px;
+    }
+
+    .board-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .search-area {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    .category-sidebar {
+        margin-bottom: 20px;
+    }
+}
+
+.rank-icon {
+    font-size: 16px;  /* 닉네임과 동일한 크기 */
+    margin-left:-5px;
+    margin-bottom: 15px;
+}
+
+/* 새로 추가되는 스타일 */
+.sidebar-col {
+  position: relative;
+}
+
+.sticky-sidebar {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 64px;
+  height: auto;
+}
+
+.ad-banner {
+  height: 100%;
+  width: 100%;
+}
+
+.banner-img2 {
+  height: 100%;
+  width: 100%;
+}
+
+/* 스크롤바 스타일링 */
+.sticky-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* v-col 스타일 추가 */
+.v-col:first-child {
+    position: relative;
+    min-width: 200px;
+    width: auto;
+}
 </style>
