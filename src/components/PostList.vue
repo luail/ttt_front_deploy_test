@@ -49,7 +49,7 @@
                             class="search-select"
                         ></v-select>
                     </v-col>
-                   
+
                     <!-- 검색 입력창 -->
                     <v-col cols="7">
                         <v-text-field
@@ -65,7 +65,7 @@
 
                     <!-- 검색 버튼 -->
                     <v-col cols="2" class="d-flex justify-center">
-                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts()">
+                        <v-btn color="primary" class="search-btn text-white font-weight-bold" @click="searchPosts">
                             <v-icon left>mdi-magnify</v-icon> 검색
                         </v-btn>
                     </v-col>
@@ -76,6 +76,7 @@
                         <v-btn color="primary" class="text-white font-weight-bold" @click="createPost">+ 글쓰기</v-btn>
                     </v-col>
                 </v-row>
+
 
                 <!-- 게시글 카드 리스트 -->
                     <v-row>
@@ -131,8 +132,8 @@
 
                 <!-- 페이지네이션 -->
                 <v-pagination 
-                    v-model="page" 
-                    :length="totalPages" 
+                    v-model="page"
+                    :length="totalPages"
                     color="purple"
                     class="mt-5"
                     @update:modelValue="fetchPage"
@@ -206,7 +207,7 @@ export default {
         //페이지 열자마자 실행되는 함수 해당 게시판에 맞는 데이터 불러오기.전체게시판이면 모든 글, 특정 게시판이면  해당 게시판에 맞는 글
         async changeBoard(){
 
-            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴 
+            const boardId = this.$route.params.boardId;//현재 url에서 boardId값을 가져옴
             console.log(boardId)
             let url = boardId === "0" ? `${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=${this.page-1}&size=${this.size}`
                                     : `${process.env.VUE_APP_API_BASE_URL}/post/category/${boardId}?page=${this.page - 1}&size=${this.size}`;
@@ -290,7 +291,15 @@ export default {
                 return"";
             }
         },
-    
+  handleProjectUpdated(updatedProject){
+          this.editDialogVisible = false;
+          this.selectedProjects = [];
+          this.selectAll = false;
+
+          this.projectList = this.projectList.map(project =>
+          project.id === updatedProject.id ? updatedProject : project);
+          this.$forceUpdate();
+  }
     }
     }
 
@@ -342,6 +351,7 @@ export default {
     margin-bottom: 25px; /* 게시물 카드 간격 증가 */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     border-radius: 25px;
+    padding: 30px 20px; /* 상하 여백 늘려서 카드 크기 키우기 */
     transition: 0.3s;
 }
 
@@ -372,9 +382,9 @@ export default {
 
 
 .rounded-square {
-  width: 60px;
-  height: 60px;
-  border-radius: 50px; /* 모서리를 둥글게 */
+  width: 80px;
+  height: 80px;
+  border-radius: 10px; /* 모서리를 둥글게 */
   object-fit: cover;
   border: 2px solid #ddd; /* 테두리 추가 (선택 사항) */
 }
@@ -400,7 +410,6 @@ export default {
 .nickname {
   font-size: 20px;
   font-weight: bold;  /* 닉네임을 더 강조하기 위해 추가 */
-  margin-top:-20px;
 }
 
 .date {

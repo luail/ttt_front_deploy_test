@@ -21,12 +21,21 @@
                             prepend-icon="mdi-lock"
                             required
                             />
+
+                          <v-row>
+                            <v-col cols="12" class="text-right">
+                              <v-btn text class="text-right text-black" color="#c0c1ff" @click="toCreate">
+                                회원가입
+                              </v-btn>
+                            </v-col>
+                          </v-row>
+                          <br>
                             <div class="d-flex justify-center">
-                                <v-btn 
-                                    color="#c0c1ff" 
+                                <v-btn
+                                    color="#c0c1ff"
                                     block
                                     class="mb-4"
-                                    @click="doLogin()" 
+                                    @click="doLogin()"
                                     @keyup.enter="doLogin()"
                                 >
                                     로그인
@@ -37,13 +46,13 @@
                         <!-- oauth 로그인 -->
                         <v-divider class="mb-4"></v-divider>
                         <div class="d-flex justify-center gap-4">
-                            <img 
-                                src="@/assets/google_login.png" 
+                            <img
+                                src="@/assets/google_login.png"
                                 class="oauth-btn"
                                 @click="googleLogin"
                             />
-                            <img 
-                                src="@/assets/kakao_login.png" 
+                            <img
+                                src="@/assets/kakao_login.png"
                                 class="oauth-btn"
                                 @click="kakaoLogin"
                             />
@@ -66,7 +75,7 @@
 </template>
 <script>
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 export default {
     data() {
@@ -101,7 +110,7 @@ export default {
             localStorage.setItem('refreshToken', refreshToken)
             localStorage.setItem('nickName', nickName)
             localStorage.setItem('role', role)
-            window.location.href = '/';
+            window.location.href = '/ttt';
             }catch(error) {
                 console.log(error)
                 this.trueOrFalse=true
@@ -115,6 +124,9 @@ export default {
             const auth_url = `${this.googleOAuthUrl}?client_id=${this.googleClientId}&redirect_uri=${this.googleRedirectUri}&response_type=code&scope=${this.googleScope}`;
             window.location.href = auth_url;
         },
+      toCreate() {
+        this.$router.push('/ttt/user/create');
+      },
         googleLoginServer(){
             // 이 요청은 서버를통해 OAuth 제공자(Google)로 이동하므로, 서버로부터 jwt토큰을 받을때 리다이렉트 방식으로 밖에 받을수 없음.
             window.location.href = "http://localhost:8080/oauth2/authorization/google";
