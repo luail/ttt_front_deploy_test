@@ -1,183 +1,211 @@
 <template>
-  <v-container fluid class="page-container">
-      <!-- 상단 배너 -->
-      <v-row justify="center">
-                 <v-col cols="12">
-                    <div class="ad-banner">
-                      <img :src="require('@/assets/kakaohadd.png')" alt="" class="banner-img">
-                    </div>
-                 </v-col>
-            </v-row>
-
+  <v-container class="pt-0">
     <v-row>
-      <!-- 사이드 메뉴 -->
-     <!-- 사이드바 -->
-     <v-col cols="1">
-          <v-navigation-drawer permanent class="sidebar" width="180">
-            <v-list>
-              <v-list-item v-for="(c, index) in categoryList" :key="index" @click="selectedBoard(c.categoryId)" class="clickable-item">
-                <v-list-item-content>
-                  <v-list-item-title class="font-weight-bold" >{{c.categoryName}}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list>
-          </v-navigation-drawer>
-        </v-col>
+      <!-- 왼쪽 사이드바 -->
+      <v-col cols="2">
+        <div class="category-sidebar">
+          <h3 class="sidebar-title">카테고리</h3>
+          <v-list class="category-list pa-0">
+            <v-list-item
+              v-for="category in categoryList"
+              :key="category.categoryId"
+              @click="selectedBoard(category.categoryId)"
+              :class="{ 'active-category': category.categoryId === selectedCategory }"
+              class="category-item"
+              dense
+            >
+              <v-list-item-content>
+                <v-list-item-title 
+                  :class="{ 'selected-text': category.categoryId === selectedCategory }"
+                >
+                  {{ category.categoryName }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </div>
+      </v-col>
 
-
-      <!-- 게시물 상세 -->
-      <v-col cols="10" v-if="thisPost">
-        <v-card class="post-detail">
-          <v-card-title>
-            <div class="post-title">
-              <img :src="thisPost.profileImageOfAuthor|| require('@/assets/basicProfileImage.png')" class="author-img"/>
+      <!-- 메인 컨텐츠 -->
+      <v-col cols="8">
+        <v-card class="post-container">
+          <!-- 게시글 헤더 -->
+          <div class="post-header pa-6">
+            <div class="d-flex">
+              <div class="category-tag">{{ thisPost.categoryName || 'Q&A' }}</div>
+            </div>
+            
+            <div class="d-flex align-center mt-4">
+              <v-avatar size="36" class="mr-3">
+                <v-img
+                  :src="thisPost.profileImageOfAuthor || require('@/assets/basicProfileImage.png')"
+                  :alt="thisPost.authorNickName"
+                  class="profile-image"
+                ></v-img>
+              </v-avatar>
               <div>
-                <strong>{{ thisPost.authorNickName }}</strong>
-                <v-icon v-if ="!isAuthor" class="ml-2" @click="gotoChat(thisPost.postUserId)">mdi-forum-outline</v-icon>
+                <div class="author-name">{{ thisPost.authorNickName }}</div>
                 <div class="post-meta">
-                  <span class="author-rank">랭킹포인트 : {{ thisPost.rankingPointOfAuthor }}</span><br>
-                  {{ formatDate(thisPost.createdTime) }}
+                  {{ formatDate(thisPost.createdTime) }} · 조회 {{ thisPost.viewCount || 0 }}
                 </div>
               </div>
             </div>
-          </v-card-title>
-          
-          <v-divider></v-divider>
-        
-          <v-card-text class="post-content">
-            <!-- quill-editor로 작성했기때문에 html요소를 그대로 읽어와야하므로 v-html태그로 읽는다 -->
-             <div v-html="thisPost.contents"></div>
-
-            <!-- 사용자가 올린 이미지 리스트 -->
-            <!-- <v-row>
-              <v-col v-for="(image, index) in thisPost.attachmentsUrl" :key="index" cols="4">
-                <v-img 
-                  :src="image" 
-                  class="uploaded-image"
-                  contain
-                />
-              </v-col>
-            </v-row> -->
-          </v-card-text>
-          <v-card-actions class="like-container">
-          <v-btn icon class="like-btn" @click="toggleLike()">
-          <v-icon v-if="thisPost.liked">mdi-thumb-up</v-icon>
-          <v-icon v-else>mdi-thumb-up-outline</v-icon>
-          </v-btn>
-          <div class="like-count">{{ thisPost.likesCount }}</div>
-          </v-card-actions>
-       
-
-        <!-- 글 수정/삭제 버튼 (작성자만 보이게) -->
-        <v-card-actions v-if="isAuthor" class="edit-delete-container">
-            <v-btn color="blue" class="text-white" @click="editPost()">수정</v-btn>
-            <v-btn color="red" class="text-white ml-2" @click="deletePost()">삭제</v-btn>
-          </v-card-actions>
-        </v-card>
-
-       <!-- 댓글 입력창 -->
-       <div class="comment-section">
-          <h4>댓글</h4>
-          <v-textarea v-model="newComment" placeholder="댓글을 입력하세요"></v-textarea>
-          <v-btn color="primary" class="mt-2" @click="submitComment()">댓글 등록</v-btn>
           </div>
 
-          <!-- 댓글 리스트 -->
-        <div v-if="thisPost.commentList && thisPost.commentList.length > 0" class="comment-list">
-          <div v-for="(comment, index) in thisPost.commentList" :key="index" class="comment-item">
-            <img :src="comment.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')" class="comment-author-img" alt="댓글 프로필" />
-            <div class="comment-content">
-              <strong>{{ comment.nickNameOfCommentAuthor }}</strong>
-              <span class="comment-rank">{{ comment.rankingPointOfCommentAuthor }}</span>
-              <div class="comment-time">{{ formatDate(comment.createdTime) }}</div>
-              <!-- 그런데, 내 댓글에 대해서는 수정,삭제버튼이 나옴 -->
-              <div v-if="comment.loginIdOfCommentAuthor === userId" class="comment-actions">
-                <v-btn color="blue" class="text-white" @click="editComment(comment)">수정</v-btn>
-                <v-btn color="red" class="text-white ml-2" @click="deleteComment(comment.commentId)">삭제</v-btn>
-              </div>
-            <!-- 수정 중인 댓글이면 입력창 표시 -->
-            <div v-if="editingCommentId == comment.commentId">
-              <v-textarea v-model="editingCommentContent" dense auto-grow></v-textarea>
-              <v-btn color="blue" class="text-white" @click="updateComment(comment.commentId)">수정</v-btn>
-              <v-btn color="blue" class="text-white" @click="cancelEdit()">취소</v-btn>
+          <!-- 게시글 제목 -->
+          <div class="post-title pa-6 pb-2">
+            <h1>{{ thisPost.title }}</h1>
+          </div>
+
+          <!-- 게시글 내용 -->
+          <div class="post-content pa-6" v-html="thisPost.contents"></div>
+
+          <!-- 좋아요 & 공유 버튼 -->
+          <v-card-actions class="post-actions pa-6">
+            <v-btn
+              text
+              :color="thisPost.liked ? 'primary' : ''"
+              @click="toggleLike"
+              class="like-btn"
+            >
+              <v-icon left>{{ thisPost.liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
+              {{ thisPost.likesCount || 0 }}
+            </v-btn>
+          </v-card-actions>
+
+          <!-- 댓글 섹션 -->
+          <v-divider></v-divider>
+          
+          <div class="comments-section pa-6">
+            <div class="comments-header mb-4">
+              <h3>{{ thisPost.commentList ? thisPost.commentList.length : 0 }}개의 댓글</h3>
             </div>
-            <!-- 수정 누른 댓글이 아니라면 기존처럼 표시(수정이 완료되면 기존처럼 보임) -->
-              <div v-else class="comment-text">{{ comment.contents }}
-              <div class="again-comment" @click="toggleReply(comment.commentId)">+댓글등록</div> 
-              </div>
-              <!-- 대댓글 입력창 (해당 댓글을 클릭했을 때만 보임) -->
-            <div v-if="replyCommentVisible[comment.commentId]" class="reply-section">
-              <v-textarea 
-                v-model="newReply" 
-                placeholder="대댓글을 입력하세요"
-                outlined dense auto-grow
-              ></v-textarea>
-              <v-btn color="primary" class="mt-2" @click="createNewReply(comment.commentId)">대댓글 등록</v-btn>
+
+            <v-textarea
+              v-model="newComment"
+              outlined
+              placeholder="댓글을 작성하세요"
+              hide-details
+              class="mb-3"
+            ></v-textarea>
+            
+            <div class="d-flex justify-end mb-6">
+              <v-btn color="primary" @click="submitComment">댓글 작성</v-btn>
             </div>
-              <!-- 대댓글 리스트 -->
-              <div v-if="comment.childCommentList && comment.childCommentList.length > 0" class="child-comments">
-                <div v-for="(child, cIndex) in comment.childCommentList" :key="cIndex" class="child-comment-item">
-                  <img :src="child.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')" class="comment-author-img" alt="대댓글 프로필" />
+
+            <!-- 댓글 목록 -->
+            <div v-if="thisPost.commentList && thisPost.commentList.length > 0" class="comments-list">
+              <div v-for="comment in thisPost.commentList" :key="comment.commentId" class="comment-item">
+                <div class="d-flex">
+                  <v-avatar size="40" class="mr-3">
+                    <v-img
+                      :src="comment.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')"
+                      :alt="comment.nickNameOfCommentAuthor"
+                      class="profile-image"
+                    ></v-img>
+                  </v-avatar>
                   <div class="comment-content">
-                    <strong>{{ child.nickNameOfCommentAuthor }}</strong>
-                    <span class="comment-rank">{{ child.rankingPointOfCommentAuthor }}</span>
-                    <div class="comment-time">{{ formatDate(child.createdTime) }}</div>
-                    <div v-if="comment.loginIdOfCommentAuthor === userId" class="comment-actions">
-                      <v-btn color="blue" class="text-white" @click="editComment2(child)">수정</v-btn>
-                      <v-btn color="red" class="text-white ml-2" @click="deleteComment(child.commentId)">삭제</v-btn>
+                    <div class="comment-author">{{ comment.nickNameOfCommentAuthor }}</div>
+                    <div class="comment-meta">{{ formatDate(comment.createdTime) }}</div>
+                    <div class="comment-text">
+                      {{ comment.contents }}
+                      <!-- 답글달기 버튼 -->
+                      <div class="reply-actions mt-2">
+                        <v-btn text small color="primary" @click="showReplyForm(comment.commentId)">
+                          <v-icon small class="mr-1">mdi-reply</v-icon>
+                          답글달기
+                        </v-btn>
+                      </div>
                     </div>
-              <!-- 수정 중인 댓글이면 입력창 표시 -->
-            <div v-if="editingCommentId2 == child.commentId">
-              <v-textarea v-model="editingCommentContent2" dense auto-grow></v-textarea>
-              <v-btn color="blue" class="text-white" @click="updateComment2(child.commentId)">수정</v-btn>
-              <v-btn color="blue" class="text-white" @click="cancelEdit2()">취소</v-btn>
-            </div>
-            <!-- 수정 누른 댓글이 아니라면 기존처럼 표시(수정이 완료되면 기존처럼 보임) -->
-              <div v-else class="comment-text">{{ child.contents }}
-              <div class="again-comment" @click="toggleReply(child.commentId)">+댓글등록</div> 
-              </div>
-            </div>
-                  <!-- 댓글에 달린 대댓글에 다시 댓글을 달려면 생기는 창 -->
-                  <div v-if="replyCommentVisible[child.commentId]" class="reply-section">
-                  <v-textarea 
-                    v-model="newReply2" 
-                    placeholder="대댓글을 입력하세요"
-                    outlined dense auto-grow
-                  ></v-textarea>
-                  <v-btn color="primary" class="mt-2" @click="createNewReply2(child.commentId)">대댓글 등록</v-btn>
+
+                    <!-- 답글 입력 폼 -->
+                    <div v-if="activeReplyId === comment.commentId" class="reply-form mt-3">
+                      <v-textarea
+                        v-model="newReply"
+                        outlined
+                        dense
+                        rows="3"
+                        hide-details
+                        placeholder="답글을 입력하세요"
+                        class="mb-2"
+                      ></v-textarea>
+                      <div class="d-flex justify-end mt-2">
+                        <v-btn text class="mr-2" @click="hideReplyForm">취소</v-btn>
+                        <v-btn color="primary" @click="submitReply(comment.commentId)">답글 작성</v-btn>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <!-- 댓글에 달린 대댓글에 달린 대댓글리스트 -->
-                <div v-if="child.childCommentList && child.childCommentList.length > 0" class="child-comments">
-                <div v-for="(grandchild, gIndex) in child.childCommentList" :key="gIndex" class="child-comment-item">
-                  <img :src="grandchild.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')" class="comment-author-img" alt="대댓글 프로필" />
-                  <div class="comment-content">
-                    <strong>{{ grandchild.nickNameOfCommentAuthor }}</strong>
-                    <span class="comment-rank">{{ grandchild.rankingPointOfCommentAuthor }}</span>
-                    <div class="comment-time">{{ formatDate(grandchild.createdTime) }}</div>
-                    <div v-if="grandchild.loginIdOfCommentAuthor === userId" class="comment-actions">
-                      <v-btn color="blue" class="text-white" @click="editComment3(grandchild)">수정</v-btn>
-                      <v-btn color="red" class="text-white ml-2" @click="deleteComment3(grandchild.commentId)">삭제</v-btn>
+
+                <!-- 대댓글 목록 -->
+                <div v-if="comment.childCommentList && comment.childCommentList.length > 0" class="child-comments">
+                  <div v-for="child in comment.childCommentList" :key="child.commentId" class="child-comment-item">
+                    <div class="d-flex">
+                      <v-avatar size="36" class="mr-3">
+                        <v-img
+                          :src="child.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')"
+                          :alt="child.nickNameOfCommentAuthor"
+                          class="profile-image"
+                        ></v-img>
+                      </v-avatar>
+                      <div class="child-comment-content">
+                        <div class="comment-author">{{ child.nickNameOfCommentAuthor }}</div>
+                        <div class="comment-meta">{{ formatDate(child.createdTime) }}</div>
+                        <div class="comment-text">
+                          {{ child.contents }}
+                          <!-- 대댓글의 답글달기 버튼 -->
+                          <div class="reply-actions mt-2">
+                            <v-btn text small color="primary" @click="showReplyForm(child.commentId)">
+                              <v-icon small class="mr-1">mdi-reply</v-icon>
+                              답글달기
+                            </v-btn>
+                          </div>
+                        </div>
+
+                        <!-- 대댓글의 답글 입력 폼 -->
+                        <div v-if="activeReplyId === child.commentId" class="reply-form mt-3">
+                          <v-textarea
+                            v-model="newReply"
+                            outlined
+                            dense
+                            rows="3"
+                            hide-details
+                            placeholder="답글을 입력하세요"
+                            class="mb-2"
+                          ></v-textarea>
+                          <div class="d-flex justify-end mt-2">
+                            <v-btn text class="mr-2" @click="hideReplyForm">취소</v-btn>
+                            <v-btn color="primary" @click="submitReply(child.commentId)">답글 작성</v-btn>
+                          </div>
+                        </div>
+
+                        <!-- 대대댓글 목록 -->
+                        <div v-if="child.childCommentList && child.childCommentList.length > 0" class="grandchild-comments">
+                          <div v-for="grandchild in child.childCommentList" :key="grandchild.commentId" class="grandchild-comment-item">
+                            <div class="d-flex">
+                              <v-avatar size="32" class="mr-3">
+                                <v-img
+                                  :src="grandchild.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')"
+                                  :alt="grandchild.nickNameOfCommentAuthor"
+                                  class="profile-image"
+                                ></v-img>
+                              </v-avatar>
+                              <div class="grandchild-comment-content">
+                                <div class="comment-author">{{ grandchild.nickNameOfCommentAuthor }}</div>
+                                <div class="comment-meta">{{ formatDate(grandchild.createdTime) }}</div>
+                                <div class="comment-text">{{ grandchild.contents }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  
-                  
-                  
-                    <div v-if="editingCommentId3 == grandchild.commentId">
-              <v-textarea v-model="editingCommentContent3" dense auto-grow></v-textarea>
-              <v-btn color="blue" class="text-white" @click="updateComment3(grandchild.commentId)">수정</v-btn>
-              <v-btn color="blue" class="text-white" @click="cancelEdit3()">취소</v-btn>
-            </div>
-                    <!-- 수정 누른 댓글이 아니라면 기존처럼 표시(수정이 완료되면 기존처럼 보임) -->
-              <div v-else class="comment-text">{{ grandchild.contents }}
-              </div>
                   </div>
                 </div>
               </div>
             </div>
-              </div>
-            </div>
           </div>
-        </div>
-
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
@@ -201,11 +229,8 @@ export default {
       commetList:[],
       userId:'',
       newComment: '',
-      replyComment: {}, // 대댓글을 저장하는 객체
-      replyCommentVisible:{}, //댓글 id별로 대댓글 입력창을 켰는지 아닌지의 상태를 저장
-      newReply:'',
-      newReply2:'',
-      newReply3:'',
+      activeReplyId: null, // 현재 활성화된 답글 폼의 댓글 ID
+      newReply: '',
       isAuthor:false, //글작성자와 본인이 동일한지 따지는 boolean객체->글 수정,삭제버튼 보이게 하기 위해
       isAuthorOfComment:false,
       originalComment:'',
@@ -425,222 +450,239 @@ export default {
         },
       //대댓글 달때 누르면 대댓글 입력창뜨도록
         toggleReply(commentId){
-          this.replyCommentVisible ={
-            ...this.replyCommentVisible,
-            [commentId]: !this.replyCommentVisible[commentId]
-          };
-          },
+          this.activeReplyId = commentId;
+          this.newReply = '';
+        },
      //대댓글 작성하기
-      async createNewReply(commentId){
-        try{
-          const idOfthisPost = this.$route.params.id
-          const reply ={
-            contents : this.newReply,
-            postId : idOfthisPost,
-            parentId : commentId
+      async submitReply(commentId) {
+        try {
+          if (!this.newReply.trim()) {
+            alert('답글 내용을 입력해주세요.');
+            return;
           }
-          await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/create`,reply);
-          window.location.reload();
-        }catch(error){
-          console.log("대댓글 달기 실패", error)
-        }
-         } ,
 
+          const reply = {
+            contents: this.newReply,
+            postId: this.$route.params.id,
+            parentId: commentId
+          };
 
-         //댓글에 달린 대댓글에 달린 대댓글 작성하기ㅠ
-      async createNewReply2(commentId){
-        try{
-          const idOfthisPost = this.$route.params.id
-          const reply ={
-            contents : this.newReply2,
-            postId : idOfthisPost,
-            parentId : commentId
-          }
-          await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/create`,reply);
-          window.location.reload();
-        }catch(error){
-          console.log("대댓글 달기 실패", error)
+          await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/create`, reply);
+          
+          // 폼 초기화 및 숨기기
+          this.hideReplyForm();
+          
+          // 댓글 목록 새로고침
+          await this.refreshPost();
+        } catch (error) {
+          console.error('답글 작성 실패:', error);
+          alert('답글 작성에 실패했습니다.');
         }
-         },
-         
-         async gotoChat(otherUserId) {
+      },
+
+      // 답글 폼 숨기기
+      hideReplyForm() {
+        this.activeReplyId = null;
+        this.newReply = '';
+      },
+
+      // 답글 폼 표시
+      showReplyForm(commentId) {
+        this.activeReplyId = commentId;
+        this.newReply = '';
+      },
+
+      async gotoChat(otherUserId) {
         console.log(this.post)
         const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/private/create?otherUserId=${otherUserId}`) 
         const roomId = response.data.result;
         this.$router.push(`/ttt/chatpage/${roomId}`)
       } 
-
-
-
-
-
-        }  
-        
-      }
- 
-
+    }
+}
 </script>
 
 <style scoped>
-.page-container {
-  margin: 0 30px;
+.post-container {
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.ad-banner {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto; /* 좌우 여백 자동 조정 */
+.category-tag {
+  color: #1976d2;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
-.banner-img {
-  width: 1500px; /* 전체 너비를 차지하도록 설정 */
-  height: 350px; /* 원본 비율 유지 */
-  display: block; /* 블록 요소로 설정하여 중앙 정렬 */
-  border-radius: 40px;
-  margin-top: 0px;
-  margin-right: 100px;
-  margin-left:100px;
-  margin-bottom: 20px;
+.post-title h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
 }
 
-.sidebar {
-  background-color: #f4f4f4;
-  border-right: 1px solid #ccc;
-}
-
-.post-detail {
-  margin: 20px 0;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 60px;
-  min-height: 600px;
-}
-
-.post-title {
-  display: flex;
-  align-items: center;
-}
-
-.author-img {
-  width: 60px;
-  height: 60px;
-  border: 2px solid #d6cdf3;
-  border-radius: 50%;
-  margin-right: 15px;
-}
-
-.author-rank {
-  font-size: 0.85em;
-  color: #888;
+.author-name {
+  font-weight: 500;
+  color: #1a202c;
 }
 
 .post-meta {
-  font-size: 0.8em;
-  color: #555;
+  font-size: 0.875rem;
+  color: #718096;
 }
 
 .post-content {
-  font-size: 1.4em;
-  margin-top: 15px;
-}
-
-.like-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #2d3748;
 }
 
 .like-btn {
-  color: #4b3f72;
-}
-
-.like-count {
-  margin-left: 2px;
-  width: 35px;
-  height: 35px;
-  background-color: #eee;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-}
-
-.edit-delete-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.edit-delete-container v-btn {
-  margin-left: 5px;
-}
-
-
-.comment-section {
-  margin-top: 30px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
 .comment-item {
-  display: flex;
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px;
-  background-color: #fafafa;
-}
-
-.comment-author-img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.comment-content {
-  flex: 1;
-  position: relative; /* 부모 요소를 기준으로 위치 지정 */
-  width: 100%;
-}
-
-.comment-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 5px;
-}
-
-.comment-time {
-  font-size: 0.75em;
-  color: #888;
-}
-
-.comment-text {
-  margin-top: 5px;
-}
-
-.reply-section {
-  margin-top: 10px;
-  padding-left: 50px;
-}
-
-.again-comment {
-  color: blue;
-  cursor: pointer;
-  margin-top: 5px;
-  font-size: 14px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
 }
 
 .child-comments {
-  margin-top: 10px;
-  padding-left: 50px;
+  margin-left: 48px;
+  margin-top: 16px;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 16px;
 }
 
+.grandchild-comments {
+  margin-left: 32px;
+  margin-top: 12px;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 16px;
+}
 
+.child-comment-item, .grandchild-comment-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
 
+.comment-author {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
 
+.comment-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.reply-section {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.reply-btn {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+}
+
+.again-comment {
+  margin-top: 8px;
+}
+
+.category-sidebar {
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  position: sticky;
+  top: 80px; /* 상단 네비게이션 바 높이에 맞춰 조정 */
+  height: calc(100vh - 100px); /* 뷰포트 높이에서 상단 여백 제외 */
+  overflow-y: auto; /* 내용이 많을 경우 스크롤 가능하도록 */
+}
+
+/* 스크롤바 스타일링 */
+.category-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.category-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.category-sidebar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.category-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #9155FD;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  padding: 16px 20px;
+  margin: 0;
+  border-bottom: 2px solid #9155FD;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.category-list {
+  background: transparent !important;
+}
+
+.category-item {
+  padding: 12px 20px !important;
+  min-height: 0 !important;
+  border-left: 3px solid transparent;
+}
+
+.active-category {
+  background-color: #F4F1FA !important;
+  border-left: 3px solid #9155FD;
+}
+
+.selected-text {
+  color: #9155FD;
+  font-weight: 500;
+}
+
+.category-item:hover {
+  background-color: #F4F1FA !important;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.reply-form {
+  background-color: #f5f6f8;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.reply-actions {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.reply-actions:hover {
+  opacity: 1;
+}
 </style>
+
