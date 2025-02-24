@@ -6,11 +6,11 @@
                 <div class="category-sidebar">
                     <div class="category-title">카테고리</div>
                     <div 
-                        v-for="(c, index) in categoryList" 
-                        :key="index" 
+                        v-for="c in categoryList" 
+                        :key="c.categoryId"
                         @click="selectedBoard(c.categoryId)"
                         class="category-item"
-                        :class="{ 'active': c.categoryId === currentCategoryId }"
+                        :class="{ 'active': String(c.categoryId) === $route.params.boardId }"
                     >
                         {{ c.categoryName }}
                     </div>
@@ -224,7 +224,8 @@ export default {
         },
         //사이드 바에서 게시판 눌러이동
         async selectedBoard(boardId){
-            this.$router.push(`/ttt/post/list/${boardId}`);
+            await this.$router.push(`/ttt/post/list/${boardId}`);
+            await this.changeBoard();
         },
         //게시물 검색
         async searchPosts(){
