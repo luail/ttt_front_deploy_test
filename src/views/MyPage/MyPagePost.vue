@@ -1,26 +1,23 @@
 <template>
   <v-container>
-    <v-row justify="center">
+    <v-row>
       <!-- 왼쪽 프로필 카드 -->
-      <v-col cols="12" md="4">
-        <UserProfileCard
-          :avatar="userDetail.profileImageOfAuthor"
-          :userName="userDetail.authorNickName"
-          :userBio="'내가 쓴 글 목록입니다.'"
-          selectedMenu="post"
-        />
-      </v-col>
+      <UserProfileCard
+        :avatar="userDetail.profileImageOfAuthor"
+        :userName="userDetail.authorNickName"
+        :userBio="'내가 작성한 게시글 목록입니다.'"
+        selectedMenu="post"
+      />
 
-      <!-- 오른쪽 게시글 리스트 -->
-      <v-col cols="12" md="8">
-        <v-card class="pa-4 post-card">
+      <!-- 오른쪽 게시글 목록 -->
+      <v-col cols="8">
+        <v-card class="pa-4">
           <v-card-title class="title-text">📜 내가 작성한 게시글</v-card-title>
-          <v-divider class="my-3"></v-divider>
-
+          <v-divider></v-divider>
           <v-card-text v-if="postDetail.length">
             <v-row>
-              <v-col v-for="myPost in postDetail" :key="myPost.postId" cols="12">
-                <v-card class="post-card-item" @click="goToDetailPost(myPost.postId)">
+              <v-col v-for="myPost in postDetail" :key="myPost.postUserId" cols="12">
+                <v-card class="post-card" @click="goToDetailPost(myPost.postId)">
                   <v-card-text>
                     <!-- 게시글 정보 -->
                     <v-row no-gutters class="align-center">
@@ -42,7 +39,7 @@
                     <!-- 제목 -->
                     <v-row no-gutters>
                       <v-col>
-                        <h3 class="clickable-title">
+                        <h3 class="post-title">
                           {{ myPost.title }}
                         </h3>
                       </v-col>
@@ -51,25 +48,24 @@
                     <!-- 게시글 내용 미리보기 -->
                     <v-row no-gutters>
                       <v-col>
-                        <p class="clickable-content">
-                          {{ truncatedContent(removeHtmlTags(myPost.contents), 80) }}
+                        <p class="text-preview">
+                          {{ truncatedContent(removeHtmlTags(myPost.contents), 100) }}
                         </p>
                       </v-col>
                     </v-row>
 
                     <!-- 좋아요 및 댓글 정보 -->
                     <v-row no-gutters class="post-meta mt-2">
-                      <v-icon class="mr-1" color="red">mdi-thumb-up</v-icon> {{ myPost.likesCount }}
-                      <v-icon class="ml-3 mr-1" color="blue">mdi-comment</v-icon> {{ myPost.countOfComment }}
+                      <span>👍 {{ myPost.likesCount }}</span>
+                      <span class="ml-3">💬 {{ myPost.countOfComment }}</span>
                     </v-row>
                   </v-card-text>
                 </v-card>
               </v-col>
             </v-row>
           </v-card-text>
-
-          <v-card-text v-else class="text-center text-grey">
-            아직 작성한 게시글이 없습니다. ✏️
+          <v-card-text v-else>
+            작성한 게시글이 없습니다. ✏️
           </v-card-text>
         </v-card>
       </v-col>
@@ -79,7 +75,7 @@
 
 <script>
 import axios from "axios";
-import UserProfileCard from "@/components/UserProfileCard.vue";
+import UserProfileCard from "@/components/UserProfileCard.vue"; // 프로필 카드 컴포넌트 import
 
 export default {
   components: {
@@ -87,18 +83,16 @@ export default {
   },
   data() {
     return {
-      userDetail: {},  // 유저 정보 저장
-      postDetail: [],  // 게시글 리스트 저장
+      userDetail: {}, // 유저 정보 저장
+      postDetail: [],
     };
   },
   async created() {
     try {
-      // 게시글 목록 가져오기
       const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/myPostList`);
       this.postDetail = response.data.result;
-      console.log("API 응답:", this.postDetail);
 
-      // 유저 정보 가져오기 (게시글 리스트에서 첫 번째 게시글의 유저 정보 활용)
+      console.log("저장된 postDetail 데이터:", this.postDetail);
       if (this.postDetail.length > 0) {
         this.userDetail = {
           profileImageOfAuthor: this.postDetail[0].profileImageOfAuthor || "",
@@ -110,27 +104,30 @@ export default {
     }
   },
   methods: {
-    // 게시물 본문 미리보기
-    truncatedContent(text, length) {
-      if (!text) return ""; // text가 undefined일 경우 빈 문자열 반환
+    goToDetailPost(postId) {
+      console.log("선택된 postId:", postId);
+      if (!postId) {
+        console.error("postId가 정의되지 않았습니다.");
+        return;
+      }
+      this.$router.push(`/ttt/post/${postId}`);
+    },
+    truncatedContent(text, length = 100) {
+      if (!text) return "";
       return text.length > length ? text.slice(0, length) + "..." : text;
     },
-    // HTML 태그 제거 (Quill Editor 등에서 사용)
     removeHtmlTags(text) {
       if (text) {
         const doc = new DOMParser().parseFromString(text, "text/html");
-        return doc.body.textContent || ""; // HTML 태그 제거 후 텍스트만 반환
+        return doc.body.textContent || "";
       } else {
         return "";
       }
     },
-    goToDetailPost(postId) {
-      this.$router.push(`/ttt/post/${postId}`);
-    },
     formatDate(dateArray) {
       if (!dateArray || dateArray.length < 6) return "";
       return `${dateArray[0]}-${String(dateArray[1]).padStart(2, "0")}-${String(dateArray[2]).padStart(2, "0")}`;
-    }
+    },
   },
 };
 </script>
@@ -145,12 +142,6 @@ export default {
 
 /* 게시글 카드 스타일 */
 .post-card {
-  border-radius: 12px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* 개별 게시글 카드 */
-.post-card-item {
   cursor: pointer;
   transition: 0.3s ease-in-out;
   border-radius: 12px;
@@ -159,7 +150,8 @@ export default {
   padding: 16px;
 }
 
-.post-card-item:hover {
+/* 마우스 호버 시 카드 효과 */
+.post-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(98, 0, 234, 0.3);
 }
@@ -171,6 +163,7 @@ export default {
   border-bottom: 1px solid #eee;
 }
 
+/* 마우스 호버 시 효과 */
 .post-item:hover {
   background-color: #f3f3f3;
   transform: translateX(5px);
@@ -254,3 +247,4 @@ export default {
   }
 }
 </style>
+

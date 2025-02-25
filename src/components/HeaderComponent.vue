@@ -20,37 +20,19 @@
                       :class="{ 'active-menu': hoveredMenu === 'community' }"
                       @mouseover="hoveredMenu = 'community'"
                       @mouseleave="hoveredMenu = null">
-                      커뮤니티
+                      Tik
                     </v-btn>
                   </template>
                   <v-card class="dropdown-menu" flat>
                     <v-list>
-                      <v-list-item to="/ttt/post/list/0">전체게시판</v-list-item>
-                      <v-list-item to="/ttt/post/list/1">자유게시판</v-list-item>
-                      <v-list-item to="/ttt/post/list/2">정보게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/0">Community</v-list-item>
+                      <v-list-item to="/ttt/post/list/1">FreeTalk</v-list-item>
+                      <v-list-item to="/ttt/post/list/2">Knowledge</v-list-item>
+                      <v-list-item to="/ttt/post/list/3">Algorithm</v-list-item>
                     </v-list>
                   </v-card>
                 </v-menu>
               </v-col>
-
-              <v-col cols="3">
-                <v-menu open-on-hover offset-y>
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
-                      :class="{ 'active-menu': hoveredMenu === 'chat' }"
-                      @mouseover="hoveredMenu = 'chat'"
-                      @mouseleave="hoveredMenu = null">
-                      오픈채팅
-                    </v-btn>
-                  </template>
-                  <v-card class="dropdown-menu" flat>
-                    <v-list>
-                      <v-list-item to="/ttt/chat/list">오픈채팅리스트</v-list-item>
-                    </v-list>
-                  </v-card>
-                </v-menu>
-              </v-col>
-
               <v-col cols="3">
                 <v-menu open-on-hover offset-y>
                   <template v-slot:activator="{ props }">
@@ -58,16 +40,35 @@
                       :class="{ 'active-menu': hoveredMenu === 'list' }"
                       @mouseover="hoveredMenu = 'list'"
                       @mouseleave="hoveredMenu = null">
-                      리스트
+                      Tac
                     </v-btn>
                   </template>
                   <v-card class="dropdown-menu" flat>
                     <v-list>
-                      <v-list-item to="/ttt/project/find">프로젝트</v-list-item>
+                      <v-list-item class="d-flex justify-center" to="/ttt/project/find">project</v-list-item>
                     </v-list>
                   </v-card>
                 </v-menu>
               </v-col>
+              <v-col cols="3">
+                <v-menu open-on-hover offset-y>
+                  <template v-slot:activator="{ props }">
+                    <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
+                      :class="{ 'active-menu': hoveredMenu === 'chat' }"
+                      @mouseover="hoveredMenu = 'chat'"
+                      @mouseleave="hoveredMenu = null">
+                      Toc
+                    </v-btn>
+                  </template>
+                  <v-card class="dropdown-menu" flat>
+                    <v-list>
+                      <v-list-item class="d-flex justify-center" to="/ttt/chat/list">chat</v-list-item>
+                    </v-list>
+                  </v-card>
+                </v-menu>
+              </v-col>
+
+              
 
               <v-col cols="3" v-if="userRole === 'ADMIN'">
                 <v-menu open-on-hover offset-y>
@@ -174,7 +175,7 @@ export default {
       const payload = jwtDecode(token);
       this.isLoggedIn = true;
       this.userRole = payload.role;
-      this.fetchProfileImage(payload.userId);
+      await this.fetchProfileImage(); // 🔹 프로필 이미지 불러오기
       
       // 채팅방 목록 초기화
       try {
@@ -219,11 +220,9 @@ export default {
       this.eventSource.onopen = () => {
         console.log('SSE 연결됨');
       };
-
       this.eventSource.addEventListener('connect', (e) => {
         console.log('SSE Connected:', e.data);
       });
-
       this.eventSource.addEventListener('chat-message', (e) => {
         const chatMessage = JSON.parse(e.data);
         
@@ -271,18 +270,15 @@ export default {
         localStorage.clear();
         window.location.href = '/';
     },
-    async fetchProfileImage(userId) {
+    async fetchProfileImage() {
       try {
-        const response = await fetch(`/api/users/${userId}/profile-image`);
-        const data = await response.json();
-        if (data.status === 200) {
-          this.profileImageUrl = data.data || require('@/assets/basicProfileImage.png');
-        } else {
-          this.profileImageUrl = require('@/assets/basicProfileImage.png');
-        }
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/myInformation`);
+        console.log("프로필 API 응답:", response.data); // 🔍 응답 데이터 확인
+        this.profileImageUrl = response.data.result.profileImage;
+        
       } catch (error) {
         console.error('프로필 이미지 로드 실패:', error);
-        this.profileImageUrl = require('@/assets/basicProfileImage.png');
+        this.profileImageUrl = require('@/assets/basicProfileImage.png'); // 기본 이미지 설정
       }
     },
     handleImageError() {

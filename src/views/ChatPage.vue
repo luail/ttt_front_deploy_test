@@ -5,7 +5,7 @@
             <v-col cols="12" md="4" class="chat-list-column">
                 <v-card class="chat-list-card" elevation="0">
                     <v-card-title class="text-center text-h6">
-                        채팅 목록
+                        My Tok
                     </v-card-title>
                     <v-card-text>
                         <div class="chat-rooms">
@@ -14,18 +14,17 @@
                                     v-for="chat in chatList"
                                     :key="chat.roomId"
                                     :class="{'active-chat': chat.roomId === roomId}"
-                                    
                                     @click="enterChatRoom(chat.roomId)"
                                 >
-                                    <v-list-item-content>
-                                        <v-list-item-title class="chat-room-name">
-                                            {{ getChatRoomName(senderNickName, chat.roomName) }}
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle v-if="chat.unReadCount > 0" class="unread-count">
-                                            읽지 않은 메시지: {{ chat.unReadCount }}
-                                        </v-list-item-subtitle>
-                                    </v-list-item-content>
-                                    <template v-slot:append>
+                                    <div class="d-flex justify-space-between align-center w-100">
+                                        <div class="room-info">
+                                            <div class="room-name-container">
+                                                <span>{{ getChatRoomName(senderNickName, chat.roomName) }}</span>
+                                                <span v-if="chat.isGroupChat === 'Y'" class="participant-count">
+                                                    ({{ chat.chatPaticipantCount }})
+                                                </span>
+                                            </div>
+                                        </div>
                                         <v-btn
                                             v-if="chat.isGroupChat === 'Y'"
                                             density="compact"
@@ -34,7 +33,7 @@
                                             color="error"
                                             @click.stop="openLeaveModal(chat.roomId)"
                                         ></v-btn>
-                                    </template>
+                                    </div>
                                 </v-list-item>
                             </v-list>
                         </div>
@@ -46,7 +45,7 @@
             <v-col cols="12" md="7" class="chat-main-column">
                 <v-card class="chat-card" elevation="0">
                     <v-card-title class="chat-room-header">
-                        {{ getChatRoomName(senderNickName, currentChatRoom ? currentChatRoom.roomName : '채팅방을 선택해주세요') }}
+                        {{ getChatRoomName(senderNickName, currentChatRoom ? currentChatRoom.roomName : 'Choice Your Tok') }}
                     </v-card-title>
                     <div class="chat-content-wrapper">
                         <div class="chat-box" ref="chatBox">
@@ -114,22 +113,24 @@
                     </p>
                 </v-card-text>
                 <v-card-actions class="leave-actions">
-                    <v-btn
-                        variant="outlined"
-                        color="grey-darken-1"
-                        class="cancel-button"
-                        @click="showLeaveModal = false"
-                    >
-                        취소
-                    </v-btn>
-                    <v-btn
-                        color="error"
-                        class="leave-button"
-                        @click="confirmLeave"
-                        :loading="isLeaving"
-                    >
-                        나가기
-                    </v-btn>
+                    <div class="button-wrapper">
+                        <v-btn
+                            variant="outlined"
+                            color="grey-darken-1"
+                            class="cancel-button"
+                            @click="showLeaveModal = false"
+                        >
+                            취소
+                        </v-btn>
+                        <v-btn
+                            color="error"
+                            class="leave-button"
+                            @click="confirmLeave"
+                            :loading="isLeaving"
+                        >
+                            나가기
+                        </v-btn>
+                    </div>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -313,16 +314,23 @@ export default{
                 
                 // 채팅방 나가기 API 호출
                 await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/${roomId}/leave`);
-                this.$store.dispatch('removeChatRoom', roomId);
+                
+                // Vuex store에서 채팅방 제거
+                await this.$store.dispatch('removeChatRoom', roomId);
+                
+                // chatList 업데이트
+                const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
+                this.$store.dispatch('setChatList', response.data.result);
                 
                 // 현재 보고 있는 채팅방을 나갔다면 첫 번째 채팅방으로 이동
-                if (this.roomId === roomId && this.chatList.length > 0) {
-                    this.enterChatRoom(this.chatList[0].roomId);
-                } else {
-                    // 채팅방이 없더라도 현재 페이지에 머무름
-                    this.roomId = null;
-                    this.currentChatRoom = null;
-                    this.messages = [];
+                if (this.roomId === roomId) {
+                    if (this.chatList.length > 0) {
+                        this.enterChatRoom(this.chatList[0].roomId);
+                    } else {
+                        this.roomId = null;
+                        this.currentChatRoom = null;
+                        this.messages = [];
+                    }
                 }
             } catch (error) {
                 console.error('채팅방 나가기 실패:', error);
@@ -420,48 +428,62 @@ export default{
     box-shadow: none;
 }
 
-.v-list {
-    background: transparent;
-    padding: 12px;
-}
-
-.v-list-item {
-    margin-bottom: 12px;
-    border-radius: 16px;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(37, 99, 235, 0.08);
+.chat-list-header {
     padding: 16px 20px;
-}
-
-.v-list-item:hover {
-    background-color: #F8FAFC;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.08);
-}
-
-.active-chat {
-    background-color: rgba(37, 99, 235, 0.08) !important;
-    border-left: 3px solid #2563EB;
-    transform: translateX(2px);
-}
-
-.chat-room-name {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #1E293B;
-    margin-bottom: 6px;
-}
-
-.unread-count {
-    color: #2563EB;
-    font-size: 0.9rem;
-    margin-top: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    font-weight: 600;
 }
 
 .chat-rooms {
-    height: calc(100vh - 220px);
+    padding: 0;
+    height: calc(100vh - 160px);
     overflow-y: auto;
-    padding-right: 8px;
+    padding-bottom: 40px;
+}
+
+.v-list {
+    padding: 0 !important;
+    padding-bottom: 40px !important;
+    background: transparent;
+}
+
+.chat-room-item {
+    min-height: 44px !important;  /* 높이 조정 */
+    padding: 10px 16px !important;  /* 상하 패딩 줄임 */
+    margin: 0 !important;  /* 마진 완전 제거 */
+    border-radius: 0 !important;  /* 라운드 제거 */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);  /* 얇은 구분선 */
+    transition: all 0.2s ease;
+}
+
+.chat-room-item:hover {
+    background-color: #F4F1FA;
+}
+
+.active-chat {
+    background-color: #F4F1FA !important;
+    border-left: 3px solid #9155FD;
+}
+
+.chat-room-name {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.2;  /* 줄 높이 조정 */
+}
+
+.unread-count {
+    color: #9155FD;
+    font-size: 0.85rem;
+    margin-left: 4px;
+}
+
+/* Vuetify 기본 스타일 오버라이드 */
+:deep(.v-list-item__content) {
+    padding: 0 !important;
+}
+
+:deep(.v-list-item__title) {
+    font-size: inherit !important;
 }
 
 .chat-message {
@@ -670,7 +692,13 @@ export default{
     padding: 16px 32px 32px;
     display: flex;
     justify-content: center;
+}
+
+.button-wrapper {
+    display: flex;
     gap: 12px;
+    justify-content: center;
+    width: 100%;
 }
 
 .cancel-button, .leave-button {
@@ -755,5 +783,48 @@ export default{
     font-size: 0.8rem;
     color: #64748B;
     border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.chat-rooms::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chat-rooms::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-rooms::-webkit-scrollbar-thumb {
+    background: #E2E8F0;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.chat-rooms::-webkit-scrollbar-thumb:hover {
+    background: #9155FD;
+}
+
+.chat-rooms::-webkit-scrollbar-thumb:active {
+    background: #7934F3;
+}
+
+.room-info {
+    flex-grow: 1;
+}
+
+.room-name-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;  /* 간격을 좀 더 줄임 */
+}
+
+.room-name-container span {
+    font-weight: 500;
+}
+
+.participant-count {
+    color: #94A3B8;  /* 더 연한 회색으로 변경 */
+    font-size: 0.85rem;  /* 글자 크기도 살짝 줄임 */
+    font-weight: normal;
+    opacity: 0.8;  /* 투명도 추가 */
 }
 </style>
