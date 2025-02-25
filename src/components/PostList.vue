@@ -74,6 +74,9 @@
                                     </span>
                                 </span>
                                 <span class="post-date">{{ formatDate(post.createdTime) }}</span>
+                                <span class="category-tag">
+                                    {{ post.categoryName || getCategoryNameById(post.categoryId) }}
+                                </span>
                             </div>
                         </div>
 
@@ -284,6 +287,24 @@ export default {
             if (points >= 300) return '실버 등급';
             if (points >= 100) return '브론즈 등급';
             return '새싹';
+        },
+        getCategoryNameById(categoryId) {
+            // 카테고리 ID를 기반으로 카테고리 이름을 반환
+            if (!categoryId) return '전체게시판';
+            
+            // 카테고리 목록에서 찾기
+            const category = this.categoryList.find(c => c.categoryId === parseInt(categoryId));
+            if (category) return category.categoryName;
+            
+            // 기본 매핑
+            const categories = {
+                0: '전체게시판',
+                1: '자유게시판',
+                2: '정보게시판',
+                3: '알고리즘'
+            };
+            
+            return categories[categoryId] || '전체게시판';
         }
     }
     }
@@ -555,5 +576,17 @@ export default {
     position: relative;
     min-width: 200px;
     width: auto;
+}
+
+/* 카테고리 태그 스타일 수정 */
+.category-tag {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  margin-left: 8px;
+  background-color: rgba(241, 245, 249, 0.8);
+  color: rgba(99, 102, 241, 0.9);
+  border-radius: 4px;
+  white-space: nowrap;
+  font-weight: 500;
 }
 </style>
