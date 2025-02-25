@@ -1,76 +1,132 @@
 <template>
-    <v-container>
+    <v-container class="pt-6">
         <v-row justify="center">
-            <v-col cols="12" sm="4" md="6">
-                <v-card>
-                    <v-card-title class="text-h5 text-center">
+            <v-col cols="12" sm="8" md="6" lg="5">
+                <v-card class="elevation-3">
+                    <v-card-title class="text-h5 font-weight-bold text-center pa-4">
                         추가 정보 입력
                     </v-card-title>
-                    <v-card-text>
+                    <v-divider></v-divider>
+                    <v-card-text class="pa-6">
                         <v-form @keydown.enter="create">
                             <v-text-field
-                            label="name"
-                            v-model="name"
-                            prepend-icon="mdi-account"
-                            required
+                                label="이름"
+                                v-model="name"
+                                prepend-icon="mdi-account"
+                                required
+                                dense
+                                class="mb-2"
                             />
                             
                             <!-- 전화번호 입력 -->
-                            <v-text-field
-                            label="phone number"
-                            v-model="phoneNumber"
-                            prepend-icon="mdi-phone"
-                            :disabled="isVerified"
-                            required
-                            :hint="showHint ? `- 빼고 입력해주세요.` : ''"
-                            persistent-hint
-                            @input="showHint = !phoneNumber"
-                            />
-                            <v-btn @click="sendAuthCode" :disabled="authSent || isVerified" color="primary">
-                            인증요청
-                            </v-btn>
+                            <v-row no-gutters class="mb-2">
+                                <v-col cols="9">
+                                    <v-text-field
+                                        label="전화번호"
+                                        v-model="phoneNumber"
+                                        prepend-icon="mdi-phone"
+                                        :disabled="isVerified"
+                                        required
+                                        dense
+                                        :hint="showHint ? `- 빼고 입력해주세요.` : ''"
+                                        persistent-hint
+                                        @input="showHint = !phoneNumber"
+                                    />
+                                </v-col>
+                                <v-col cols="3" class="pl-2">
+                                    <v-btn 
+                                        @click="sendAuthCode" 
+                                        :disabled="authSent || isVerified" 
+                                        color="primary" 
+                                        block
+                                        class="mt-1"
+                                    >
+                                        인증요청
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
 
-                            <!-- 인증번호 입력 (전송 후 표시) -->
-                            <div v-if="authSent">
-                            <v-text-field
-                                label="인증번호"
-                                v-model="authCode"
-                                prepend-icon="mdi-key"
-                                :disabled="isVerified"
-                                required
-                            />
-                            <v-btn @click="verifyAuthCode" :disabled="isVerified" color="success">
-                            인증확인
-                            </v-btn>
+                            <!-- 인증번호 입력 -->
+                            <div v-if="authSent" class="mb-4">
+                                <v-row no-gutters>
+                                    <v-col cols="9">
+                                        <v-text-field
+                                            label="인증번호"
+                                            v-model="authCode"
+                                            prepend-icon="mdi-key"
+                                            :disabled="isVerified"
+                                            required
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="3" class="pl-2">
+                                        <v-btn 
+                                            @click="verifyAuthCode" 
+                                            :disabled="isVerified" 
+                                            color="success" 
+                                            block
+                                            class="mt-1"
+                                        >
+                                            인증확인
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
                             </div>
 
                             <!-- 인증 결과 표시 -->
-                            <p v-if="isVerified" class="text-green">인증 완료! 수정 불가</p>
-                            <p v-if="verifyError" class="text-red">인증 실패! 다시 입력해주세요.</p>
+                            <v-alert
+                                v-if="isVerified"
+                                type="success"
+                                dense
+                                text
+                                class="mb-4"
+                            >
+                                인증이 완료되었습니다.
+                            </v-alert>
+                            <v-alert
+                                v-if="verifyError"
+                                type="error"
+                                dense
+                                text
+                                class="mb-4"
+                            >
+                                인증에 실패했습니다. 다시 시도해주세요.
+                            </v-alert>
 
                             <v-text-field
-                            label="nickName"
-                            v-model="nickName"
-                            prepend-icon="mdi-rename"
-                            required
+                                label="닉네임"
+                                v-model="nickName"
+                                prepend-icon="mdi-rename"
+                                required
+                                dense
+                                class="mb-2"
                             />
                             <v-text-field
-                            label="blogLink"
-                            v-model="blogLink"
-                            prepend-icon="mdi-link-box-variant"
-                            required
+                                label="블로그 링크"
+                                v-model="blogLink"
+                                prepend-icon="mdi-link-box-variant"
+                                required
+                                dense
+                                class="mb-2"
                             />
                             <v-text-field
-                            label="batch"
-                            v-model="batch"
-                            prepend-icon="mdi-flag"
-                            required
+                                label="기수"
+                                v-model="batch"
+                                prepend-icon="mdi-flag"
+                                required
+                                dense
+                                class="mb-6"
                             />
-                            <v-row>
-                                <v-col cols="12">
-                                    <v-btn color="#c0c1ff" block @click="create()">제출</v-btn>
-                                </v-col>
-                            </v-row>
+                            
+                            <v-btn 
+                                color="primary" 
+                                block 
+                                large 
+                                @click="create()"
+                                :elevation="2"
+                            >
+                                가입하기
+                            </v-btn>
                         </v-form>
                     </v-card-text>
                 </v-card>
