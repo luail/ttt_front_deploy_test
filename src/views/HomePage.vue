@@ -25,6 +25,8 @@
         </div>
       </v-carousel-item>
     </v-carousel>
+    <!-- 🔹 배너 아래 얇은 선 추가 -->
+    <v-divider class="banner-divider"></v-divider>
 
     <!-- 메인 컨텐츠를 하나의 컨테이너로 통합 -->
     <div class="content-wrapper">
@@ -35,9 +37,11 @@
             <div class="sticky-sidebar">
               <!-- Top Writers 섹션 -->
               <v-card class="top-writers-card">
-                <v-card-title class="top-writers-title">
+                <v-card-title
+                  class="top-writers-title"
+                >
                   <v-icon left small color="amber darken-2">mdi-trophy</v-icon>
-                  Top Writers
+                  T-랭킹
                 </v-card-title>
                 <v-list>
                   <v-list-item v-for="(writer, index) in topWriters" :key="index" class="writer-item">
@@ -71,7 +75,7 @@
               <v-card class="chat-rooms-card mt-4">
                 <v-card-title class="chat-rooms-title">
                   <v-icon left small>mdi-chat</v-icon>
-                  실시간 채팅방
+                  T-톡
                 </v-card-title>
                 
                 <v-list dense>
@@ -106,8 +110,8 @@
               <v-col cols="6">
                 <v-card class="board-card">
                   <v-card-title class="board-title">
-                    전체게시글
-                    <v-btn icon small class="ml-auto" :to="'/ttt/post/list/0'">
+                    커뮤니티
+                    <v-btn small class="ml-auto" :to="'/ttt/post/list/0'">
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-btn>
                   </v-card-title>
@@ -134,8 +138,8 @@
               <v-col cols="6"> 
                 <v-card class="board-card">
                   <v-card-title class="board-title">
-                    인기글
-                    <v-btn icon small class="ml-auto" :to="'/ttt/post/list/popular'">
+                    TODAY's BEST
+                    <v-btn class="ml-auto" :to="'/ttt/post/list/popular'">
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-btn>
                   </v-card-title>
@@ -165,8 +169,8 @@
               <v-col cols="6">
                 <v-card class="board-card">
                   <v-card-title class="board-title">
-                    정보
-                    <v-btn icon small class="ml-auto" :to="'/ttt/post/list/2'">
+                    TimeToTalk(이제는 말할수 있다.)
+                    <v-btn class="ml-auto" :to="'/ttt/post/list/2'">
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-btn>
                   </v-card-title>
@@ -193,8 +197,8 @@
               <v-col cols="6">
                 <v-card class="board-card">
                   <v-card-title class="board-title">
-                    알고리즘
-                    <v-btn icon small class="ml-auto" :to="'/ttt/post/list/3'">
+                    Q&A
+                    <v-btn class="ml-auto" :to="'/ttt/post/list/3'">
                       <v-icon>mdi-chevron-right</v-icon>
                     </v-btn>
                   </v-card-title>
@@ -376,91 +380,126 @@ export default {
 <style scoped>
 .home-wrapper {
   width: 100%;
+  background-color: #f5f5fc; /* 연한 보라톤 배경 */
 }
 
+/* 🔹 메인 컨텐츠 영역 */
 .content-wrapper {
   position: relative;
-  min-height: 100vh;
+  min-height: 100vh; /* 최소 높이 설정 (뷰포트 높이와 동일) */
+  margin-bottom: 0%; /* 하단 마진 (필요 시 조정) */
+  margin-left: 8%;  /* 좌측 여백 추가 */
+  margin-right: 8%; /* 우측 여백 추가 */
 }
 
+/* 🔹 사이드바 영역 */
 .sidebar-col {
   position: relative;
 }
 
+/* 🔹 사이드바를 고정 (스크롤 시 따라오게 설정) */
 .sticky-sidebar {
   position: -webkit-sticky;
   position: sticky;
-  top: 64px;
+  top: 64px; /* 네비게이션 바 높이를 고려하여 위치 조정 */
   height: auto;
 }
 
+/* 🔹 배너 스타일 */
 .banner-container {
   width: 100%;
-  height: 1200px;
+  height: 250px;
   overflow: hidden;
   position: relative;
-  margin-top: -15px;
+}
+
+.banner-carousel {
+  max-width: 80%; /* 🔹 배너 크기를 80%로 조정 */
+  margin: 0 auto; /* 가운데 정렬 */
 }
 
 .banner-img {
   width: 100%;
   height: 250px;
-  object-fit: fill;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
 }
 
+/* 🔹 Top Writers & 채팅방 카드 스타일 */
 .top-writers-card,
 .chat-rooms-card {
   width: 100%;
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background-color: #f8f9fa; /* 연한 회색 배경 */
+  border: 1px solid #e9ecef; /* 연한 테두리 */
 }
 
+/* 🔹 Top Writers 타이틀 스타일 */
 .top-writers-title {
   font-size: 1rem;
   padding: 12px 16px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa; /* 연한 회색 배경 */
+  border-bottom: 1px solid #e9ecef; /* 하단 테두리 */
 }
 
-.ranker-name{
+.ranker-name {
   margin-left: 3px;
   margin-right: 10px;
 }
 
+/* 🔹 랭킹 아이템 스타일 */
 .writer-item {
   padding: 8px 16px;
 }
 
+/* 🔹 게시판 카드 스타일 */
 .board-card {
-  height: 100%;
-  border: 1px solid #e9ecef;
+  background: white;
+  border-radius: 0px; /* 둥근 모서리 */
+  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 그림자 효과 */
+  /* transition: all 0.3s ease-in-out; 부드러운 애니메이션 */
 }
 
+/* 🔹 게시판 타이틀 스타일 */
 .board-title {
-  font-size: 1.4rem;
+  font-size: 1rem;
   font-weight: bold;
+  color: #6200ea; /* 텍스트 색상 */
   padding: 12px 16px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  border: 1px solid #6200ea; /* ✅ 테두리 색상 적용 */
+  background-color: #f5f5fc; /* 연한 보라톤 배경 */
+
+}
+.v-list {
+  background-color: transparent; /* ✅ 배경색 제거 (원하는 경우 추가 가능) */
+
 }
 
+/* 🔹 버튼 스타일 */
+.v-btn {
+  font-weight: bold;
+  background-color: #f5f5fc; /* 흰색 배경 */
+  color: #6200ea; /* 보라색 텍스트 */
+  transition: background 0.3s ease-in-out;
+  height: 50px;
+  width: 10%;
+}
+
+/* 🔹 글 목록 제목 스타일 */
 .post-title {
   font-size: 0.95rem;
-  line-height: 1.4;
-  margin-bottom: 4px;
+  font-weight: bold;
+  color: #333; /* 진한 회색 */
 }
 
 .post-meta {
   font-size: 0.85rem;
-  color: #666;
+  color: #666; /* 중간 회색 */
 }
 
 .author {
-  color: #357abd;
+  color: #357abd; /* 블루 계열 색상 */
   font-weight: 500;
 }
 
@@ -468,14 +507,34 @@ export default {
   color: #666;
 }
 
-v-list-item:hover {
-  background-color: #f8f9fa;
+/* 🔹 리스트 아이템 효과 */
+.v-list-item {
+  transition: background-color 0.2s ease-in-out;
 }
 
 .writer-content {
   min-width: 0; /* 긴 닉네임 처리를 위한 설정 */
 }
 
+/* 🔹 채팅방 & 랭킹 섹션 */
+.chat-rooms-card,
+.top-writers-card {
+  background: white;
+  border-radius: 0px;/* 둥근 모서리 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+}
+
+/* 🔹 Top Writers 타이틀 */
+.top-writers-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #6200ea; /* 텍스트 색상 */
+  padding: 12px 16px;
+  border: 1px solid #6200ea; /* ✅ 테두리 색상 적용 */
+  background-color: transparent; /* ✅ 배경색 제거 (원하는 경우 추가 가능) */
+}
+
+/* 🔹 랭킹 배지 스타일 */
 .rank-badge {
   display: inline-flex;
   align-items: center;
@@ -484,16 +543,19 @@ v-list-item:hover {
   padding: 2px;
 }
 
+/* 🔹 1위 애니메이션 효과 */
 .rank-1 {
   animation: shine 2s infinite;
 }
 
+/* 🔹 랭킹 번호 스타일 */
 .rank-number {
   font-size: 0.8rem;
   font-weight: bold;
   color: #666;
 }
 
+/* 🔹 1위 효과 애니메이션 */
 @keyframes shine {
   0% {
     transform: scale(1);
@@ -509,35 +571,40 @@ v-list-item:hover {
   }
 }
 
-/* 호버 효과 */
+/* 🔹 호버 효과 */
 .writer-item:hover {
   background-color: rgba(0, 0, 0, 0.03);
   transition: background-color 0.2s ease;
 }
 
-/* 각 순위별 칩 스타일 */
+/* 🔹 작은 칩 스타일 */
 .v-chip.v-size--x-small {
   font-weight: bold;
 }
 
-
+/* 🔹 플레이스홀더 카드 스타일 */
 .placeholder-card {
   background-color: #f5f5f5;
   border: 1px dashed #ddd;
 }
 
+/* 🔹 4~5위 아이콘 투명도 조정 */
 .rank-4 .v-icon,
 .rank-5 .v-icon {
   opacity: 0.9;
 }
 
+/* 🔹 채팅방 타이틀 */
 .chat-rooms-title {
   font-size: 1rem;
+  font-weight: bold;
+  color: #6200ea; /* 텍스트 색상 */
   padding: 12px 16px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  border: 1px solid #6200ea; /* ✅ 테두리 색상 적용 */
+  background-color: transparent; /* ✅ 배경색 제거 (원하는 경우 추가 가능) */
 }
 
+/* 🔹 채팅방 리스트 아이템 */
 .chat-room-item {
   padding: 8px 16px;
   transition: background-color 0.2s;
@@ -547,6 +614,7 @@ v-list-item:hover {
   background-color: #e9ecef;
 }
 
+/* 🔹 채팅방 제목 스타일 */
 .chat-room-title {
   font-size: 0.9rem;
   font-weight: 500;
@@ -556,6 +624,7 @@ v-list-item:hover {
   text-overflow: ellipsis;
 }
 
+/* 🔹 채팅방 정보 스타일 */
 .chat-room-info {
   font-size: 0.8rem;
   color: #666;
@@ -568,18 +637,18 @@ v-list-item:hover {
   font-size: 0.75rem;
 }
 
-.ad-banner{
+/* 🔹 광고 배너 */
+.ad-banner {
   height: 100%;
   width: 100%;
 }
 
-.banner-img2{
+.banner-img2 {
   height: 100%;
   width: 100%;
 }
 
-
-/* 스크롤바 스타일링 */
+/* 🔹 채팅방 스크롤바 스타일 */
 .chat-rooms-card ::-webkit-scrollbar {
   width: 4px;
 }
@@ -597,8 +666,7 @@ v-list-item:hover {
   background: #555;
 }
 
-
-/* 스크롤바 스타일링 */
+/* 🔹 사이드바 스크롤바 스타일 */
 .sticky-sidebar::-webkit-scrollbar {
   width: 4px;
 }
@@ -615,5 +683,6 @@ v-list-item:hover {
 .sticky-sidebar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
 
 </style>
