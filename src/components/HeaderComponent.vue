@@ -28,6 +28,7 @@
                       <v-list-item to="/ttt/post/list/0">전체게시판</v-list-item>
                       <v-list-item to="/ttt/post/list/1">자유게시판</v-list-item>
                       <v-list-item to="/ttt/post/list/2">정보게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/3">알고리즘게시판</v-list-item>
                     </v-list>
                   </v-card>
                 </v-menu>
@@ -92,9 +93,9 @@
 
           <!-- 우측 메뉴 -->
           <v-col cols="4" class="d-flex justify-end align-center">
-            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea">
+            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea" :class="{ 'pulse': isNewMessage }">
               <v-icon>
-                {{ hasUnreadMessages ? 'mdi-message-badge-outline' : 'mdi-message-outline' }}
+                {{ hasUnreadMessages ? 'mdi-message-badge' : 'mdi-message-outline' }}
               </v-icon>
             </v-btn>
 
@@ -160,7 +161,8 @@ export default {
       profileImageUrl: null,
       profileMenu: false,
       eventSource: null,
-      reconnectTimeout: null
+      reconnectTimeout: null,
+      isNewMessage: false,
     }
   },
   computed: {
@@ -229,6 +231,13 @@ export default {
         
         this.$store.dispatch('handleNewMessage', chatMessage);
         
+        // 새 메시지가 오면 깜빡임 효과 시작
+        this.isNewMessage = true;
+        // 3초 후 깜빡임 효과 중지
+        setTimeout(() => {
+          this.isNewMessage = false;
+        }, 1000);
+
         if (Notification.permission === 'granted') {
           const notification = new Notification('TikTakTalk', {
             body: `${chatMessage.senderNickName}: ${chatMessage.message}`,
@@ -339,6 +348,7 @@ export default {
 .chat-icon {
   width: 40px !important;
   height: 40px !important;
+  position: relative;
 }
 
 .profile-avatar {
@@ -360,5 +370,22 @@ export default {
 
 .mr-2 {
   margin-right: 8px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(98, 0, 234, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(98, 0, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(98, 0, 234, 0);
+  }
+}
+
+.pulse {
+  animation: pulse 1s;  /* infinite 제거하여 한 번만 실행 */
+  border-radius: 50%;
 }
 </style>

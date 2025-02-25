@@ -10,25 +10,34 @@
       <div class="footer-section">
         <h3>팀원</h3>
         <ul class="team-members">
-          <li><a href="https://github.com/member1" target="_blank">팀원1 이름</a></li>
-          <li><a href="https://github.com/member2" target="_blank">팀원2 이름</a></li>
-          <li><a href="https://github.com/member3" target="_blank">팀원3 이름</a></li>
-          <li><a href="https://github.com/member4" target="_blank">팀원4 이름</a></li>
-          <li><a href="https://github.com/member5" target="_blank">팀원5 이름</a></li>
+          <li><a href="https://github.com/jykim1187" target="_blank">김진영</a></li>
+          <li><a href="https://github.com/issac-cosmos" target="_blank">경수혁</a></li>
+          <li><a href="https://github.com/luail" target="_blank">고준혁</a></li>
+          <li><a href="https://github.com/2ma1995" target="_blank">소병윤</a></li>
+          <li><a href="https://github.com/JungJunHwan" target="_blank">정준환</a></li>
         </ul>
       </div>
 
       <div class="footer-section">
         <h3>도움을 주신 분</h3>
-        <p><a href="https://inf.run/KZWA" target="_blank">Brad Kim</a></p>
+        <p><a href="https://www.inflearn.com/users/1014633/@bradkim" target="_blank">Brad Kim</a></p>
       </div>
 
       <div class="footer-section">
         <h3>프로젝트 문서</h3>
         <ul>
-          <li><a href="#" target="_blank">요구사항명세서</a></li>
-          <li><a href="https://github.com/4dollerExit" target="_blank">팀 GitHub</a></li>
+          <li><a href="https://www.notion.so/180da9f139ca801c98c7c26eb1e2af31?v=180da9f139ca81d08b86000c2c26c05e" target="_blank">요구사항명세서</a></li>
+          <li><a href="https://www.erdcloud.com/d/62rYxocZt6sFHzFyG" target="_blank">ERD</a></li>
+          <li><a href="https://github.com/beyond-sw-camp/be11-2nd-4dollarExit-TikTakTalk-FE" target="_blank">FE GitHub</a></li>
+          <li><a href="https://github.com/beyond-sw-camp/be11-2nd-4dollarExit-TikTakTalk-BE" target="_blank">BE GitHub</a></li>
         </ul>
+      </div>
+
+      <div class="footer-section">
+        <h3>후원계좌</h3>
+        <p class="account-info">카카오뱅크</p>
+        <p class="account-number">3333-22-1468066</p>
+        <p class="account-name">정준환</p>
       </div>
     </div>
     
@@ -48,7 +57,7 @@ export default {
 .footer {
   background-color: #38036e;
   color: #fff;
-  padding: 2rem 0;
+  padding: 1.5rem 0;
 }
 
 .footer-content {
@@ -61,19 +70,20 @@ export default {
 
 .footer-section {
   flex: 1;
-  margin: 0 1rem;
+  margin: 0 0.8rem;
+  font-size: 0.9rem;
 }
 
 .footer-section h3 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
   color: #fff;
 }
 
 .team-name {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .footer-section ul {
@@ -82,7 +92,7 @@ export default {
 }
 
 .footer-section ul li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .footer-section a {
@@ -101,9 +111,27 @@ export default {
 
 .footer-bottom {
   text-align: center;
-  margin-top: 2rem;
-  padding-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 0.8rem;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+}
+
+.account-info {
+  margin-bottom: 0.2rem;
+  color: #b388ff;
+  font-size: 0.9rem;
+}
+
+.account-number {
+  font-family: monospace;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+}
+
+.account-name {
+  font-size: 0.85rem;
+  color: #ccc;
 }
 
 @media (max-width: 768px) {
