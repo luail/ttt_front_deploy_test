@@ -1,117 +1,173 @@
 <template>
-    <v-container>
+    <v-container class="pt-6">
         <v-row justify="center">
-            <v-col cols="12" sm="4" md="6">
-                <v-card>
-                    <v-card-title class="text-h5 text-center">
+            <v-col cols="12" sm="8" md="6" lg="5">
+                <v-card class="elevation-3">
+                    <v-card-title class="text-h5 font-weight-bold text-center pa-4">
                         회원가입
                     </v-card-title>
-                    <v-card-text>
+                    <v-divider></v-divider>
+                    <v-card-text class="pa-6">
                         <v-form @keydown.enter="create">
                             <v-text-field
-                            label="name"
-                            v-model="name"
-                            prepend-icon="mdi-account"
-                            required
-                            />
-                            <v-text-field
-                            label="email"
-                            v-model="email"
-                            type="email"
-                            prepend-icon="mdi-email"
-                            required
-                            />
-                            <v-text-field
-                            label="loginId"
-                            v-model="loginId"
-                            prepend-icon="mdi-login"
-                            required
-                            />
-                            <v-text-field
-                            label="password"
-                            v-model="password"
-                            type="password"
-                            prepend-icon="mdi-lock"
-                            required
-                            />
-                            <v-text-field
-                            label="passwordCheck"
-                            v-model="passwordCheck"
-                            type="password"
-                            prepend-icon="mdi-lock"
-                            required
-                            />
-                            <!-- 전화번호 입력 -->
-                                <v-text-field
-                                label="phone number"
-                                v-model="phoneNumber"
-                                prepend-icon="mdi-phone"
-                                :disabled="isVerified"
+                                label="이름"
+                                v-model="name"
+                                prepend-icon="mdi-account"
                                 required
-                                :hint="showHint ? `- 빼고 입력해주세요.` : ''"
-                                persistent-hint
-                                @input="showHint = !phoneNumber"
-                                />
-                                <v-btn @click="sendAuthCode" :disabled="authSent || isVerified" color="primary">
-                                인증요청
-                                </v-btn>
-
-                                <!-- 인증번호 입력 (전송 후 표시) -->
-                                <div v-if="authSent">
-                                <v-text-field
-                                    label="인증번호"
-                                    v-model="authCode"
-                                    prepend-icon="mdi-key"
-                                    :disabled="isVerified"
-                                    required
-                                />
-                                <v-btn @click="verifyAuthCode" :disabled="isVerified" color="success">
-                                인증확인
-                                </v-btn>
-                                </div>
-
-                                <!-- 인증 결과 표시 -->
-                                <p v-if="isVerified" class="text-green">인증 완료! 수정 불가</p>
-                                <p v-if="verifyError" class="text-red">인증 실패! 다시 입력해주세요.</p>
-                            <v-text-field
-                            label="nickName"
-                            v-model="nickName"
-                            prepend-icon="mdi-rename"
-                            required
+                                dense
+                                class="mb-1"
                             />
                             <v-text-field
-                            label="blogLink"
-                            v-model="blogLink"
-                            prepend-icon="mdi-link-box-variant"
-                            required
+                                label="이메일"
+                                v-model="email"
+                                type="email"
+                                prepend-icon="mdi-email"
+                                required
+                                dense
+                                class="mb-1"
                             />
                             <v-text-field
-                            label="batch"
-                            v-model="batch"
-                            prepend-icon="mdi-flag"
-                            required
+                                label="아이디"
+                                v-model="loginId"
+                                prepend-icon="mdi-login"
+                                required
+                                dense
+                                class="mb-1"
                             />
-                            <v-row>
-                                <v-col cols="12">
-                                    <v-btn color="#c0c1ff" block @click="create()">제출</v-btn>
+                            <v-text-field
+                                label="비밀번호"
+                                v-model="password"
+                                type="password"
+                                prepend-icon="mdi-lock"
+                                required
+                                dense
+                                class="mb-1"
+                            />
+                            <v-text-field
+                                label="비밀번호 확인"
+                                v-model="passwordCheck"
+                                type="password"
+                                prepend-icon="mdi-lock"
+                                required
+                                dense
+                                class="mb-1"
+                            />
+                            
+                            <!-- 전화번호 입력 -->
+                            <v-row no-gutters class="mb-1">
+                                <v-col cols="9">
+                                    <v-text-field
+                                        label="전화번호"
+                                        v-model="phoneNumber"
+                                        prepend-icon="mdi-phone"
+                                        :disabled="isVerified"
+                                        required
+                                        dense
+                                        :hint="showHint ? `- 빼고 입력해주세요.` : ''"
+                                        persistent-hint
+                                        @input="showHint = !phoneNumber"
+                                    />
+                                </v-col>
+                                <v-col cols="3" class="pl-2">
+                                    <v-btn 
+                                        @click="sendAuthCode" 
+                                        :disabled="authSent || isVerified" 
+                                        color="primary" 
+                                        block
+                                        class="mt-1"
+                                    >
+                                        인증요청
+                                    </v-btn>
                                 </v-col>
                             </v-row>
+
+                            <!-- 인증번호 입력 -->
+                            <div v-if="authSent" class="mb-2">
+                                <v-row no-gutters>
+                                    <v-col cols="9">
+                                        <v-text-field
+                                            label="인증번호"
+                                            v-model="authCode"
+                                            prepend-icon="mdi-key"
+                                            :disabled="isVerified"
+                                            required
+                                            dense
+                                        />
+                                    </v-col>
+                                    <v-col cols="3" class="pl-2">
+                                        <v-btn 
+                                            @click="verifyAuthCode" 
+                                            :disabled="isVerified" 
+                                            color="success" 
+                                            block
+                                            class="mt-1"
+                                        >
+                                            인증확인
+                                        </v-btn>
+                                    </v-col>
+                                </v-row>
+                            </div>
+
+                            <!-- 인증 결과 표시 -->
+                            <v-alert
+                                v-if="isVerified"
+                                type="success"
+                                dense
+                                text
+                                class="mb-2"
+                            >
+                                인증이 완료되었습니다.
+                            </v-alert>
+                            <v-alert
+                                v-if="verifyError"
+                                type="error"
+                                dense
+                                text
+                                class="mb-2"
+                            >
+                                인증에 실패했습니다. 다시 시도해주세요.
+                            </v-alert>
+
+                            <v-text-field
+                                label="닉네임"
+                                v-model="nickName"
+                                prepend-icon="mdi-rename"
+                                required
+                                dense
+                                class="mb-1"
+                            />
+                            <v-text-field
+                                label="블로그 링크"
+                                v-model="blogLink"
+                                prepend-icon="mdi-link-box-variant"
+                                required
+                                dense
+                                class="mb-1"
+                            />
+                            <v-text-field
+                                label="기수"
+                                v-model="batch"
+                                prepend-icon="mdi-flag"
+                                required
+                                dense
+                                class="mb-4"
+                            />
+                            
+                            <v-btn 
+                                color="primary" 
+                                block 
+                                large 
+                                @click="create()"
+                                :elevation="2"
+                            >
+                                가입하기
+                            </v-btn>
                         </v-form>
                     </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
     </v-container>
-    <v-dialog v-model="trueOrFalse" max-width="400px" @keydown.enter="resetModal()">
-        <v-card>
-            <v-card-text class="error-message">
-                {{errorMessage}}
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="c0c1ff" @click="resetModal()">확인</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
 </template>
 <script>
 import axios from 'axios';
