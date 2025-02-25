@@ -6,7 +6,11 @@
           <!-- 로고 -->
           <v-col cols="2">
             <router-link to="/ttt" class="text-decoration-none">
-              <h1 class="logo">TTT</h1>
+              <h1 class="logo">
+                <span class="highlight">T</span><span class="small-text">ik</span>
+                <span class="highlight">T</span><span class="small-text">ak</span>
+                <span class="highlight">T</span><span class="small-text">alk</span>
+              </h1>
             </router-link>
           </v-col>
 
@@ -20,52 +24,36 @@
                       :class="{ 'active-menu': hoveredMenu === 'community' }"
                       @mouseover="hoveredMenu = 'community'"
                       @mouseleave="hoveredMenu = null">
-                      Tik
+                      <v-icon>mdi-text</v-icon>&nbsp;커뮤니티
                     </v-btn>
                   </template>
                   <v-card class="dropdown-menu" flat>
                     <v-list>
-                      <v-list-item to="/ttt/post/list/0">Community</v-list-item>
-                      <v-list-item to="/ttt/post/list/1">FreeTalk</v-list-item>
-                      <v-list-item to="/ttt/post/list/2">Knowledge</v-list-item>
-                      <v-list-item to="/ttt/post/list/3">Algorithm</v-list-item>
+                      <v-list-item to="/ttt/post/list/0">전체게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/1">자유게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/2">정보게시판</v-list-item>
+                      <v-list-item to="/ttt/post/list/3">알고리즘게시판</v-list-item>
                     </v-list>
                   </v-card>
                 </v-menu>
               </v-col>
               <v-col cols="3">
-                <v-menu open-on-hover offset-y>
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
-                      :class="{ 'active-menu': hoveredMenu === 'list' }"
-                      @mouseover="hoveredMenu = 'list'"
-                      @mouseleave="hoveredMenu = null">
-                      Tac
-                    </v-btn>
-                  </template>
-                  <v-card class="dropdown-menu" flat>
-                    <v-list>
-                      <v-list-item class="d-flex justify-center" to="/ttt/project/find">project</v-list-item>
-                    </v-list>
-                  </v-card>
-                </v-menu>
+                <v-btn class="menu-btn" variant="text" block flat :ripple="false"
+                  :class="{ 'active-menu': hoveredMenu === 'list' }"
+                  @mouseover="hoveredMenu = 'list'"
+                  @mouseleave="hoveredMenu = null"
+                  to="/ttt/project/find">
+                  프로젝트
+                </v-btn>
               </v-col>
               <v-col cols="3">
-                <v-menu open-on-hover offset-y>
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
-                      :class="{ 'active-menu': hoveredMenu === 'chat' }"
-                      @mouseover="hoveredMenu = 'chat'"
-                      @mouseleave="hoveredMenu = null">
-                      Toc
-                    </v-btn>
-                  </template>
-                  <v-card class="dropdown-menu" flat>
-                    <v-list>
-                      <v-list-item class="d-flex justify-center" to="/ttt/chat/list">chat</v-list-item>
-                    </v-list>
-                  </v-card>
-                </v-menu>
+                <v-btn class="menu-btn" variant="text" block flat :ripple="false"
+                  :class="{ 'active-menu': hoveredMenu === 'chat' }"
+                  @mouseover="hoveredMenu = 'chat'"
+                  @mouseleave="hoveredMenu = null"
+                  to="/ttt/chat/list">
+                  라운지
+                </v-btn>
               </v-col>
 
               
@@ -77,7 +65,7 @@
                       :class="{ 'active-menu': hoveredMenu === 'admin' }"
                       @mouseover="hoveredMenu = 'admin'"
                       @mouseleave="hoveredMenu = null">
-                      관리자
+                      <v-icon>mdi-text</v-icon>&nbsp;관리자
                     </v-btn>
                   </template>
                   <v-card class="dropdown-menu" flat>
@@ -93,9 +81,9 @@
 
           <!-- 우측 메뉴 -->
           <v-col cols="4" class="d-flex justify-end align-center">
-            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea">
+            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea" :class="{ 'pulse': isNewMessage }">
               <v-icon>
-                {{ hasUnreadMessages ? 'mdi-message-badge-outline' : 'mdi-message-outline' }}
+                {{ hasUnreadMessages ? 'mdi-message-badge' : 'mdi-message-outline' }}
               </v-icon>
             </v-btn>
 
@@ -121,7 +109,7 @@
                       <template v-slot:prepend>
                         <v-icon>mdi-account-circle</v-icon>
                       </template>
-                      <v-list-item-title>마이페이지</v-list-item-title>
+                      <v-list-item-title>프로필</v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
                     <v-list-item @click="doLogout">
@@ -161,7 +149,8 @@ export default {
       profileImageUrl: null,
       profileMenu: false,
       eventSource: null,
-      reconnectTimeout: null
+      reconnectTimeout: null,
+      isNewMessage: false,
     }
   },
   computed: {
@@ -228,6 +217,13 @@ export default {
         
         this.$store.dispatch('handleNewMessage', chatMessage);
         
+        // 새 메시지가 오면 깜빡임 효과 시작
+        this.isNewMessage = true;
+        // 3초 후 깜빡임 효과 중지
+        setTimeout(() => {
+          this.isNewMessage = false;
+        }, 1000);
+
         if (Notification.permission === 'granted') {
           const notification = new Notification('TikTakTalk', {
             body: `${chatMessage.senderNickName}: ${chatMessage.message}`,
@@ -303,6 +299,18 @@ export default {
   margin: 0;
 }
 
+.logo .highlight {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #6200ea;
+}
+
+.logo .small-text {
+  font-size: 0.8rem;
+  color: #666666;
+  font-weight: normal;
+}
+
 .menu-btn {
   text-transform: none !important;
   height: 48px !important;
@@ -335,6 +343,7 @@ export default {
 .chat-icon {
   width: 40px !important;
   height: 40px !important;
+  position: relative;
 }
 
 .profile-avatar {
@@ -356,5 +365,22 @@ export default {
 
 .mr-2 {
   margin-right: 8px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(98, 0, 234, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(98, 0, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(98, 0, 234, 0);
+  }
+}
+
+.pulse {
+  animation: pulse 1s;  /* infinite 제거하여 한 번만 실행 */
+  border-radius: 50%;
 }
 </style>
