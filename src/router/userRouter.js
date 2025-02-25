@@ -55,9 +55,4 @@ export const userRouter= [
         name: 'OauthUserCreate',
         component: OauthUserCreate
     },
-    {
-        path: '/ttt/book',
-        name: 'Book',
-        component: Book
-    }
 ]
