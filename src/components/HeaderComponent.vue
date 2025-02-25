@@ -90,22 +90,18 @@
             <!-- 로그인 상태 -->
             <template v-if="isLoggedIn">
               <!-- 프로필 메뉴 -->
-              <v-menu v-model="profileMenu" :close-on-content-click="false" location="bottom">
+              <v-menu v-model="profileMenu" :close-on-content-click="true">
                 <template v-slot:activator="{ props }">
-                  <v-avatar class="profile-avatar" size="40" v-bind="props">
+                  <v-avatar class="profile-avatar" size="32" v-bind="props">
                     <v-img :src="profileImageUrl || require('@/assets/basicProfileImage.png')"
                           :alt="'프로필 이미지'"
                           @error="handleImageError">
-                      <template v-slot:placeholder>
-                        <v-icon>mdi-account-circle</v-icon>
-                      </template>
                     </v-img>
                   </v-avatar>
                 </template>
-
                 <v-card min-width="200" class="profile-menu">
                   <v-list>
-                    <v-list-item to="/ttt/user/myInformation">
+                    <v-list-item class="profile-menu-item" to="/ttt/user/myInformation" @click="profileMenu = false">
                       <template v-slot:prepend>
                         <v-icon>mdi-account-circle</v-icon>
                       </template>

@@ -7,6 +7,7 @@ import UserMyInformation from "@/views/MyPage/UserMyInformation.vue";
 import MyPagePost from "@/views/MyPage/MyPagePost.vue";
 import MyPageLikes from "@/views/MyPage/MyPageLikes.vue";
 import OauthUserCreate from "@/views/OauthUserCreate.vue";
+import Book from "@/views/Book.vue";
 
 export const userRouter= [
     {

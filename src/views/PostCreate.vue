@@ -2,20 +2,32 @@
   <v-container fluid class="page-container">
     <v-row>
       <!-- 사이드 메뉴 -->
-      <v-col cols="1">
-        <v-navigation-drawer permanent class="sidebar" width="180">
-          <v-list>
-            <v-list-item v-for="(c, index) in categoryList" :key="index" @click="selectedBoard(c.categoryId)" class="clickable-item">
+      <v-col cols="2">
+        <div class="category-sidebar">
+          <h3 class="sidebar-title">카테고리</h3>
+          <v-list class="category-list pa-0">
+            <v-list-item
+              v-for="category in categoryList"
+              :key="category.categoryId"
+              @click="selectedBoard(category.categoryId)"
+              :class="{ 'active-category': category.categoryId === selectedCategoryId }"
+              class="category-item"
+              dense
+            >
               <v-list-item-content>
-                <v-list-item-title class="font-weight-bold">{{c.categoryName}}</v-list-item-title>
+                <v-list-item-title 
+                  :class="{ 'selected-text': category.categoryId === selectedCategoryId }"
+                >
+                  {{ category.categoryName }}
+                </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list>
-        </v-navigation-drawer>
+        </div>
       </v-col>
 
       <!-- 게시물 작성 폼 -->
-      <v-col cols="10">
+      <v-col cols="9">
         <v-card class="post-detail">
           <v-card-title>
             <v-container>
@@ -208,13 +220,72 @@ export default {
   margin: 0 30px;
 }
 
-
-
-.sidebar {
-  background-color: #f4f4f4;
-  border-right: 1px solid #ccc;
+.category-sidebar {
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  position: sticky;
+  top: 80px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
+/* 스크롤바 스타일링 */
+.category-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.category-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.category-sidebar::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.category-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #9155FD;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  padding: 16px 20px;
+  margin: 0;
+  border-bottom: 2px solid #9155FD;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.category-list {
+  background: transparent !important;
+}
+
+.category-item {
+  padding: 12px 20px !important;
+  min-height: 0 !important;
+  border-left: 3px solid transparent;
+}
+
+.active-category {
+  background-color: #F4F1FA !important;
+  border-left: 3px solid #9155FD;
+}
+
+.selected-text {
+  color: #9155FD;
+  font-weight: 500;
+}
+
+.category-item:hover {
+  background-color: #F4F1FA !important;
+}
+
+/* 기존 스타일 유지 */
 .post-detail {
   margin: 20px 0;
   border: 1px solid #ccc;
@@ -222,19 +293,15 @@ export default {
   padding: 20px;
 }
 
-/* Quill Editor 스타일 외부 라이브러리이므로 스타일이 적용이안되 브이 딥명령어 이용*/
 ::v-deep .ql-editor {
   min-height: 800px;
   font-size: 25px;
-
 }
 
 ::v-deep .ql-editor img {
-  max-width: 100%;  /* 화면을 벗어나지 않도록 설정 */
-  height: auto;  /* 비율 유지하면서 자동 조정 */
-  display: block;  /* 블록 요소로 변경 (여백 조정) */
-  margin: 0 auto;  /* 중앙 정렬 */
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
-
-
 </style>
