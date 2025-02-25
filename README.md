@@ -40,7 +40,6 @@
       <td align="center"><img src="./assets/img/member3.png" width="180px"/></td>
       <td align="center"><img src="./assets/img/member4.png" width="180px"/></td>
       <td align="center"><img src="./assets/img/member4.png" width="180px"/></td>
-      <td align="center"><img src="./assets/img/member4.png" width="180px"/></td>
     </tr>
     <tr>
       <td align="center">팀장: <a href="https://github.com/jykim1187">김진영</a></td>
