@@ -61,57 +61,7 @@
         </div>
       </div>
 
-      <!-- 일일 트렌딩 섹션 -->
-      <section class="trending-section mb-8">
-        <div class="section-header">
-          <h2>🔥 일일 트렌딩</h2>
-        </div>
-        <v-row>
-          <v-col v-for="(post, index) in filteredTrendingPosts" 
-                 :key="post.postId" 
-                 cols="12" 
-                 md="4">
-            <v-card 
-              class="trending-card" 
-              elevation="0"
-              :style="{ borderLeft: `4px solid ${getTrendingColor(index)}` }"
-              @click="$router.push(`/ttt/post/${post.postId}`)"
-            >
-              <v-card-text>
-                <div class="trending-rank" :style="{ color: getTrendingColor(index) }">#{{ index + 1 }}</div>
-                <h3 class="trending-title text-truncate">{{ post.title }}</h3>
-                <div class="trending-meta">
-                  <span class="author">
-                    <v-avatar size="20">
-                      <v-img 
-                        :src="post.authorImage"
-                        @error="handleImageError"
-                      ></v-img>
-                    </v-avatar>
-                    {{ post.authorNickName }}
-                  </span>
-                  <div class="stats mt-2">
-                    <v-chip x-small outlined class="mr-2">
-                      <v-icon x-small left>mdi-eye</v-icon>
-                      {{ post.viewCount }}
-                    </v-chip>
-                    <v-chip x-small outlined class="mr-2">
-                      <v-icon x-small left>mdi-heart</v-icon>
-                      {{ post.likesCount }}
-                    </v-chip>
-                    <v-chip x-small outlined>
-                      <v-icon x-small left>mdi-comment</v-icon>
-                      {{ post.countOfComment }}
-                    </v-chip>
-                  </div>
-                </div>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-      </section>
-
-      <v-row class="mt-6">
+      <v-row>
         <!-- 좌측 사이드바 -->
         <v-col cols="12" lg="3">
           <div class="sticky-container">
@@ -159,8 +109,72 @@
           </div>
         </v-col>
 
-        <!-- 메인 컨텐츠 -->
+        <!-- 메인 컨텐츠 영역 -->
         <v-col cols="12" lg="9" class="pl-lg-6">
+          <!-- 일일 트렌딩 섹션 -->
+          <section class="trending-section mb-8">
+            <div class="section-header">
+              <h2>🔥 일일 트렌딩</h2>
+            </div>
+            <div class="trending-container">
+              <v-row>
+                <v-col v-for="(post, index) in currentTrendingPosts" 
+                       :key="getCurrentIndex(index)" 
+                       cols="12" 
+                       md="4">
+                  <transition name="fade">
+                    <v-card 
+                      class="trending-card" 
+                      elevation="1"
+                      :style="{ borderLeft: `4px solid ${getTrendingColor(getCurrentIndex(index))}` }"
+                      @click="$router.push(`/ttt/post/${post.postId}`)"
+                    >
+                      <v-card-text>
+                          <div class="trending-header">
+                        <div class="rank-category">
+                          <div class="trending-rank" :style="{ color: getTrendingColor(getCurrentIndex(index)) }">
+                            #{{ getCurrentIndex(index) + 1 }}
+                          </div>
+                          <span class="category-label">
+                            {{ post.categoryName }}
+                          </span>
+                        </div>
+                        <div class="trending-title">{{ post.title }}</div>
+                      </div>
+                        <div class="trending-meta">
+                          <div class="author-info">
+                            <v-avatar size="24">
+                              <v-img 
+                                :src="post.authorImage"
+                                @error="handleImageError"
+                              ></v-img>
+                            </v-avatar>
+                            <span class="author-name">{{ post.authorNickName }}</span>
+                          </div>
+                          <div class="post-stats">
+                            <span class="stat-item">
+                              <v-icon small>mdi-eye</v-icon>
+                              {{ post.viewCount }}
+                            </span>
+                            <span class="stat-item">
+                              <v-icon small>mdi-heart</v-icon>
+                              {{ post.likesCount }}
+                            </span>
+                            <span class="stat-item">
+                              <v-icon small>mdi-comment</v-icon>
+                              {{ post.countOfComment }}
+                            </span>
+                          </div>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                  </transition>
+                </v-col>
+              </v-row>
+            </div>
+          </section>
+
+          <!-- 게시판 섹션들 -->
           <v-row>
             <!-- 전체게시판 섹션 -->
             <v-col cols="12" md="6">
@@ -397,12 +411,20 @@ export default {
       totalPosts: 0,  // 전체 게시글 수 추가
       totalRooms: 0,  // 전체 채팅방 수 추가
       trendingPosts: [],
+      currentTrendingPage: 0,
+      trendingInterval: null
     }
   },
 
   computed: {
-    filteredTrendingPosts() {
-      return this.trendingPosts.slice(0, 3);
+    currentTrendingPosts() {
+      const startIndex = this.currentTrendingPage * 3;
+      const endIndex = startIndex + 3;
+      return this.trendingPosts.slice(startIndex, endIndex);
+    },
+
+    totalTrendingPages() {
+      return Math.ceil(this.trendingPosts.length / 3);
     }
   },
 
@@ -516,12 +538,36 @@ export default {
     },
 
     getTrendingColor(index) {
+      // 모든 순위에 대한 색상 지정
       const colors = {
         0: '#6366f1',  // 1등
         1: '#7c74f4',  // 2등
-        2: '#8b5cf6'   // 3등
+        2: '#8b5cf6',  // 3등
+        3: '#9333ea',  // 4등
+        4: '#a855f7',  // 5등
+        5: '#bf7af0',  // 6등
+        6: '#d277e9',  // 7등
+        7: '#e586e3',  // 8등
+        8: '#f797dc',  // 9등
+        9: '#ffa8d6',  // 10등
+        10: '#ffb9d0', // 11등
+        11: '#ffcaca'  // 12등
       };
       return colors[index] || '#gray';
+    },
+
+    getCurrentIndex(index) {
+      return (this.currentTrendingPage * 3) + index;
+    },
+
+    startTrendingSlideshow() {
+      this.trendingInterval = setInterval(() => {
+        if (this.currentTrendingPage + 1 < this.totalTrendingPages) {
+          this.currentTrendingPage++;
+        } else {
+          this.currentTrendingPage = 0;
+        }
+      }, 5000);
     },
 
     async fetchTotalUsers() {
@@ -557,11 +603,28 @@ export default {
         console.log('트렌딩 포스트 응답:', response.data); // 데이터 확인용
         if (response.data && response.data.result) {
           this.trendingPosts = response.data.result;
+          this.startTrendingSlideshow();
         }
       } catch (error) {
         console.error('트렌딩 게시글 로딩 실패:', error);
+        this.trendingPosts = [];
       }
     },
+
+    getCategoryName(categoryId) {
+      const categories = {
+        1: '자유게시판',
+        2: '정보게시판',
+        3: '알고리즘'
+      };
+      return categories[categoryId] || '전체게시판';
+    },
+  },
+
+  beforeUnmount() {
+    if (this.trendingInterval) {
+      clearInterval(this.trendingInterval);
+    }
   }
 }
 </script>
@@ -687,48 +750,95 @@ export default {
   margin: 2rem 0;
 }
 
+.trending-container {
+  position: relative;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
 .trending-card {
-  background-color: white;
-  border-radius: 8px;
-  transition: transform 0.2s ease;
-  cursor: pointer;
   height: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  border-radius: 8px;
 }
 
 .trending-card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.trending-header {
+  margin-bottom: 1rem;
+}
+
+.rank-category {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.category-label {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #f1f5f9;
 }
 
 .trending-rank {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 8px;
 }
 
 .trending-title {
   font-size: 1.1rem;
   font-weight: 500;
-  margin-bottom: 12px;
   color: #2c3e50;
+  margin-bottom: 1rem;
 }
 
 .trending-meta {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.author {
+.author-info {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.author-name {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.post-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: #64748b;
   font-size: 0.9rem;
 }
 
-.stats {
-  display: flex;
-  gap: 8px;
+.stat-item .v-icon {
+  font-size: 16px !important;
+  color: #64748b;
 }
 
 .post-card {
@@ -762,17 +872,6 @@ export default {
 
 .post-info {
   margin-left: 1rem;
-}
-
-.author-name {
-  display: block;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.post-time {
-  font-size: 0.8rem;
-  color: #666;
 }
 
 .post-title {
@@ -928,14 +1027,32 @@ export default {
 }
 
 .post-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
+  position: relative;
+  padding: 12px;
+  padding-bottom: 35px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border-bottom: 1px solid #f0f0f0;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-item:hover {
+  background-color: #f5f7fa;
+  transform: translateX(5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border-left: 2px solid #2563eb;
+  padding-left: 15px;
+  border-radius: 0 4px 4px 0;
 }
 
 .user-info {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 8px;
 }
 
@@ -946,33 +1063,48 @@ export default {
 }
 
 .author-name {
-  font-weight: 500;
   font-size: 0.9rem;
-  color: #333;
+  color: #1e293b;
 }
 
 .post-time {
-  color: #666;
-  font-size: 0.85rem;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
 .post-stats {
   display: flex;
   gap: 8px;
-  color: #666;
-  font-size: 0.85rem;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
   gap: 4px;
+  color: #64748b;
+  font-size: 0.85rem;
 }
 
 .post-title {
-  font-size: 0.95rem;
-  color: #333;
-  margin-left: 32px;  /* 프로필 이미지 크기 + 여백만큼 들여쓰기 */
+  margin-left: 0;
+  padding-left: 0;
+  position: absolute;
+  left: 12px;
+  top: 45px;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: #334155;
+  line-height: 1.2;
+  max-width: calc(100% - 24px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.post-item:hover .post-title {
+  color: #2563eb;
+  transform: translateX(3px);
 }
 
 .v-icon {
@@ -1020,5 +1152,9 @@ export default {
 .board-icon-wrapper:hover .board-icon {
   transform: scale(1.1);
   transition: transform 0.3s ease;
+}
+
+.board-section {
+  margin-bottom: 30px;
 }
 </style>
