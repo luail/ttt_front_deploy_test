@@ -5,20 +5,24 @@
       <v-container>
         <div class="hero-content">
           <div class="hero-text">
-            <h1>Tic Tak Tok</h1>
-            <p class="subtitle">HanHwa Beyond Camp</p>
+            <h1 class="logo text-center">
+              <span class="highlight">T</span><span class="small-text">ic</span>
+              <span class="highlight">T</span><span class="small-text">ak</span>
+              <span class="highlight">T</span><span class="small-text">ok</span>
+            </h1>
+            <p class="subtitle text-h6 mb-6">HanHwa Beyond Camp</p>
           </div>
           <div class="hero-stats">
             <div class="stat-item">
-              <div class="stat-number">{{ recentPosts.length }}+</div>
-              <div class="stat-label">오늘의 게시글</div>
+              <div class="stat-number">{{ totalPosts }}+</div>
+              <div class="stat-label">지금까지의 게시글</div>
             </div>
             <div class="stat-item">
-              <div class="stat-number">{{ topWriters.length }}+</div>
-              <div class="stat-label">활동 멤버</div>
+              <div class="stat-number">{{ totalUsers }}+</div>
+              <div class="stat-label">활동하는 멤버</div>
             </div>
             <div class="stat-item">
-              <div class="stat-number">{{ activeChats.length }}+</div>
+              <div class="stat-number">{{ totalRooms }}+</div>
               <div class="stat-label">실시간 채팅</div>
             </div>
           </div>
@@ -29,10 +33,31 @@
     <v-container class="main-content">
       <!-- 카테고리 네비게이션 -->
       <div class="category-section">
-        <div class="category-card" v-for="(category, index) in categories" :key="index" @click="goToCategory(category.categoryId)">
-          <v-icon size="32" :color="category.color">{{ category.icon }}</v-icon>
-          <h3>{{ category.name }}</h3>
-          <p>{{ category.description }}</p>
+        <!-- 전체게시판 -->
+        <div class="category-card cursor-pointer" @click="goToCategory(0)">
+          <div class="card-content">
+            <v-icon size="36" color="#6366f1">mdi-view-dashboard-outline</v-icon>
+            <h3>전체게시판</h3>
+            <p>모든 게시글 모음</p>
+          </div>
+        </div>
+
+        <!-- 프로젝트 -->
+        <div class="category-card cursor-pointer" @click="$router.push('/ttt/project/find')">
+          <div class="card-content">
+            <v-icon size="36" color="#22c55e">mdi-rocket-launch-outline</v-icon>
+            <h3>프로젝트</h3>
+            <p>프로젝트 찾기</p>
+          </div>
+        </div>
+
+        <!-- 라운지 -->
+        <div class="category-card cursor-pointer" @click="$router.push('/ttt/chat/list')">
+          <div class="card-content">
+            <v-icon size="36" color="#f59e0b">mdi-message-text-outline</v-icon>
+            <h3>라운지</h3>
+            <p>실시간 채팅</p>
+          </div>
         </div>
       </div>
 
@@ -89,7 +114,7 @@
           <!-- 트렌딩 섹션 -->
           <section class="trending-section mb-8">
             <div class="section-header">
-              <h2>🔥 트렌딩</h2>
+              <h2>🔥 일일 트렌딩</h2>
             </div>
             <v-row>
               <v-col v-for="(post, index) in popularPosts.slice(0, 3)" :key="post.postId" cols="12" md="4">
@@ -140,7 +165,7 @@
               <v-col cols="12" md="6">
                 <div class="board-header">
                   <div class="board-icon-wrapper">
-                    <v-icon class="board-icon">mdi-view-dashboard</v-icon>
+                    <v-icon class="board-icon">mdi-grid-large</v-icon>
                   </div>
                   <div class="board-info">
                     <h2 class="board-title cursor-pointer" @click="$router.push('/ttt/post/list/0')">
@@ -181,7 +206,7 @@
               <v-col cols="12" md="6">
                 <div class="board-header">
                   <div class="board-icon-wrapper free">
-                    <v-icon class="board-icon">mdi-forum</v-icon>
+                    <v-icon class="board-icon">mdi-forum-outline</v-icon>
                   </div>
                   <div class="board-info">
                     <h2 class="board-title cursor-pointer" @click="$router.push('/ttt/post/list/1')">
@@ -222,7 +247,7 @@
               <v-col cols="12" md="6">
                 <div class="board-header">
                   <div class="board-icon-wrapper info">
-                    <v-icon class="board-icon">mdi-information</v-icon>
+                    <v-icon class="board-icon">mdi-lightbulb-on-outline</v-icon>
                   </div>
                   <div class="board-info">
                     <h2 class="board-title cursor-pointer" @click="$router.push('/ttt/post/list/2')">
@@ -372,6 +397,9 @@ export default {
         }
       ],
       batchRanks: [], // 배치 랭킹 데이터
+      totalUsers: 0,  // 전체 사용자 수 추가
+      totalPosts: 0,  // 전체 게시글 수 추가
+      totalRooms: 0,  // 전체 채팅방 수 추가
     }
   },
 
@@ -383,7 +411,10 @@ export default {
       this.fetchAlgorithmPosts(),
       this.topRanker(),
       this.fetchBatchRanks(),
-      this.getChatRoom()
+      this.getChatRoom(),
+      this.fetchTotalUsers(),
+      this.fetchTotalPosts(),
+      this.fetchTotalRooms()  // 새로운 메소드 추가
     ]);
   },
 
@@ -490,6 +521,33 @@ export default {
         2: '#8b5cf6'   // 히어로 섹션의 끝 색상
       };
       return colors[index] || '#gray';
+    },
+
+    async fetchTotalUsers() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/total/user`);
+        this.totalUsers = response.data.result;
+      } catch (error) {
+        console.error('전체 사용자 수 로딩 실패:', error);
+      }
+    },
+
+    async fetchTotalPosts() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/total/count`);
+        this.totalPosts = response.data.result;
+      } catch (error) {
+        console.error('전체 게시글 수 로딩 실패:', error);
+      }
+    },
+
+    async fetchTotalRooms() {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/total/rooms`);
+        this.totalRooms = response.data.result;
+      } catch (error) {
+        console.error('전체 채팅방 수 로딩 실패:', error);
+      }
     }
   }
 }
@@ -498,6 +556,7 @@ export default {
 <style scoped>
 .home-container {
   background-color: #fafafa;
+  padding-bottom: 3rem;
 }
 
 .hero-section {
@@ -507,8 +566,12 @@ export default {
   text-align: center;
 }
 
+.hero-text {
+  margin-bottom: 1.5rem;
+}
+
 .hero-text h1 {
-  font-size: 3.5rem;
+  font-size: 8rem;
   font-weight: 700;
   margin-bottom: 1rem;
   background: linear-gradient(to right, #fff, #e0e0e0);
@@ -517,12 +580,13 @@ export default {
 }
 
 .subtitle {
-  font-size: 1.5rem;
+  font-size: 1.8rem !important;
   opacity: 0.9;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
 }
 
 .hero-stats {
+  margin-top: 1.5rem;
   display: flex;
   justify-content: center;
   gap: 4rem;
@@ -546,33 +610,52 @@ export default {
 
 .category-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, 280px);
+  gap: 2rem;
   margin-top: -3rem;
+  margin-bottom: 3rem;
+  justify-content: center;
 }
 
 .category-card {
   background: white;
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 1rem;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-content {
+  width: 100%;
+}
+
+.category-card .v-icon {
+  font-size: 36px !important;
+  height: 36px;
+  width: 36px;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.category-card h3 {
+  margin-bottom: 0.5rem;
 }
 
 .category-card:hover {
   transform: translateY(-5px);
 }
 
-.category-card h3 {
-  margin: 1rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+.category-card:hover .v-icon {
+  transform: scale(1.1);
 }
 
-.category-card p {
-  color: #666;
-  font-size: 0.9rem;
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .section-header {
@@ -627,14 +710,6 @@ export default {
 .stats {
   display: flex;
   align-items: center;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.cursor-pointer:hover {
-  opacity: 0.8;
 }
 
 .post-card {
@@ -772,13 +847,19 @@ export default {
 }
 
 .board-icon-wrapper {
-  width: 32px;
-  height: 32px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  transition: transform 0.3s ease;
+}
+
+.board-icon-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
 }
 
 .board-icon-wrapper.free {
@@ -794,8 +875,8 @@ export default {
 }
 
 .board-icon {
+  font-size: 24px !important;
   color: white !important;
-  font-size: 18px !important;
 }
 
 .board-info {
@@ -887,5 +968,39 @@ export default {
 .v-chip {
   height: 18px !important;
   font-size: 0.7rem !important;
+}
+
+.logo {
+  font-size: 8rem;
+  font-weight: bold;
+  color: #6200ea;
+  margin: 0;
+}
+
+.logo .highlight {
+  font-size: 8rem;
+  font-weight: bold;
+  color: white;
+}
+
+.logo .small-text {
+  font-size: 3.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: normal;
+}
+
+.category-card .v-icon {
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.category-card:hover .v-icon {
+  transform: scale(1.1);
+}
+
+/* 호버 효과 추가 */
+.board-icon-wrapper:hover .board-icon {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
 }
 </style>
