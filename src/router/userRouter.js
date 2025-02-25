@@ -6,6 +6,7 @@ import UserLogin from "@/views/UserLogin.vue";
 import UserMyInformation from "@/views/MyPage/UserMyInformation.vue";
 import MyPagePost from "@/views/MyPage/MyPagePost.vue";
 import MyPageLikes from "@/views/MyPage/MyPageLikes.vue";
+import OauthUserCreate from "@/views/OauthUserCreate.vue";
 
 export const userRouter= [
     {
@@ -47,5 +48,10 @@ export const userRouter= [
         path: '/oauth/kakao/redirect',
         name: 'KakaoRedirect',
         component: KakaoRedirect
+    },
+    {
+        path: '/oauth/user/create',
+        name: 'OauthUserCreate',
+        component: OauthUserCreate
     },
 ]
