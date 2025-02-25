@@ -2,7 +2,7 @@
   <v-container class="pa-6">
     <v-card class="pa-6 rounded-lg">
       <v-card-title class="text-h5 font-weight-bold mb-6">
-        새 프로젝트 생성
+        프로젝트 수정
       </v-card-title>
       
       <v-card-text>
@@ -57,40 +57,18 @@
           </div>
         </div>
 
-
-
         <v-card-text style="min-height: 500px">
-              <quill-editor
-                ref="quillEditor"
-                v-model="project.explanation"
-                :disabled="false"
-                :value="explanation"
-                :options="editorOptions"
-                @text-change="onEditorChange"
-                @ready="onEditorReady"
-                @drop="handleImageDrop"
-              />
-            </v-card-text>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <quill-editor
+            ref="quillEditor"
+            v-model="project.explanation"
+            :disabled="false"
+            :value="contents"
+            :options="editorOptions"
+            @text-change="onEditorChange"
+            @ready="onEditorReady"
+            @drop="handleImageDrop"
+          />
+        </v-card-text>
 
         <!-- 상세 정보 섹션 -->
         <div class="mb-6">
@@ -158,10 +136,10 @@
           color="primary"
           x-large
           min-width="150"
-          @click="saveProject"
+          @click="updateProject"
           elevation="2"
         >
-          프로젝트 생성
+          프로젝트 수정
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -173,92 +151,75 @@ import { reactive, ref, watch } from "vue";
 import axios from "axios";
 import router from "@/router";
 import { QuillEditor } from '@vueup/vue-quill';
-  import '@vueup/vue-quill/dist/vue-quill.snow.css';
-  // 최상단에 추가
-  import hljs from "highlight.js";
-  import "highlight.js/styles/tomorrow.css";
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import hljs from "highlight.js";
+import "highlight.js/styles/tomorrow.css";
 
 export default {
   components: {
-      QuillEditor,
-    },
+    QuillEditor,
+  },
   
   data() {
-    return{
-        editorOptions: {
-          placeholder: "리드미의 팀원,프로젝트 소개 및 개요 부분을 복사해주세요",
-          modules: {
-            toolbar: [
-              ['bold', 'italic', 'underline', 'strike'], // 텍스트 스타일
-              [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 리스트
-              [{ size: ["small", false, "large", "huge"] }],
-              [{color:[]},{background:[]}],
-              [{ 'align': [] }], // 정렬 옵션
-              ['clean'] // 포맷 초기화
-            ],
-            syntax:{
-              highlight : (text) => hljs.highlightAuto(text).value
-            },
+    return {
+      editorOptions: {
+        placeholder: "리드미의 팀원,프로젝트 소개 및 개요 부분을 복사해주세요",
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ size: ["small", false, "large", "huge"] }],
+            [{color:[]},{background:[]}],
+            [{ 'align': [] }],
+            ['clean']
+          ],
+          syntax:{
+            highlight : (text) => hljs.highlightAuto(text).value
           },
-          formats: [
+        },
+        formats: [
           'bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block',
           'header', 'list', 'bullet', 'script', 'indent', 'direction',
           'size', 'color', 'background', 'link', 'image', 'align', 'ordered', 'clean'
-      ]
-        },
-        content:"",
-        attachments:[],
+        ]
+      },
+      content:"",
+      attachments:[],
     }
-      },
+  },
 
-      computed:{
-      editor(){
-        return this.$refs.quillEditor.quill;
-      },
-      contentCode(){
-        return hljs.highlightAuto(this.content).value;
-      },
+  computed:{
+    editor(){
+      return this.$refs.quillEditor.quill;
     },
+    contentCode(){
+      return hljs.highlightAuto(this.content).value;
+    },
+  },
 
-    methods:{
-    //   onEditorReady(editor){
-    //     this.editorInstance = editor;
-    //     console.log("Quill Editor is ready!", this.editorInstance);
-    //   },
-    //  //에디터 변경시 content에 값 저장
-    //   onEditorChange(){
-    //     if(this.editorInstance){
-    //       this.project.explanation = this.editorInstance.root.innerHTML;
-    //     } else{
-    //       console.warn("Editor instance is not ready yet")
-    //     }
-    //   },
-  
-      async handleImageDrop(event) {
-        // 퀼에디터의 드롭 동작을 인식하기 위해 기본 드롭동작을 막음
-        event.preventDefault();
-        const file = event.dataTransfer.files[0];
-        if (!file) return;
-  
-        const formData = new FormData();
-        formData.append("attachments",file);
-  
-        try{
-         const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/post/drag-image`,formData,
-          {headers:{"Content-Type":"multipart/form-data"}}
+  methods:{
+    async handleImageDrop(event) {
+      event.preventDefault();
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("attachments", file);
+
+      try {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/post/drag-image`, formData,
+          {headers: {"Content-Type": "multipart/form-data"}}
         );
-          console.log(response);
-          const imageUrl = response.data.result;
-          const editor = this.$refs.quillEditor.getQuill();
-          const range = editor.getSelection();
-          editor.insertEmbed(range.index,"image",imageUrl);
-  
-        }catch(error){
-          console.log("드래그 이미지업로드 실패",error);
-        }
-      },
-      
+        const imageUrl = response.data.result;
+        const editor = this.$refs.quillEditor.getQuill();
+        const range = editor.getSelection();
+        editor.insertEmbed(range.index, "image", imageUrl);
+      } catch(error) {
+        console.log("드래그 이미지업로드 실패", error);
+      }
     },
+  },
+
   setup() {
     const project = reactive({
       batch: "",
@@ -267,33 +228,31 @@ export default {
       projectType: "",
       link: "",
       domain: "",
-      explanation: "",
+      contents: "",
       primaryFeatureList: []
     });
     const projectTypeOptions = ref([]);
     const featureInput = ref("");
-
     const editorInstance = ref(null);
 
-  const onEditorReady = (editor) => {
-    editorInstance.value = editor;
-    console.log("Quill Editor is ready!", editorInstance.value);
-  };
+    const onEditorReady = (editor) => {
+      editorInstance.value = editor;
+      console.log("Quill Editor is ready!", editorInstance.value);
+    };
 
-  const onEditorChange = () => {
-    if (editorInstance.value) {
-      project.explanation = editorInstance.value.root.innerHTML;
-    } else {
-      console.warn("Editor instance is not ready yet");
-    }
-  };
+    const onEditorChange = () => {
+      if (editorInstance.value) {
+        project.explanation = editorInstance.value.root.innerHTML;
+      } else {
+        console.warn("Editor instance is not ready yet");
+      }
+    };
 
     const addFeature = () => {
       if (featureInput.value.trim() === "") return;
       let features = featureInput.value.split(",").map(f => ({ utilityName: f.trim() }));
       project.primaryFeatureList.push(...features);
       featureInput.value = "";
-      console.log("✅ [addFeature] primaryFeatureList:", JSON.parse(JSON.stringify(project.primaryFeatureList)));
     };
 
     const removeFeature = (index) => {
@@ -303,24 +262,45 @@ export default {
     const fetchProjectTypes = async () => {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/types`);
-        // 응답이 CommonDto 형태면 response.data.result, 아니면 response.data 사용
         projectTypeOptions.value = response.data.result || response.data;
       } catch (error) {
         console.error("❌ 프로젝트 유형 불러오기 실패:", error);
       }
     };
 
-    const saveProject = async () => {
+    // 프로젝트 데이터 불러오기
+    const fetchProjectData = async () => {
+      try {
+        const projectId = router.currentRoute.value.params.id;
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/detailsee/${projectId}`);
+        const projectData = response.data.result;
+        console.log("아자아자")
+        console.log(projectData)
+        
+        // 데이터 매핑
+        project.batch = projectData.batch;
+        project.teamName = projectData.teamName;
+        project.serviceName = projectData.serviceName;
+        project.projectType = projectData.projectType;
+        project.link = projectData.link;
+        project.domain = projectData.domain;
+        project.contents = projectData.explanation;
+        project.primaryFeatureList = projectData.primaryFeatureList || [];
+      } catch (error) {
+        console.error("❌ 프로젝트 데이터 불러오기 실패:", error);
+      }
+    };
+
+    const updateProject = async () => {
       if (!project.projectType) {
         alert("프로젝트 유형을 선택해주세요");
         return;
       }
 
-      // featureInput에 값이 있다면, 저장 전에 primaryFeatureList에 추가
       if (featureInput.value.trim() !== "") {
         const features = featureInput.value.split(",").map(f => ({ utilityName: f.trim() }));
         project.primaryFeatureList.push(...features);
-        featureInput.value = ""; // 입력 필드 초기화
+        featureInput.value = "";
       }
 
       const projectData = {
@@ -328,24 +308,21 @@ export default {
         projectType: project.projectType,
         teamName: project.teamName,
         serviceName: project.serviceName,
-        contents : project.explanation,
+        contents: project.explanation,
         link: project.link,
         domain: project.domain,
         primaryFeatureSaveReqList: project.primaryFeatureList
       };
 
-      console.log("🚀 백엔드로 보낼 데이터:", projectData);
-
       try {
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/project/create`, projectData);
-        console.log("✅ 프로젝트 생성 성공:", response.data);
-        router.push({ path: "/ttt/project/find" }).then(() => {
-          window.location.reload();
-        });
+        const projectId = router.currentRoute.value.params.id;
+        const response = await axios.put(`${process.env.VUE_APP_API_BASE_URL}/project/update/${projectId}`, projectData);
+        console.log("✅ 프로젝트 수정 성공:", response.data);
+        router.push({ path: "/ttt/project/find" });
       } catch (error) {
-        console.error("❌ 프로젝트 생성 실패:", error);
-        if (error.response && error.response.data && error.response.data.message) {
-          console.log(error.response.data.message);
+        console.error("❌ 프로젝트 수정 실패:", error);
+        if (error.response?.data?.message) {
+          alert(error.response.data.message);
         }
       }
     };
@@ -360,34 +337,32 @@ export default {
       featureInput,
       addFeature,
       removeFeature,
-      saveProject,
+      updateProject,
       fetchProjectTypes,
+      fetchProjectData,
       editorInstance,
       onEditorReady,
       onEditorChange
     };
   },
+  
   async created() {
     await this.fetchProjectTypes();
+    await this.fetchProjectData();
   }
 };
 </script>
 
-<style scoped> 
-/* Quill Editor 스타일 외부 라이브러리이므로 스타일이 적용이안되 브이 딥명령어 이용*/
+<style scoped>
 ::v-deep .ql-editor {
-    min-height: 800px;
-    font-size: 25px;
-  
-  }
-  
-  ::v-deep .ql-editor img {
-    max-width: 100%;  /* 화면을 벗어나지 않도록 설정 */
-    height: auto;  /* 비율 유지하면서 자동 조정 */
-    display: block;  /* 블록 요소로 변경 (여백 조정) */
-    margin: 0 auto;  /* 중앙 정렬 */
-  }
+  min-height: 800px;
+  font-size: 25px;
+}
 
-
-</style> 
-
+::v-deep .ql-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+</style>

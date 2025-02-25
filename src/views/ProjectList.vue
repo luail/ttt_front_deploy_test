@@ -46,7 +46,11 @@
                 class="elevation-1 custom-table"
             >
               <template v-slot:item="{ item }">
-                <tr class="project-row">
+                <tr 
+                  class="project-row" 
+                  @click="goToProjectDetail(item.id)"
+                  style="cursor: pointer"
+                >
                   <td class="text-center">{{ item.batch }}</td>
                   <td>
                     <div class="font-weight-medium">{{ item.teamName }}</div>
@@ -63,7 +67,7 @@
                           v-for="(feature, index) in item.primaryFeatureList"
                           :key="index"
                           :class="{ 'selected-chip': feature.featureName === selectedFeature }"
-                          @click="toggleFeature(feature.featureName)"
+                          @click.stop="toggleFeature(feature.featureName)"
                           small
                           outlined
                       >
@@ -85,7 +89,7 @@
                       small
                       color="grey"
                       class="link-icon"
-                      @click="openLink(item.link)"
+                      @click.stop="openLink(item.link)"
                     >
                       mdi-link-variant
                     </v-icon>
@@ -112,7 +116,7 @@
         v-model="currentPage"
         :length="totalPages"
         :total-visible="7"
-        @click="handlePageChange"
+        @click="handlePageChange(currentPage)"
       ></v-pagination>
     </div>
   </v-container>
@@ -126,13 +130,13 @@ export default {
   components: { ProjectEditDialog },
   data() {
     return {
-      projectList: [],
+      projectList: [], //현재 페이지에 표시될 프로젝트 리스트
       selectedProjects: [],
       selectedFeature: null,
       sortDirection: "asc",
       page:1,
-      pageSize: 10,
-      currentPage: 1,
+      pageSize: 10, //한 페이지당 표시될 프로젝트 개수
+      currentPage: 1, //현재 보고 있는 페이지 번호
       isLoading: false,
       isLastPage: false,
       searchType: 'optional',
@@ -154,11 +158,13 @@ export default {
         { title: '댓글', key: 'commentCount', align: 'center', width: '100px' },
         { title: '링크', key: 'link', align: 'center', width: '80px' },
       ],
-      totalItems: 0,
-      totalPages: 0
+      totalItems: 0, //백엔드에서 가져온 전체 프로젝트 개수
+      totalPages: 0  //전체 페이지 개수
     };
   },
   async created() {
+    const savedPage = localStorage.getItem('currentPage');
+    this.currentPage = savedPage ? parseInt(savedPage) : 1;
     await this.fetchProjects();
   },
   computed: {
@@ -172,12 +178,23 @@ export default {
         : this.projectList; //?
     }
   },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+    if (!from.name) { // 새로고침일 경우 유지
+      return;
+    }
+
+    // 다른 화면에서 들어온 경우 1페이지로 초기화
+    localStorage.removeItem('currentPage');
+    vm.currentPage = 1;
+  });
+},
   methods: {
     async fetchProjects() {
       try {
         let params = {
           size: this.pageSize,
-          page: this.currentPage - 1,
+          page: this.currentPage - 1, //API는 0부처 시작하는 페이지 인덱스를 사용하니까
           ...this.getSearchParams()
         };
         const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/find`, { params });
@@ -234,7 +251,9 @@ export default {
         this.projectList.sort((a, b) => a.batch - b.batch);
       }
     },
-    handlePageChange() {
+    handlePageChange(page) {
+      this.currentPage = page;
+      localStorage.setItem('currentPage', this.currentPage);
       this.fetchProjects();
     },
     getSearchParams() {
@@ -256,6 +275,9 @@ export default {
       if (formattedUrl) {
         window.open(formattedUrl, '_blank');
       }
+    },
+    goToProjectDetail(projectId) {
+      this.$router.push(`/ttt/project/detail/${projectId}`);
     }
   }
 };
@@ -269,6 +291,7 @@ export default {
 
 .project-row {
   height: 60px;
+  transition: background-color 0.2s;
 }
 
 .project-row:hover {
