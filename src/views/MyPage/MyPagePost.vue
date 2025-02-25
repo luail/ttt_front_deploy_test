@@ -17,7 +17,7 @@
           <v-card-text v-if="postDetail.length">
             <v-row>
               <v-col v-for="myPost in postDetail" :key="myPost.postUserId" cols="12">
-                <v-card class="post-card" @click="goToDetailPost(myPost.postUserId)">
+                <v-card class="post-card" @click="goToDetailPost(myPost.postId)">
                   <v-card-text>
                     <!-- 게시글 정보 -->
                     <v-row no-gutters class="align-center">
