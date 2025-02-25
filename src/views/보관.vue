@@ -1,185 +1,234 @@
 <template>
-  <v-container fluid class="page-container">
-   <!-- 상단 배너 -->
-   <v-row justify="center">
-               <v-col cols="12">
-                  <div class="ad-banner">
-                    <img :src="require('@/assets/tttad.png')" alt="" class="banner-img">
-                  </div>
-               </v-col>
-          </v-row>
-
-    <v-row>
-      <!-- 사이드 메뉴 -->
-      <v-col cols="1">
-        <v-navigation-drawer permanent class="sidebar" width="180">
-          <v-list>
-            <v-list-item v-for="(c, index) in categoryList" :key="index" @click="selectedBoard(c.categoryId)" class="clickable-item">
-              <v-list-item-content>
-                <v-list-item-title class="font-weight-bold">{{ c.categoryName }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-navigation-drawer>
-      </v-col>
-
-      <!-- 게시물 수정 폼 -->
-      <v-col cols="10">
-        <v-card class="post-detail">
-          <v-card-title>
-            <v-container>
-              <!-- 카테고리 선택 드롭다운 -->
-              <v-select
-                v-model="selectedCategoryId"
-                :items="categoryList"
-                item-title="categoryName"
-                item-value="categoryId"
-                label="게시판을 선택하세요"
-              />
-
-              <!-- 제목 입력 칸 -->
-              <v-text-field v-model="title" label="제목을 입력하세요" outlined></v-text-field>
-            </v-container>
-          </v-card-title>
+  <v-container class="pa-6">
+    <v-card class="pa-6 rounded-lg">
+      <v-card-title class="text-h5 font-weight-bold mb-6">
+        새 프로젝트 생성
+      </v-card-title>
+      
+      <v-card-text>
+        <!-- 기본 정보 섹션 -->
+        <div class="mb-6">
+          <div class="text-subtitle-1 font-weight-medium mb-4">기본 정보</div>
           
-          <v-divider></v-divider>
-
-          <!-- 게시물 본문 입력칸 -->
-          <v-card-text class="post-content">
-            <v-textarea
-              v-model="contents"
-              label="내용을 입력하세요"
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">기수</div>
+            <v-text-field
+              v-model="project.batch"
+              type="number"
               outlined
-              rows="10"
-              auto-grow
-            ></v-textarea>
-          </v-card-text>
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
 
-          <!-- 이미지 업로드 -->
-          <v-card-text>
-            <v-file-input
-              label="이미지 업로드"
-              multiple
-              accept="image/**"
-              @change="fileUpload"
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">팀명</div>
+            <v-text-field
+              v-model="project.teamName"
               outlined
-            ></v-file-input>
-          </v-card-text>
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
 
-          <v-btn color="blue" class="secondary" @click="updatePost()">수정 완료</v-btn>
-        </v-card>
-      </v-col>
-    </v-row>
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">서비스명</div>
+            <v-text-field
+              v-model="project.serviceName"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">프로젝트 유형</div>
+            <v-select
+              v-model="project.projectType"
+              :items="projectTypeOptions"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-select>
+          </div>
+        </div>
+
+        <!-- 상세 정보 섹션 -->
+        <div class="mb-6">
+          <div class="text-subtitle-1 font-weight-medium mb-4">상세 정보</div>
+          
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">링크</div>
+            <v-text-field
+              v-model="project.link"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">프로젝트 주제</div>
+            <v-text-field
+              v-model="project.domain"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+        </div>
+
+        <!-- 주요 기능 섹션 -->
+        <div>
+          <div class="text-subtitle-1 font-weight-medium mb-4">주요 기능</div>
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">주요 기능 입력</div>
+            <v-text-field
+              v-model="featureInput"
+              hint="콤마(,)로 구분하여 여러 기능을 한 번에 입력할 수 있습니다"
+              persistent-hint
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <v-chip-group class="mt-3">
+            <v-chip
+              v-for="(feature, index) in project.primaryFeatureList"
+              :key="index"
+              closable
+              @click:close="removeFeature(index)"
+              color="primary"
+              text-color="white"
+              class="mr-2 mb-2"
+              small
+            >
+              {{ feature.utilityName }}
+            </v-chip>
+          </v-chip-group>
+        </div>
+      </v-card-text>
+
+      <v-card-actions class="pt-6">
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          x-large
+          min-width="150"
+          @click="saveProject"
+          elevation="2"
+        >
+          프로젝트 생성
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-container>
 </template>
 
 <script>
-import axios from 'axios';
+import { reactive, ref, watch } from "vue";
+import axios from "axios";
+import router from "@/router";
 
 export default {
-data() {
-  return {
-    categoryList: [],
-    postId: null,
-    selectedCategoryId: '',
-    title: '',
-    contents: '',
-    attachments: [],
-  };
-},
+  setup() {
+    const project = reactive({
+      batch: "",
+      teamName: "",
+      serviceName: "",
+      projectType: "",
+      link: "",
+      domain: "",
+      primaryFeatureList: []
+    });
+    const projectTypeOptions = ref([]);
+    const featureInput = ref("");
 
-async created() {
-  try {
-    // URL에서 postId 가져오기
-    this.postId = this.$route.params.id;
+    const addFeature = () => {
+      if (featureInput.value.trim() === "") return;
+      let features = featureInput.value.split(",").map(f => ({ utilityName: f.trim() }));
+      project.primaryFeatureList.push(...features);
+      featureInput.value = "";
+      console.log("✅ [addFeature] primaryFeatureList:", JSON.parse(JSON.stringify(project.primaryFeatureList)));
+    };
 
-    // 카테고리 리스트 불러오기
-    const categoryResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
-    this.categoryList = categoryResponse.data.result;
+    const removeFeature = (index) => {
+      project.primaryFeatureList.splice(index, 1);
+    };
 
-    // 기존 게시글 데이터 불러오기
-    const postResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/detail/${this.postId}`);
-    const postData = postResponse.data.result;
-    this.selectedCategoryId = postData.postCategoryId;
-    this.title = postData.title;
-    this.contents = postData.contents;
-    this.existingAttachments = postData.attachments || []; // 기존 첨부 파일
-  } catch (error) {
-    console.error("게시글 불러오기 실패:", error);
+    const fetchProjectTypes = async () => {
+      try {
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/types`);
+        // 응답이 CommonDto 형태면 response.data.result, 아니면 response.data 사용
+        projectTypeOptions.value = response.data.result || response.data;
+      } catch (error) {
+        console.error("❌ 프로젝트 유형 불러오기 실패:", error);
+      }
+    };
+
+    const saveProject = async () => {
+      if (!project.projectType) {
+        alert("프로젝트 유형을 선택해주세요");
+        return;
+      }
+
+      // featureInput에 값이 있다면, 저장 전에 primaryFeatureList에 추가
+      if (featureInput.value.trim() !== "") {
+        const features = featureInput.value.split(",").map(f => ({ utilityName: f.trim() }));
+        project.primaryFeatureList.push(...features);
+        featureInput.value = ""; // 입력 필드 초기화
+      }
+
+      const projectData = {
+        batch: project.batch,
+        projectType: project.projectType,
+        teamName: project.teamName,
+        serviceName: project.serviceName,
+        link: project.link,
+        domain: project.domain,
+        primaryFeatureSaveReqList: project.primaryFeatureList
+      };
+
+      console.log("🚀 백엔드로 보낼 데이터:", projectData);
+
+      try {
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/project/create`, projectData);
+        console.log("✅ 프로젝트 생성 성공:", response.data);
+        router.push({ path: "/ttt/project/find" }).then(() => {
+          window.location.reload();
+        });
+      } catch (error) {
+        console.error("❌ 프로젝트 생성 실패:", error);
+        if (error.response && error.response.data && error.response.data.message) {
+          console.log(error.response.data.message);
+        }
+      }
+    };
+
+    watch(() => project.primaryFeatureList, (newVal) => {
+      console.log("🔄 [watch] primaryFeatureList 변경됨:", JSON.parse(JSON.stringify(newVal)));
+    });
+
+    return {
+      project,
+      projectTypeOptions,
+      featureInput,
+      addFeature,
+      removeFeature,
+      saveProject,
+      fetchProjectTypes
+    };
+  },
+  async created() {
+    await this.fetchProjectTypes();
   }
-},
-
-methods: {
-  fileUpload(event) {
-    this.attachments = Array.from(event.target.files); // 파일 리스트를 배열로 변환
-  },
-
-  async updatePost() {
-   try{
-      let formData = new FormData();
-       formData.append("title",this.title);
-       formData.append("contents",this.contents);
-       
-       this.attachments.forEach(file => {
-          formData.append("attachments",file);
-       });
-
-       const response = await axios.patch(`${process.env.VUE_APP_API_BASE_URL}/post/update/${this.postId}`,formData,
-       {
-          headers:{
-              "Content-Type": "multipart/form-data"
-          }
-       }
-       )
-       console.log(response);
-       this.$router.push(`/ttt/post/${this.postId}`);
-
-
-   }catch(error){
-      console.log("수정실패",error)
-   }
-  },
-
-  async selectedBoard(boardId){
-          this.$router.push(`/ttt/post/list/${boardId}`);
-      },
-}
-}
+};
 </script>
-
-<style scoped>
-.page-container {
-margin: 0 30px;
-}
-
-.ad-banner {
-width: 100%;
-display: flex;
-justify-content: center;
-align-items: center;
-margin: 0 auto; /* 좌우 여백 자동 조정 */
-}
-
-.banner-img {
-width: 1500px; /* 전체 너비를 차지하도록 설정 */
-height: 350px; /* 원본 비율 유지 */
-display: block; /* 블록 요소로 설정하여 중앙 정렬 */
-border-radius: 40px;
-margin-top: 0px;
-margin-right: 100px;
-margin-left:100px;
-margin-bottom: 40px;
-}
-
-.sidebar {
-background-color: #f4f4f4;
-border-right: 1px solid #ccc;
-}
-
-.post-detail {
-margin: 20px 0;
-border: 1px solid #ccc;
-border-radius: 10px;
-padding: 20px;
-}
-</style>

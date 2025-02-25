@@ -1,3 +1,4 @@
+import DetailProject from "@/views/DetailProject.vue";
 import ProjectCreate from "@/views/ProjectCreate.vue";
 import ProjectList from "@/views/ProjectList.vue";
 import ProjectUpdate from "@/views/ProjectUpdate.vue";
@@ -18,5 +19,12 @@ export const ProjectRouter =[
         name:'ProjectUpdate',
         component:ProjectUpdate
     },
+    // ㅈㅇ
+    {
+        path:'/ttt/project/detail/:id',
+        name:'DetailProject',
+        component:DetailProject
+    },
+ 
 
 ]

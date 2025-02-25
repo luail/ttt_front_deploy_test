@@ -1,41 +1,169 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12">
-        <v-text-field v-model="project.batch" type="number" label="기수" outlined></v-text-field>
-        <v-text-field v-model="project.teamName" label="팀명" outlined></v-text-field>
-        <v-text-field v-model="project.serviceName" label="서비스명" outlined></v-text-field>
-        <v-select
-            v-model="project.projectType"
-            :items="projectTypeOptions"
-            label="프로젝트 유형 선택"
-            outlined
-            dense
-            required
-        ></v-select>
-        <v-text-field v-model="project.link" label="링크" outlined></v-text-field>
-        <v-text-field v-model="project.domain" label="프로젝트 주제" outlined></v-text-field>
-        <!-- 주요 기능 입력 -->
-        <v-text-field
-            v-model="featureInput"
-            label="주요 기능 (콤마로 구분 / 엔터로 입력)"
-            hint="예: 기능1, 기능2, 기능3"
-            persistent-hint
-            outlined
-        ></v-text-field>
-        <v-chip-group>
-          <v-chip
+  <v-container class="pa-6">
+    <v-card class="pa-6 rounded-lg">
+      <v-card-title class="text-h5 font-weight-bold mb-6">
+        새 프로젝트 생성
+      </v-card-title>
+      
+      <v-card-text>
+        <!-- 기본 정보 섹션 -->
+        <div class="mb-6">
+          <div class="text-subtitle-1 font-weight-medium mb-4">기본 정보</div>
+          
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">기수</div>
+            <v-text-field
+              v-model="project.batch"
+              type="number"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">팀명</div>
+            <v-text-field
+              v-model="project.teamName"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">서비스명</div>
+            <v-text-field
+              v-model="project.serviceName"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">프로젝트 유형</div>
+            <v-select
+              v-model="project.projectType"
+              :items="projectTypeOptions"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-select>
+          </div>
+        </div>
+
+
+
+        <v-card-text style="min-height: 500px">
+              <quill-editor
+                ref="quillEditor"
+                :disabled="false"
+                :value="explanation"
+                :options="editorOptions"
+                @text-change="onEditorChange"
+                @ready="onEditorReady"
+                @drop="handleImageDrop"
+              />
+            </v-card-text>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- 상세 정보 섹션 -->
+        <div class="mb-6">
+          <div class="text-subtitle-1 font-weight-medium mb-4">상세 정보</div>
+          
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">링크</div>
+            <v-text-field
+              v-model="project.link"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">프로젝트 주제</div>
+            <v-text-field
+              v-model="project.domain"
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+        </div>
+
+        <!-- 주요 기능 섹션 -->
+        <div>
+          <div class="text-subtitle-1 font-weight-medium mb-4">주요 기능</div>
+          <div class="mb-4">
+            <div class="text-body-2 font-weight-medium mb-2">주요 기능 입력</div>
+            <v-text-field
+              v-model="featureInput"
+              hint="콤마(,)로 구분하여 여러 기능을 한 번에 입력할 수 있습니다"
+              persistent-hint
+              outlined
+              dense
+              hide-details="auto"
+              background-color="white"
+            ></v-text-field>
+          </div>
+
+          <v-chip-group class="mt-3">
+            <v-chip
               v-for="(feature, index) in project.primaryFeatureList"
               :key="index"
               closable
               @click:close="removeFeature(index)"
-          >
-            {{ feature.utilityName }}
-          </v-chip>
-        </v-chip-group>
-        <v-btn color="primary" class="mt-3" @click="saveProject">저장</v-btn>
-      </v-col>
-    </v-row>
+              color="primary"
+              text-color="white"
+              class="mr-2 mb-2"
+              small
+            >
+              {{ feature.utilityName }}
+            </v-chip>
+          </v-chip-group>
+        </div>
+      </v-card-text>
+
+      <v-card-actions class="pt-6">
+        <v-spacer></v-spacer>
+        <v-btn
+          color="primary"
+          x-large
+          min-width="150"
+          @click="saveProject"
+          elevation="2"
+        >
+          프로젝트 생성
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-container>
 </template>
 
@@ -43,8 +171,94 @@
 import { reactive, ref, watch } from "vue";
 import axios from "axios";
 import router from "@/router";
+import { QuillEditor } from '@vueup/vue-quill';
+  import '@vueup/vue-quill/dist/vue-quill.snow.css';
+  // 최상단에 추가
+  import hljs from "highlight.js";
+  import "highlight.js/styles/tomorrow.css";
 
 export default {
+  components: {
+      QuillEditor,
+    },
+  
+  data() {
+    return{
+      editorInstance: null,
+        editorOptions: {
+          placeholder: "리드미의 팀원,프로젝트 소개 및 개요 부분을 복사해주세요",
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline', 'strike'], // 텍스트 스타일
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 리스트
+              [{ size: ["small", false, "large", "huge"] }],
+              [{color:[]},{background:[]}],
+              [{ 'align': [] }], // 정렬 옵션
+              ['clean'] // 포맷 초기화
+            ],
+            syntax:{
+              highlight : (text) => hljs.highlightAuto(text).value
+            },
+          },
+          formats: [
+          'bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block',
+          'header', 'list', 'bullet', 'script', 'indent', 'direction',
+          'size', 'color', 'background', 'link', 'image', 'align', 'ordered', 'clean'
+      ]
+        },
+        content:"",
+        attachments:[],
+    }
+      },
+
+      computed:{
+      editor(){
+        return this.$refs.quillEditor.quill;
+      },
+      contentCode(){
+        return hljs.highlightAuto(this.content).value;
+      },
+    },
+
+    methods:{
+      onEditorReady(editor){
+        this.editorInstance = editor;
+        console.log("Quill Editor is ready!", this.editorInstance);
+      },
+     //에디터 변경시 content에 값 저장
+      onEditorChange(){
+        if(this.editorInstance){
+          this.explanation = this.editorInstance.root.innerHTML;
+        } else{
+          console.warn("Editor instance is not ready yet")
+        }
+      },
+  
+      async handleImageDrop(event) {
+        // 퀼에디터의 드롭 동작을 인식하기 위해 기본 드롭동작을 막음
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
+  
+        const formData = new FormData();
+        formData.append("attachments",file);
+  
+        try{
+         const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/post/drag-image`,formData,
+          {headers:{"Content-Type":"multipart/form-data"}}
+        );
+          console.log(response);
+          const imageUrl = response.data.result;
+          const editor = this.$refs.quillEditor.getQuill();
+          const range = editor.getSelection();
+          editor.insertEmbed(range.index,"image",imageUrl);
+  
+        }catch(error){
+          console.log("드래그 이미지업로드 실패",error);
+        }
+      },
+      
+    },
   setup() {
     const project = reactive({
       batch: "",
@@ -53,6 +267,7 @@ export default {
       projectType: "",
       link: "",
       domain: "",
+      explanation: "",
       primaryFeatureList: []
     });
     const projectTypeOptions = ref([]);
@@ -138,3 +353,22 @@ export default {
   }
 };
 </script>
+
+<style scoped> 
+/* Quill Editor 스타일 외부 라이브러리이므로 스타일이 적용이안되 브이 딥명령어 이용*/
+::v-deep .ql-editor {
+    min-height: 800px;
+    font-size: 25px;
+  
+  }
+  
+  ::v-deep .ql-editor img {
+    max-width: 100%;  /* 화면을 벗어나지 않도록 설정 */
+    height: auto;  /* 비율 유지하면서 자동 조정 */
+    display: block;  /* 블록 요소로 변경 (여백 조정) */
+    margin: 0 auto;  /* 중앙 정렬 */
+  }
+
+
+</style> 
+
