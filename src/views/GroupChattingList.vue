@@ -5,12 +5,12 @@
             <v-col cols="8">
                 <!-- 채팅방 목록 헤더 -->
                 <div class="board-header">
-                    <h2 class="board-title">그룹 채팅방 목록</h2>
+                    <h2 class="board-title" style="margin-left: 20px;">Toks</h2>
                     
                     <div class="search-area">
                         <v-text-field
                             v-model="searchQuery"
-                            placeholder="채팅방 검색"
+                            placeholder="Search Toks"
                             variant="outlined"
                             density="compact"
                             hide-details
@@ -26,8 +26,9 @@
                         class="create-btn" 
                         @click="showCreateRoomModal = true"
                         prepend-icon="mdi-plus"
+                        style="margin-right: 20px;"
                     >
-                        채팅방 생성
+                        new Toks
                     </v-btn>
                 </div>
 

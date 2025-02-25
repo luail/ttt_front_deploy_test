@@ -32,7 +32,7 @@
           <!-- 게시글 헤더 -->
           <div class="post-header pa-6">
             <div class="d-flex">
-              <div class="category-tag">{{ thisPost.categoryName || 'Q&A' }}</div>
+              <div class="category-tag">{{ thisPost.categoryName || '' }}</div>
             </div>
             
             <div class="d-flex align-center mt-4">
