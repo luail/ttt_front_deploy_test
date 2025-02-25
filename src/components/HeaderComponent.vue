@@ -6,7 +6,11 @@
           <!-- 로고 -->
           <v-col cols="2">
             <router-link to="/ttt" class="text-decoration-none">
-              <h1 class="logo">TTT</h1>
+              <h1 class="logo">
+                <span class="highlight">T</span><span class="small-text">ik</span>
+                <span class="highlight">T</span><span class="small-text">ak</span>
+                <span class="highlight">T</span><span class="small-text">alk</span>
+              </h1>
             </router-link>
           </v-col>
 
@@ -20,7 +24,7 @@
                       :class="{ 'active-menu': hoveredMenu === 'community' }"
                       @mouseover="hoveredMenu = 'community'"
                       @mouseleave="hoveredMenu = null">
-                      커뮤니티
+                      <v-icon>mdi-text</v-icon>&nbsp;커뮤니티
                     </v-btn>
                   </template>
                   <v-card class="dropdown-menu" flat>
@@ -33,42 +37,26 @@
                   </v-card>
                 </v-menu>
               </v-col>
-
               <v-col cols="3">
-                <v-menu open-on-hover offset-y>
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
-                      :class="{ 'active-menu': hoveredMenu === 'chat' }"
-                      @mouseover="hoveredMenu = 'chat'"
-                      @mouseleave="hoveredMenu = null">
-                      오픈채팅
-                    </v-btn>
-                  </template>
-                  <v-card class="dropdown-menu" flat>
-                    <v-list>
-                      <v-list-item to="/ttt/chat/list">오픈채팅리스트</v-list-item>
-                    </v-list>
-                  </v-card>
-                </v-menu>
+                <v-btn class="menu-btn" variant="text" block flat :ripple="false"
+                  :class="{ 'active-menu': hoveredMenu === 'list' }"
+                  @mouseover="hoveredMenu = 'list'"
+                  @mouseleave="hoveredMenu = null"
+                  to="/ttt/project/find">
+                  프로젝트
+                </v-btn>
+              </v-col>
+              <v-col cols="3">
+                <v-btn class="menu-btn" variant="text" block flat :ripple="false"
+                  :class="{ 'active-menu': hoveredMenu === 'chat' }"
+                  @mouseover="hoveredMenu = 'chat'"
+                  @mouseleave="hoveredMenu = null"
+                  to="/ttt/chat/list">
+                  라운지
+                </v-btn>
               </v-col>
 
-              <v-col cols="3">
-                <v-menu open-on-hover offset-y>
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" class="menu-btn" variant="text" block flat :ripple="false"
-                      :class="{ 'active-menu': hoveredMenu === 'list' }"
-                      @mouseover="hoveredMenu = 'list'"
-                      @mouseleave="hoveredMenu = null">
-                      리스트
-                    </v-btn>
-                  </template>
-                  <v-card class="dropdown-menu" flat>
-                    <v-list>
-                      <v-list-item to="/ttt/project/find">프로젝트</v-list-item>
-                    </v-list>
-                  </v-card>
-                </v-menu>
-              </v-col>
+              
 
               <v-col cols="3" v-if="userRole === 'ADMIN'">
                 <v-menu open-on-hover offset-y>
@@ -77,7 +65,7 @@
                       :class="{ 'active-menu': hoveredMenu === 'admin' }"
                       @mouseover="hoveredMenu = 'admin'"
                       @mouseleave="hoveredMenu = null">
-                      관리자
+                      <v-icon>mdi-text</v-icon>&nbsp;관리자
                     </v-btn>
                   </template>
                   <v-card class="dropdown-menu" flat>
@@ -121,7 +109,7 @@
                       <template v-slot:prepend>
                         <v-icon>mdi-account-circle</v-icon>
                       </template>
-                      <v-list-item-title>마이페이지</v-list-item-title>
+                      <v-list-item-title>프로필</v-list-item-title>
                     </v-list-item>
                     <v-divider></v-divider>
                     <v-list-item @click="doLogout">
@@ -176,7 +164,7 @@ export default {
       const payload = jwtDecode(token);
       this.isLoggedIn = true;
       this.userRole = payload.role;
-      this.fetchProfileImage(payload.userId);
+      await this.fetchProfileImage(); // 🔹 프로필 이미지 불러오기
       
       // 채팅방 목록 초기화
       try {
@@ -221,11 +209,9 @@ export default {
       this.eventSource.onopen = () => {
         console.log('SSE 연결됨');
       };
-
       this.eventSource.addEventListener('connect', (e) => {
         console.log('SSE Connected:', e.data);
       });
-
       this.eventSource.addEventListener('chat-message', (e) => {
         const chatMessage = JSON.parse(e.data);
         
@@ -280,18 +266,15 @@ export default {
         localStorage.clear();
         window.location.href = '/';
     },
-    async fetchProfileImage(userId) {
+    async fetchProfileImage() {
       try {
-        const response = await fetch(`/api/users/${userId}/profile-image`);
-        const data = await response.json();
-        if (data.status === 200) {
-          this.profileImageUrl = data.data || require('@/assets/basicProfileImage.png');
-        } else {
-          this.profileImageUrl = require('@/assets/basicProfileImage.png');
-        }
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/myInformation`);
+        console.log("프로필 API 응답:", response.data); // 🔍 응답 데이터 확인
+        this.profileImageUrl = response.data.result.profileImage;
+        
       } catch (error) {
         console.error('프로필 이미지 로드 실패:', error);
-        this.profileImageUrl = require('@/assets/basicProfileImage.png');
+        this.profileImageUrl = require('@/assets/basicProfileImage.png'); // 기본 이미지 설정
       }
     },
     handleImageError() {
@@ -314,6 +297,18 @@ export default {
   font-weight: bold;
   color: #6200ea;
   margin: 0;
+}
+
+.logo .highlight {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #6200ea;
+}
+
+.logo .small-text {
+  font-size: 0.8rem;
+  color: #666666;
+  font-weight: normal;
 }
 
 .menu-btn {
