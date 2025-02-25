@@ -64,59 +64,58 @@
       <v-row>
         <!-- 좌측 사이드바 -->
         <v-col cols="12" lg="3">
-          <div class="sticky-container">
+          <div class="sticky-container pr-lg-4">
             <!-- Top Writers 카드 -->
-            <v-card flat class="mb-4">
+            <v-card flat class="mb-5 ranking-card">
               <div class="card-header pa-3">
                 <h3 class="text-subtitle-2 font-weight-medium">🏆 Top Writers</h3>
               </div>
               <v-divider></v-divider>
-              <v-list dense>
-                <v-list-item v-for="(writer, index) in topWriters" :key="index" class="py-1">
-                  <v-list-item-title class="text-caption">
-                    {{ writer.nickName }}
-                    <v-chip x-small :color="getRankColor(index)" dark class="ml-1" label>
-                      #{{ index + 1 }}
-                    </v-chip>
-                  </v-list-item-title>
-                  <v-list-item-subtitle class="text-caption">
-                    {{ writer.rankingPoint }}p
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
+              <div class="ranking-list pa-2">
+                <div v-for="(writer, index) in topWriters" :key="index" class="ranking-item">
+                  <div class="user-info">
+                    <div class="user-name">{{ writer.nickName }}</div>
+                    <div class="user-points">{{ writer.rankingPoint }}p</div>
+                  </div>
+                </div>
+              </div>
             </v-card>
 
             <!-- Top Batches 카드 -->
-            <v-card flat>
+            <v-card flat class="ranking-card">
               <div class="card-header pa-3">
                 <h3 class="text-subtitle-2 font-weight-medium">🎯 Top Batches</h3>
               </div>
               <v-divider></v-divider>
-              <v-list dense>
-                <v-list-item v-for="(batch, index) in batchRanks" :key="index" class="py-1">
-                  <v-list-item-title class="text-caption">
-                    {{ batch.batch }}기
-                    <v-chip x-small :color="getRankColor(index)" dark class="ml-1" label>
-                      #{{ index + 1 }}
-                    </v-chip>
-                  </v-list-item-title>
-                  <v-list-item-subtitle class="text-caption">
-                    {{ batch.averageRankingPoint }}p
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
+              <div class="ranking-list pa-2">
+                <div v-for="(batch, index) in batchRanks" :key="index" class="ranking-item">
+                  <div class="user-info">
+                    <div class="user-name">{{ batch.batch }}기</div>
+                    <div class="user-points">{{ batch.averageRankingPoint }}p</div>
+                  </div>
+                </div>
+              </div>
             </v-card>
           </div>
         </v-col>
 
         <!-- 메인 컨텐츠 영역 -->
-        <v-col cols="12" lg="9" class="pl-lg-6">
+        <v-col cols="12" lg="9" class="pl-lg-8">
           <!-- 일일 트렌딩 섹션 -->
-          <section class="trending-section mb-8">
+          <section class="trending-section mb-8" style="margin-top: -16px;">
             <div class="section-header">
               <h2>🔥 일일 트렌딩</h2>
             </div>
-            <div class="trending-container">
+            <div class="trending-container position-relative">
+              <!-- 좌우 화살표 버튼 - 평소에는 숨겨져 있음 -->
+              <div class="trending-nav-button trending-prev-button" @click.stop="prevTrendingPage">
+                <v-icon>mdi-chevron-left</v-icon>
+              </div>
+              
+              <div class="trending-nav-button trending-next-button" @click.stop="nextTrendingPage">
+                <v-icon>mdi-chevron-right</v-icon>
+              </div>
+              
               <v-row>
                 <v-col v-for="(post, index) in currentTrendingPosts" 
                        :key="getCurrentIndex(index)" 
@@ -135,7 +134,7 @@
                           <div class="trending-rank" :style="{ color: getTrendingColor(getCurrentIndex(index)) }">
                             #{{ getCurrentIndex(index) + 1 }}
                           </div>
-                          <span class="category-label">
+                          <span class="category-tag" :class="getCategoryClass(post.categoryId)">
                             {{ post.categoryName }}
                           </span>
                         </div>
@@ -145,7 +144,7 @@
                           <div class="author-info">
                             <v-avatar size="24">
                               <v-img 
-                                :src="post.authorImage"
+                                :src="post.authorImage || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
                                 @error="handleImageError"
                               ></v-img>
                             </v-avatar>
@@ -171,6 +170,17 @@
                   </transition>
                 </v-col>
               </v-row>
+              
+              <!-- 페이지 인디케이터 -->
+              <div class="trending-indicators mt-3 text-center">
+                <span 
+                  v-for="(_, i) in Math.ceil(trendingPosts.length / 3)" 
+                  :key="i"
+                  class="indicator-dot"
+                  :class="{ active: i === currentTrendingPage }"
+                  @click="setTrendingPage(i)"
+                ></span>
+              </div>
             </div>
           </section>
 
@@ -197,12 +207,15 @@
                       <div class="user-info-left">
                         <v-avatar size="24">
                           <v-img 
-                            :src="post.profileImageOfAuthor || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
+                            :src="post.authorImage || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
                             @error="handleImageError"
                           ></v-img>
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
+                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
+                          {{ getActualCategoryName(post) }}
+                        </span>
                       </div>
                       <div class="post-stats">
                         <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
@@ -237,12 +250,15 @@
                       <div class="user-info-left">
                         <v-avatar size="24">
                           <v-img 
-                            :src="post.profileImageOfAuthor || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
+                            :src="post.authorImage || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
                             @error="handleImageError"
                           ></v-img>
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
+                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
+                          {{ getActualCategoryName(post) }}
+                        </span>
                       </div>
                       <div class="post-stats">
                         <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
@@ -277,12 +293,15 @@
                       <div class="user-info-left">
                         <v-avatar size="24">
                           <v-img 
-                            :src="post.profileImageOfAuthor || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
+                            :src="post.authorImage || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
                             @error="handleImageError"
                           ></v-img>
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
+                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
+                          {{ getActualCategoryName(post) }}
+                        </span>
                       </div>
                       <div class="post-stats">
                         <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
@@ -317,12 +336,15 @@
                       <div class="user-info-left">
                         <v-avatar size="24">
                           <v-img 
-                            :src="post.profileImageOfAuthor || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
+                            :src="post.authorImage || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
                             @error="handleImageError"
                           ></v-img>
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
+                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
+                          {{ getActualCategoryName(post) }}
+                        </span>
                       </div>
                       <div class="post-stats">
                         <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
@@ -562,12 +584,15 @@ export default {
 
     startTrendingSlideshow() {
       this.trendingInterval = setInterval(() => {
-        if (this.currentTrendingPage + 1 < this.totalTrendingPages) {
-          this.currentTrendingPage++;
-        } else {
-          this.currentTrendingPage = 0;
-        }
-      }, 5000);
+        this.nextTrendingPage();
+      }, 10000);
+    },
+
+    resetTrendingInterval() {
+      if (this.trendingInterval) {
+        clearInterval(this.trendingInterval);
+        this.startTrendingSlideshow();
+      }
     },
 
     async fetchTotalUsers() {
@@ -619,13 +644,68 @@ export default {
       };
       return categories[categoryId] || '전체게시판';
     },
+
+    getRankGradient(index) {
+      const gradients = [
+        'linear-gradient(45deg, #FFD700, #FFC107)', // 1등 - 골드
+        'linear-gradient(45deg, #C0C0C0, #E0E0E0)', // 2등 - 실버
+        'linear-gradient(45deg, #CD7F32, #D2691E)', // 3등 - 브론즈
+        'linear-gradient(45deg, #9155FD, #7934F3)', // 4등 - 보라색
+        'linear-gradient(45deg, #2979FF, #1565C0)'  // 5등 - 파란색
+      ];
+      return gradients[index] || 'linear-gradient(45deg, #757575, #9E9E9E)';
+    },
+
+    prevTrendingPage() {
+      if (this.currentTrendingPage > 0) {
+        this.currentTrendingPage--;
+      } else {
+        this.currentTrendingPage = Math.ceil(this.trendingPosts.length / 3) - 1;
+      }
+      this.resetTrendingInterval();
+    },
+
+    nextTrendingPage() {
+      if (this.currentTrendingPage < Math.ceil(this.trendingPosts.length / 3) - 1) {
+        this.currentTrendingPage++;
+      } else {
+        this.currentTrendingPage = 0;
+      }
+      this.resetTrendingInterval();
+    },
+
+    setTrendingPage(page) {
+      this.currentTrendingPage = page;
+    },
+
+    getCategoryClass(categoryId) {
+      const classes = {
+        '1': 'free',   // 자유게시판
+        '2': 'info',   // 정보게시판
+        '3': 'algo',   // 알고리즘
+        '0': 'all'     // 전체게시판
+      };
+      return classes[categoryId] || 'all';
+    },
+
+    // 실제 카테고리 이름을 가져오는 함수
+    getActualCategoryName(post) {
+      // post 객체에 categoryName이 있으면 그것을 사용
+      if (post.categoryName) {
+        return post.categoryName;
+      }
+      
+      // categoryId로 판단
+      return this.getCategoryName(post.categoryId);
+    }
   },
 
-  beforeUnmount() {
+  mounted() {
+    this.startTrendingSlideshow();
     if (this.trendingInterval) {
       clearInterval(this.trendingInterval);
     }
-  }
+  },
 }
 </script>
 
@@ -735,19 +815,12 @@ export default {
 }
 
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.section-header h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  padding-top: 0;
+  margin-bottom: 1rem;
 }
 
 .trending-section {
-  margin: 2rem 0;
+  margin-top: 0;
 }
 
 .trending-container {
@@ -944,7 +1017,21 @@ export default {
 
 .sticky-container {
   position: sticky;
-  top: 64px;
+  top: 24px;
+  padding-right: 12px;
+}
+
+.main-content {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+/* 모바일에서는 사이드바와 콘텐츠 간격 조정 */
+@media (max-width: 960px) {
+  .sticky-container {
+    margin-bottom: 2rem;
+    padding-right: 0;
+  }
 }
 
 /* 호버 효과 추가 */
@@ -1156,5 +1243,186 @@ export default {
 
 .board-section {
   margin-bottom: 30px;
+}
+
+.ranking-card {
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+}
+
+.ranking-list {
+  padding: 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 0;
+  border-radius: 0;
+  background: white;
+  transition: all 0.2s ease;
+  position: relative;
+  border-left: 3px solid rgba(71, 85, 105, 0.6);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.ranking-item:last-child {
+  border-bottom: none;
+}
+
+.ranking-item:hover {
+  background: #f8fafc;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: #334155;
+}
+
+.user-points {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background: rgba(71, 85, 105, 0.06);
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* 카드 헤더 스타일 수정 */
+.card-header {
+  background: white;
+}
+
+@media (min-width: 1264px) {
+  /* 대형 화면에서만 적용되는 정렬 조정 */
+  .trending-section {
+    margin-top: -16px; /* 네거티브 마진으로 위로 당김 */
+  }
+}
+
+/* 트렌딩 컨트롤 버튼 스타일 */
+.trending-controls .v-btn {
+  background-color: rgba(145, 85, 253, 0.1);
+}
+
+.trending-controls .v-btn:hover {
+  background-color: rgba(145, 85, 253, 0.2);
+}
+
+.trending-controls .v-icon {
+  color: #9155FD;
+}
+
+/* 인디케이터 스타일 */
+.trending-indicators {
+  margin-top: 1rem;
+}
+
+.indicator-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  background-color: #9155FD;
+  transform: scale(1.2);
+}
+
+/* 트렌딩 네비게이션 버튼 스타일 */
+.trending-container {
+  position: relative;
+}
+
+.trending-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+.trending-prev-button {
+  left: -10px;
+}
+
+.trending-next-button {
+  right: -10px;
+}
+
+.trending-container:hover .trending-nav-button {
+  opacity: 0.7;
+}
+
+.trending-nav-button:hover {
+  opacity: 1 !important;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* 모바일에서는 항상 보이게 설정 (터치 인터페이스 고려) */
+@media (max-width: 960px) {
+  .trending-nav-button {
+    opacity: 0.7;
+  }
+}
+
+/* 카테고리 태그 스타일 */
+.category-tag {
+  font-size: 0.8rem;
+  padding: 1px 6px;
+  margin-left: 8px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* 카테고리별 스타일 */
+.category-tag.free {
+  background-color: rgba(240, 253, 244, 0.8);
+  color: rgba(34, 197, 94, 0.9);
+}
+
+.category-tag.info {
+  background-color: rgba(254, 252, 232, 0.8);
+  color: rgba(245, 158, 11, 0.9);
+}
+
+.category-tag.algo {
+  background-color: rgba(254, 242, 242, 0.8);
+  color: rgba(239, 68, 68, 0.9);
+}
+
+.category-tag.all {
+  background-color: rgba(241, 245, 249, 0.8);
+  color: rgba(99, 102, 241, 0.9);
 }
 </style>
