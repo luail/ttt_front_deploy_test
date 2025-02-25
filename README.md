@@ -35,16 +35,19 @@
 <figure>
   <table>
     <tr>
-      <td align="center"><img src="./assets/img/member1.png" width="180px"/></td>
+      <td align="center"><img src="" width="180px"/></td>
       <td align="center"><img src="./assets/img/member2.png" width="180px"/></td>
       <td align="center"><img src="./assets/img/member3.png" width="180px"/></td>
       <td align="center"><img src="./assets/img/member4.png" width="180px"/></td>
+      <td align="center"><img src="./assets/img/member4.png" width="180px"/></td>
+      <td align="center"><img src="./assets/img/member4.png" width="180px"/></td>
     </tr>
     <tr>
-      <td align="center">팀장: <a href="https://github.com/yourGithub1">이름1</a></td>
-      <td align="center">팀원: <a href="https://github.com/yourGithub2">이름2</a></td>
-      <td align="center">팀원: <a href="https://github.com/yourGithub3">이름3</a></td>
-      <td align="center">팀원: <a href="https://github.com/yourGithub4">이름4</a></td>
+      <td align="center">팀장: <a href="https://github.com/jykim1187">김진영</a></td>
+      <td align="center">팀원: <a href="https://github.com/issac-cosmos">경수혁</a></td>
+      <td align="center">팀원: <a href="https://github.com/luail">고준혁</a></td>
+      <td align="center">팀원: <a href="https://github.com/2ma1995">소병윤</a></td>
+      <td align="center">팀원: <a href="https://github.com/JungJunHwan">정준환</a></td>
     </tr>
   </table>
 </figure>
@@ -55,7 +58,7 @@
 > 사용자 친화적인 UI와 다양한 커뮤니케이션 기능을 제공하여, 학원 내 커뮤니티 문화를 혁신적으로 개선하는 것을 목표로 합니다.
 
 ## ⚙️ 화면 설계서
-[Figma 화면 설계서](https://www.figma.com/your-design-link)
+[Figma 화면 설계서](https://www.figma.com/design/m9uP1dZjImJFZG0l2wj4jU/%EC%A4%91%EA%B0%84-%ED%8C%80%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8?node-id=40-2&t=C53OKmtBDillncKR-1)
 <br>
 
 ## 📧 도메인 주소
