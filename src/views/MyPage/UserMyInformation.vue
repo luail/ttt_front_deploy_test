@@ -1,129 +1,173 @@
 <template>
-  <v-container class="fill-height">
-    <v-row class="justify-center align-stretch">
+  <v-container class="fill-height pa-4" fluid>
+    <v-row class="justify-center align-center">
       <!-- 왼쪽 프로필 카드 -->
-      <UserProfileCard
-          :avatar="userDetail.avatar"
-          :userName="userDetail.nickName"
-          :userBio="'짧은 소개글을 여기에 입력하세요.'"
-          selectedMenu="profile"
-          class="elevation-0"
-      />
+      <v-col cols="12" md="4" class="d-flex align-center justify-center mb-6 mb-md-0">
+        <UserProfileCard
+            :avatar="userDetail.avatar"
+            :userName="userDetail.nickName"
+            :userBio="'짧은 소개글을 여기에 입력하세요.'"
+            :selectedMenu="'profile'"
+            class="elevation-0"
+        />
+      </v-col>
 
-      <!-- 오른쪽 카드 -->
-      <v-col cols="8">
-        <v-card class="profile-card elevation-0" style="height: 100%">
-          <v-card-text v-if="Object.keys(userDetail).length">
-            <v-form ref="form">
-              <v-table class="custom-table">
-                <tbody>
-                <!-- 수정 가능한 필드 -->
-                <tr>
-                  <th>email</th>
-                  <td>
-                    <v-text-field
-                        v-model="editData.email"
-                        @input="checkChanges"
-                        dense
-                        outlined
-                        hide-details
-                        clearable
-                        class="neon-input"
-                        style="height: auto"
-                    ></v-text-field>
-                  </td>
-                </tr>
-                <tr>
-                  <th>nickName</th>
-                  <td>
-                    <v-text-field
-                        v-model="editData.nickName"
-                        @input="checkChanges"
-                        dense
-                        outlined
-                        hide-details
-                        clearable
-                        class="neon-input"
-                        style="height: auto"
-                    ></v-text-field>
-                  </td>
-                </tr>
-                <tr>
-                  <th>blogLink</th>
-                  <td>
-                    <v-text-field
-                        v-model="editData.blogLink"
-                        @input="checkChanges"
-                        dense
-                        outlined
-                        hide-details
-                        clearable
-                        class="neon-input"
-                        style="height: auto"
-                    ></v-text-field>
-                  </td>
-                </tr>
+      <!-- 오른쪽 카드 (세부 정보) -->
+      <v-col cols="12" md="8">
+        <v-card class="profile-info-card pa-4" outlined rounded="lg" height="100%">
+          <v-card-title class="text-h5 font-weight-bold grey--text text--darken-2 mb-4">
+            개인 정보
+          </v-card-title>
+          <v-card-subtitle class="grey--text mb-6">
+            연락 가능한 전화번호 및 이메일 주소를 포함한 개인 정보를 관리하세요.
+          </v-card-subtitle>
 
-                <!-- 읽기 전용 필드 -->
-                <tr>
-                  <th>phoneNumber</th>
-                  <td>
-                    <v-text-field
-                        v-model="userDetail.phoneNumber"
-                        disabled
-                        dense
-                        outlined
-                        hide-details
-                        class="readonly-input"
-                        style="height: auto"
-                    ></v-text-field>
-                  </td>
-                </tr>
-                <tr>
-                  <th>기수</th>
-                  <td>
-                    <v-text-field
-                        v-model="userDetail.batch"
-                        disabled
-                        dense
-                        outlined
-                        hide-details
-                        class="readonly-input"
-                        style="height: auto"
-                    ></v-text-field>
-                  </td>
-                </tr>
-                <tr>
-                  <th>rankingPoint</th>
-                  <td>
-                    <v-text-field
-                        v-model="userDetail.rankingPoint"
-                        disabled
-                        dense
-                        outlined
-                        hide-details
-                        class="readonly-input"
-                        style="height: auto"
-                    ></v-text-field>
-                  </td>
-                </tr>
-                </tbody>
-              </v-table>
-            </v-form>
-          </v-card-text>
+          <v-row no-gutters>
+            <!-- 왼쪽 열 -->
+            <v-col cols="12" md="6" class="pr-md-2">
+              <v-card
+                  class="info-card mb-4 elevation-2"
+                  outlined
+                  rounded="lg"
+                  v-if="Object.keys(userDetail).length"
+              >
+                <v-card-text class="pa-4">
+                  <v-text-field
+                      v-model="editData.email"
+                      label="Email"
+                      @input="checkChanges"
+                      dense
+                      outlined
+                      clearable
+                      prepend-inner-icon="mdi-email"
+                      class="neon-input"
+                      rounded
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+
+              <v-card
+                  class="info-card mb-4 elevation-2"
+                  outlined
+                  rounded="lg"
+                  v-if="Object.keys(userDetail).length"
+              >
+                <v-card-text class="pa-4">
+                  <v-text-field
+                      v-model="editData.nickName"
+                      label="닉네임"
+                      @input="checkChanges"
+                      dense
+                      outlined
+                      clearable
+                      prepend-inner-icon="mdi-account"
+                      class="neon-input"
+                      rounded
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+
+              <v-card
+                  class="info-card mb-4 elevation-2"
+                  outlined
+                  rounded="lg"
+                  v-if="Object.keys(userDetail).length"
+              >
+                <v-card-text class="pa-4">
+                  <v-text-field
+                      v-model="userDetail.phoneNumber"
+                      label="전화번호"
+                      disabled
+                      dense
+                      outlined
+                      prepend-inner-icon="mdi-phone"
+                      class="readonly-input"
+                      rounded
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+            </v-col>
+
+            <!-- 오른쪽 열 -->
+            <v-col cols="12" md="6" class="pl-md-2">
+              <v-card
+                  class="info-card mb-4 elevation-2"
+                  outlined
+                  rounded="lg"
+                  v-if="Object.keys(userDetail).length"
+              >
+                <v-card-text class="pa-4">
+                  <v-text-field
+                      v-model="editData.blogLink"
+                      label="블로그 링크"
+                      @input="checkChanges"
+                      dense
+                      outlined
+                      clearable
+                      prepend-inner-icon="mdi-link"
+                      class="neon-input"
+                      rounded
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+
+              <v-card
+                  class="info-card mb-4 elevation-2"
+                  outlined
+                  rounded="lg"
+                  v-if="Object.keys(userDetail).length"
+              >
+                <v-card-text class="pa-4">
+                  <v-text-field
+                      v-model="userDetail.batch"
+                      label="기수"
+                      disabled
+                      dense
+                      outlined
+                      prepend-inner-icon="mdi-flag"
+                      class="readonly-input"
+                      rounded
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+
+              <v-card
+                  class="info-card mb-4 elevation-2"
+                  outlined
+                  rounded="lg"
+                  v-if="Object.keys(userDetail).length"
+              >
+                <v-card-text class="pa-4">
+                  <v-text-field
+                      v-model="userDetail.rankingPoint"
+                      label="랭킹 포인트"
+                      disabled
+                      dense
+                      outlined
+                      prepend-inner-icon="mdi-star"
+                      class="readonly-input"
+                      rounded
+                  ></v-text-field>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
 
           <!-- 버튼 그룹 -->
-          <v-card-actions class="justify-space-between pa-4">
-            <v-btn color="grey" @click="userDelete" class="neon-btn1"
-            >회원탈퇴</v-btn
-            >
+          <v-card-actions class="justify-center pa-4">
+            <v-btn color="grey" @click="userDelete" class="neon-btn1 mr-4" rounded large>
+              회원탈퇴
+            </v-btn>
             <v-btn
                 color="purple"
                 :disabled="!isEdited"
                 @click="userUpdate"
                 class="neon-btn2"
-            >수정하기</v-btn
+                rounded
+                large
             >
+              수정하기
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
