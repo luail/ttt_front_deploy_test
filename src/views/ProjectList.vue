@@ -206,7 +206,8 @@ export default {
         { text: "선택", value: "optional" },
         { text: "기수", value: "batch" },
         { text: "프로젝트 유형", value: "projectType" },
-        { text: "서비스명", value: "serviceName" }
+        { text: "서비스명", value: "serviceName" },
+        { text: "기능명", value: "featureName" }
       ],
       searchKeyword: '',
       selectAll: false,
@@ -332,6 +333,12 @@ export default {
             return project.projectType.toLowerCase().includes(this.searchKeyword.toLowerCase());
           } else if (this.searchType === 'serviceName') {
             return project.serviceName.toLowerCase().includes(this.searchKeyword.toLowerCase());
+          } else if (this.searchType === 'featureName') {
+            // 기능명으로 검색
+            return project.primaryFeatureList && 
+                   project.primaryFeatureList.some(feature => 
+                     feature.featureName.toLowerCase().includes(this.searchKeyword.toLowerCase())
+                   );
           }
           return true;
         });
@@ -639,26 +646,27 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 8px 4px;
+  padding: 4px !important;
   width: 100%;
   min-height: 48px;
-  height: auto;
-  align-content: flex-start; /* 위에서부터 시작 */
+  align-content: flex-start;
 }
 
-/* 기능 키워드 칩 스타일 */
+/* 기능 키워드 칩 스타일 수정 */
 .feature-container .v-chip {
-  height: 24px !important;
+  height: 32px !important;  /* 28px에서 32px로 증가 */
   margin: 2px !important;
   font-size: 12px !important;
-  white-space: normal !important; /* 긴 텍스트 줄바꿈 허용 */
+  white-space: normal !important;
+  padding: 0 14px !important;  /* 12px에서 14px로 패딩 증가 */
 }
 
-/* 기능 키워드 셀 스타일 */
+/* 기능 키워드 셀 스타일 수정 */
 .cell[style*="width: 220px"] {
   height: auto !important;
-  align-items: flex-start; /* 내용을 위에서부터 시작 */
-  padding: 8px;
+  align-items: flex-start !important;
+  padding: 8px 8px !important;  /* 6px에서 8px로 패딩 증가 */
+  min-height: 48px !important;
 }
 
 /* 다른 셀들의 세로 정렬 수정 */
