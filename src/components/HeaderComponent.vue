@@ -70,7 +70,7 @@
                   </template>
                   <v-card class="dropdown-menu" flat>
                     <v-list>
-                      <v-list-item to="/ttt/blog/list">블로그</v-list-item>
+<!--                      <v-list-item to="/ttt/blog/list">블로그</v-list-item>-->
                       <v-list-item to="/ttt/user/list">회원목록조회</v-list-item>
                     </v-list>
                   </v-card>
