@@ -8,26 +8,33 @@
                     </v-card-title>
                     <v-divider></v-divider>
                     <v-card-text class="pa-6">
-                        <v-form @keydown.enter="create">
+                        <v-form @keydown.enter="create" class="d-flex flex-column align-center">
                             <v-text-field
                                 label="이름"
                                 v-model="name"
                                 prepend-icon="mdi-account"
+                                variant="outlined"
+                                hide-details
+                                class="mb-4"
+                                density="comfortable"
+                                bg-color="white"
+                                style="width: 300px;"
                                 required
-                                dense
-                                class="mb-2"
                             />
                             
                             <!-- 전화번호 입력 -->
-                            <v-row no-gutters class="mb-2">
+                            <v-row no-gutters class="mb-4" style="width: 300px;">
                                 <v-col cols="9">
                                     <v-text-field
                                         label="전화번호"
                                         v-model="phoneNumber"
                                         prepend-icon="mdi-phone"
                                         :disabled="isVerified"
+                                        variant="outlined"
+                                        hide-details
+                                        density="comfortable"
+                                        bg-color="white"
                                         required
-                                        dense
                                         :hint="showHint ? `- 빼고 입력해주세요.` : ''"
                                         persistent-hint
                                         @input="showHint = !phoneNumber"
@@ -37,9 +44,10 @@
                                     <v-btn 
                                         @click="sendAuthCode" 
                                         :disabled="authSent || isVerified" 
-                                        color="primary" 
+                                        color="#6200ea"
                                         block
                                         class="mt-1"
+                                        height="40"
                                     >
                                         인증요청
                                     </v-btn>
@@ -47,7 +55,7 @@
                             </v-row>
 
                             <!-- 인증번호 입력 -->
-                            <div v-if="authSent" class="mb-4">
+                            <div v-if="authSent" class="mb-4" style="width: 300px;">
                                 <v-row no-gutters>
                                     <v-col cols="9">
                                         <v-text-field
@@ -55,8 +63,11 @@
                                             v-model="authCode"
                                             prepend-icon="mdi-key"
                                             :disabled="isVerified"
+                                            variant="outlined"
+                                            hide-details
+                                            density="comfortable"
+                                            bg-color="white"
                                             required
-                                            dense
                                         />
                                     </v-col>
                                     <v-col cols="3" class="pl-2">
@@ -66,6 +77,7 @@
                                             color="success" 
                                             block
                                             class="mt-1"
+                                            height="40"
                                         >
                                             인증확인
                                         </v-btn>
@@ -74,56 +86,60 @@
                             </div>
 
                             <!-- 인증 결과 표시 -->
-                            <v-alert
-                                v-if="isVerified"
-                                type="success"
-                                dense
-                                text
-                                class="mb-4"
-                            >
-                                인증이 완료되었습니다.
-                            </v-alert>
-                            <v-alert
-                                v-if="verifyError"
-                                type="error"
-                                dense
-                                text
-                                class="mb-4"
-                            >
-                                인증에 실패했습니다. 다시 시도해주세요.
-                            </v-alert>
+                            <div style="width: 300px;">
+                                <v-alert
+                                    v-if="isVerified"
+                                    type="success"
+                                    dense
+                                    text
+                                    class="mb-4"
+                                >
+                                    인증이 완료되었습니다.
+                                </v-alert>
+                                <v-alert
+                                    v-if="verifyError"
+                                    type="error"
+                                    dense
+                                    text
+                                    class="mb-4"
+                                >
+                                    인증에 실패했습니다. 다시 시도해주세요.
+                                </v-alert>
+                            </div>
 
                             <v-text-field
-                                label="닉네임"
-                                v-model="nickName"
-                                prepend-icon="mdi-rename"
+                                v-for="(field, index) in [{
+                                    label: '닉네임',
+                                    model: 'nickName',
+                                    icon: 'mdi-rename'
+                                }, {
+                                    label: '블로그 링크',
+                                    model: 'blogLink',
+                                    icon: 'mdi-link-box-variant'
+                                }, {
+                                    label: '기수',
+                                    model: 'batch',
+                                    icon: 'mdi-flag'
+                                }]"
+                                :key="index"
+                                :label="field.label"
+                                v-model="$data[field.model]"
+                                :prepend-icon="field.icon"
+                                variant="outlined"
+                                hide-details
+                                class="mb-4"
+                                density="comfortable"
+                                bg-color="white"
+                                style="width: 300px;"
                                 required
-                                dense
-                                class="mb-2"
-                            />
-                            <v-text-field
-                                label="블로그 링크"
-                                v-model="blogLink"
-                                prepend-icon="mdi-link-box-variant"
-                                required
-                                dense
-                                class="mb-2"
-                            />
-                            <v-text-field
-                                label="기수"
-                                v-model="batch"
-                                prepend-icon="mdi-flag"
-                                required
-                                dense
-                                class="mb-6"
                             />
                             
                             <v-btn 
-                                color="primary" 
-                                block 
-                                large 
+                                color="#c0c1ff"
+                                style="width: 300px;"
+                                class="mt-6"
                                 @click="create()"
-                                :elevation="2"
+                                height="48"
                             >
                                 가입하기
                             </v-btn>
@@ -265,5 +281,19 @@ export default {
     word-wrap: break-word;
     overflow-wrap: break-word;
     text-align: center;
+}
+
+.v-btn {
+    text-transform: none !important;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.v-text-field ::v-deep .v-input__slot {
+    min-height: 40px !important;
+}
+
+.v-btn:not(:disabled):hover {
+    opacity: 0.9;
 }
 </style>

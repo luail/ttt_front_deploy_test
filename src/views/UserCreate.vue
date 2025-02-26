@@ -41,18 +41,29 @@
                             </v-carousel-item>
                             <!-- step 2 --> 
                             <v-carousel-item>
+                                <div class="email-container">
+                                    <div class="email-fields">
+                                        <v-text-field
+                                            label="email"
+                                            v-model="email"
+                                            prepend-icon="mdi-email"
+                                            required
+                                            class="email-input"
+                                            @input="validateEmail"
+                                        />
+                                        <div class="email-requirements">
+                                            <div :class="['requirement', { 'requirement-met': isEmailValid }]">
+                                                <v-icon x-small>{{ isEmailValid ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                                <span>이메일 형식</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <v-text-field
-                                label="email"
-                                v-model="email"
-                                type="email"
-                                prepend-icon="mdi-email"
-                                required
-                                />
-                                <v-text-field
-                                label="blogLink"
-                                v-model="blogLink"
-                                prepend-icon="mdi-link-box-variant"
-                                required
+                                    label="blogLink"
+                                    v-model="blogLink"
+                                    prepend-icon="mdi-link"
+                                    required
                                 />
                                 <div class="btn-group">
                                     <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
@@ -67,12 +78,36 @@
                             </v-carousel-item>
                             <!-- step 3 --> 
                             <v-carousel-item>
-                                <v-text-field
-                                label="loginId"
-                                v-model="loginId"
-                                prepend-icon="mdi-login"
-                                required
-                                />
+                                <div class="id-container">
+                                    <div class="id-fields">
+                                        <v-text-field
+                                            label="loginId"
+                                            v-model="loginId"
+                                            prepend-icon="mdi-account"
+                                            required
+                                            class="id-input"
+                                            @input="resetIdCheck"
+                                        />
+                                        <v-btn
+                                            small
+                                            :loading="isCheckingId"
+                                            :disabled="!loginId || isCheckingId"
+                                            @click="checkLoginId"
+                                            class="check-btn"
+                                            :color="isIdAvailable ? 'success' : 'primary'"
+                                        >
+                                            중복확인
+                                        </v-btn>
+                                    </div>
+                                    <div class="id-status" v-if="idCheckMessage">
+                                        <v-icon small :color="isIdAvailable ? 'success' : 'error'">
+                                            {{ isIdAvailable ? 'mdi-check' : 'mdi-close' }}
+                                        </v-icon>
+                                        <span :class="{ 'success--text': isIdAvailable, 'error--text': !isIdAvailable }">
+                                            {{ idCheckMessage }}
+                                        </span>
+                                    </div>
+                                </div>
                                 <div class="btn-group">
                                     <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
                                         다음
@@ -86,20 +121,61 @@
                             </v-carousel-item>
                             <!-- step 4 -->
                             <v-carousel-item>
-                                <v-text-field
-                                label="password"
-                                v-model="password"
-                                type="password"
-                                prepend-icon="mdi-lock"
-                                required
-                                />
-                                <v-text-field
-                                label="passwordCheck"
-                                v-model="passwordCheck"
-                                type="password"
-                                prepend-icon="mdi-lock"
-                                required
-                                />
+                                <div class="password-container">
+                                    <div class="password-fields">
+                                        <v-text-field
+                                            label="password"
+                                            v-model="password"
+                                            type="password"
+                                            prepend-icon="mdi-lock"
+                                            required
+                                            :rules="passwordRules"
+                                            class="password-input"
+                                        />
+                                        <div class="password-requirements">
+                                            <div :class="['requirement', { 'requirement-met': hasLetter }]">
+                                                <v-icon x-small>{{ hasLetter ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                                <span>문자 포함</span>
+                                            </div>
+                                            <div :class="['requirement', { 'requirement-met': hasNumber }]">
+                                                <v-icon x-small>{{ hasNumber ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                                <span>숫자 포함</span>
+                                            </div>
+                                            <div :class="['requirement', { 'requirement-met': hasSpecial }]">
+                                                <v-icon x-small>{{ hasSpecial ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                                <span>특수문자 포함</span>
+                                            </div>
+                                            <div :class="['requirement', { 'requirement-met': lengthValid }]">
+                                                <v-icon x-small>{{ lengthValid ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                                <span>8-20자 이내</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="password-container">
+                                    <div class="password-fields">
+                                        <v-text-field
+                                            label="passwordCheck"
+                                            v-model="passwordCheck"
+                                            type="password"
+                                            prepend-icon="mdi-lock"
+                                            required
+                                            class="password-input"
+                                        />
+                                        <div class="password-requirements">
+                                            <div class="requirement-placeholder" v-if="!passwordCheck">
+                                                <div class="requirement">
+                                                    <v-icon x-small>mdi-close</v-icon>
+                                                    <span>비밀번호 확인 필요</span>
+                                                </div>
+                                            </div>
+                                            <div :class="['requirement', { 'requirement-met': passwordsMatch }]" v-else>
+                                                <v-icon x-small>{{ passwordsMatch ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                                <span>비밀번호 일치</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="btn-group">
                                     <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
                                         다음
@@ -163,17 +239,44 @@
                             </v-carousel-item>
                             <!-- step 6 -->
                             <v-carousel-item>
-                                <v-text-field
-                                label="nickName"
-                                v-model="nickName"
-                                prepend-icon="mdi-rename"
-                                required
-                                :rules="nicknameRules"
-                                @input="validateNickname"
-                                @keydown.enter.prevent
-                                />
+                                <div class="nickname-container">
+                                    <div class="nickname-fields">
+                                        <v-text-field
+                                            label="nickname"
+                                            v-model="nickname"
+                                            prepend-icon="mdi-account"
+                                            required
+                                            class="nickname-input"
+                                            @input="resetNicknameCheck"
+                                        />
+                                        <v-btn
+                                            small
+                                            :loading="isCheckingNickname"
+                                            :disabled="!isNicknameLengthValid || isCheckingNickname"
+                                            @click="checkNickname"
+                                            class="check-btn"
+                                            :color="isNicknameAvailable ? 'success' : 'primary'"
+                                        >
+                                            중복확인
+                                        </v-btn>
+                                    </div>
+                                    <div class="nickname-requirements">
+                                        <div :class="['requirement', { 'requirement-met': isNicknameLengthValid }]">
+                                            <v-icon x-small>{{ isNicknameLengthValid ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                            <span>2-8자 이내</span>
+                                        </div>
+                                        <div class="requirement" v-if="nicknameCheckMessage">
+                                            <v-icon x-small :color="isNicknameAvailable ? 'success' : 'error'">
+                                                {{ isNicknameAvailable ? 'mdi-check' : 'mdi-close' }}
+                                            </v-icon>
+                                            <span :class="{ 'success--text': isNicknameAvailable, 'error--text': !isNicknameAvailable }">
+                                                {{ nicknameCheckMessage }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="btn-group">
-                                    <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isNicknameValid">
+                                    <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
                                         다음
                                     </v-btn>
                                 </div>
@@ -218,7 +321,7 @@ export default {
             isVerified: false,  // 인증 성공 여부
             verifyError: false,  // 인증 실패 여부
             showHint: true, // 힌트 표시 여부
-            nickName:"",
+            nickname:"",
             blogLink:"",
             batch:"",
             trueOrFalse:false,
@@ -229,22 +332,73 @@ export default {
                 v => (v && v.length >= 2) || '닉네임은 2자 이상이어야 합니다',
                 // 필요한 다른 규칙들 추가
             ],
-            isNicknameValid: false,
+            passwordRules: [
+                v => !!v || '비밀번호를 입력해주세요',
+                v => (v && v.length >= 8) || '비밀번호는 최소 8자 이상이어야 합니다',
+                v => (v && v.length <= 20) || '비밀번호는 최대 20자까지 가능합니다',
+                v => /[a-zA-Z]/.test(v) || '최소 하나의 문자를 포함해야 합니다',
+                v => /[0-9]/.test(v) || '최소 하나의 숫자를 포함해야 합니다',
+                v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || '최소 하나의 특수문자를 포함해야 합니다'
+            ],
+            isCheckingId: false,
+            isIdAvailable: false,
+            idCheckMessage: '',
+            isEmailValid: false,
+            isCheckingNickname: false,
+            isNicknameAvailable: false,
+            nicknameCheckMessage: '',
         }
     },
     computed: {
         isStepValid() {
             switch (this.step) {
                 case 1: return this.name.trim() !== ""; 
-                case 3: return this.email.trim() !== "" && this.blogLink.trim() !== "";
-                case 5: return this.loginId.trim() !== "";
-                case 7: return this.password.trim() !== "" && this.password === this.passwordCheck.trim();
+                case 3: return this.isEmailValid && this.email.trim() !== "" && this.blogLink.trim() !== "";
+                case 5: return this.loginId.trim() !== "" && this.isIdAvailable;
+                case 7: return this.isPasswordValid && this.password === this.passwordCheck.trim();
                 case 9: return this.isVerified;
-                case 11: return this.isNicknameValid;  // batch 검증 제거, 닉네임만 검증
-                case 13: return this.batch.trim() !== "";  // batch는 마지막 단계에서 검증
+                case 11: return this.isNicknameLengthValid && this.isNicknameAvailable;
+                case 13: return this.batch.trim() !== "";
                 default: return true;
             }
-        }
+        },
+        isPasswordValid() {
+            const password = this.password;
+            
+            // 길이 검사 (8-20자)
+            const lengthValid = password.length >= 8 && password.length <= 20;
+            
+            // 문자 포함 검사
+            const hasLetter = /[a-zA-Z]/.test(password);
+            
+            // 숫자 포함 검사
+            const hasNumber = /[0-9]/.test(password);
+            
+            // 특수문자 포함 검사
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+            // 모든 조건을 만족하는지 확인
+            return lengthValid && hasLetter && hasNumber && hasSpecial;
+        },
+        hasLetter() {
+            return /[a-zA-Z]/.test(this.password);
+        },
+        hasNumber() {
+            return /[0-9]/.test(this.password);
+        },
+        hasSpecial() {
+            return /[!@#$%^&*(),.?":{}|<>]/.test(this.password);
+        },
+        lengthValid() {
+            return this.password.length >= 8 && this.password.length <= 20;
+        },
+        passwordsMatch() {
+            return this.password === this.passwordCheck && this.password !== '';
+        },
+        isNicknameLengthValid() {
+            const length = this.nickname?.trim().length || 0;
+            return length >= 2 && length <= 8;
+        },
     },
     methods: {
         nextStep() {
@@ -266,7 +420,7 @@ export default {
                     loginId:this.loginId, 
                     password:this.password,
                     phoneNumber:this.phoneNumber, 
-                    nickName:this.nickName, 
+                    nickName:this.nickname, 
                     blogLink:this.blogLink, 
                     batch:this.batch,
                     authCode:this.authCode
@@ -338,9 +492,76 @@ export default {
         resetModal() {
             this.trueOrFalse=false
         },
-        validateNickname() {
-            this.isNicknameValid = this.nickName.length >= 2;
-        }
+        resetNicknameCheck() {
+            this.isNicknameAvailable = false;
+            this.nicknameCheckMessage = '';
+        },
+        async checkNickname() {
+            if (!this.isNicknameLengthValid) {
+                this.nicknameCheckMessage = '닉네임은 2-8자 이내여야 합니다.';
+                return;
+            }
+
+            this.isCheckingNickname = true;
+            try {
+                const response = await axios.get(
+                    `${process.env.VUE_APP_API_BASE_URL}/user/checkNickName`,
+                    { params: { nickName: this.nickname } }
+                );
+
+                if (response.data.result) {
+                    this.isNicknameAvailable = true;
+                    this.nicknameCheckMessage = '사용 가능한 닉네임입니다.';
+                } else {
+                    this.isNicknameAvailable = false;
+                    this.nicknameCheckMessage = '이미 사용 중인 닉네임입니다.';
+                }
+            } catch (error) {
+                console.error('닉네임 중복 확인 실패:', error);
+                this.isNicknameAvailable = false;
+                this.nicknameCheckMessage = '중복 확인 중 오류가 발생했습니다.';
+            } finally {
+                this.isCheckingNickname = false;
+            }
+        },
+        validateEmail() {
+            // 이메일 정규식 패턴
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            this.isEmailValid = emailPattern.test(this.email);
+        },
+        // ID 중복 확인 리셋
+        resetIdCheck() {
+            this.isIdAvailable = false;
+            this.idCheckMessage = '';
+        },
+
+        // ID 중복 확인
+        async checkLoginId() {
+            if (!this.loginId) return;
+            
+            this.isCheckingId = true;
+            try {
+                const response = await axios.get(
+                    `${process.env.VUE_APP_API_BASE_URL}/user/checkLoginId`,
+            { params: { loginId: this.loginId } });
+
+            console.log("Server response:", response); // 🛠 서버 응답 확인
+
+                if (response.data.result) {
+                    this.isIdAvailable = true;
+                    this.idCheckMessage = '사용 가능한 아이디입니다.';
+                } else {
+                    this.isIdAvailable = false;
+                    this.idCheckMessage = '이미 사용 중인 아이디입니다.';
+                }
+            } catch (error) {
+                console.error('ID 중복 확인 실패:', error);
+                this.isIdAvailable = false;
+                this.idCheckMessage = '중복 확인 중 오류가 발생했습니다.';
+            } finally {
+                this.isCheckingId = false;
+            }
+        },
     },
     watch: {
         step(newStep, oldStep) {
@@ -696,5 +917,178 @@ export default {
 
 .v-btn {
     margin-top: -8px !important;  /* 버튼 위치 위로 당기기 */
+}
+
+/* 기존 스타일 유지 */
+.password-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.password-fields {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.password-input {
+    flex: 1;
+    min-width: 0; /* 텍스트 필드 크기 안정화 */
+}
+
+.password-requirements {
+    min-width: 120px;
+    width: 120px; /* 고정 너비 설정 */
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    margin-top: 8px;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 4px 0;
+    color: #ff5252;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.requirement-met {
+    color: #4caf50;
+}
+
+.requirement .v-icon {
+    font-size: 12px !important;
+}
+
+.requirement-placeholder {
+    min-height: 24px; /* 최소 높이 설정 */
+    display: flex;
+    align-items: center;
+}
+
+.password-match {
+    margin: 8px 0;
+    font-size: 0.8rem;
+    color: #666;
+    padding-left: 40px;
+}
+
+.id-container {
+    margin-bottom: 16px;
+}
+
+.id-fields {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.id-input {
+    flex: 1;
+}
+
+.check-btn {
+    margin-top: 8px;
+    height: 36px;
+    white-space: nowrap;
+}
+
+.id-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding-left: 40px;
+    font-size: 0.8rem;
+}
+
+.email-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.email-fields {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.email-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.email-requirements {
+    min-width: 120px;
+    width: 120px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    margin-top: 8px;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 4px 0;
+    color: #ff5252;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.requirement-met {
+    color: #4caf50;
+}
+
+.requirement .v-icon {
+    font-size: 12px !important;
+}
+
+.nickname-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.nickname-fields {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.nickname-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.nickname-requirements {
+    margin-top: 8px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.75rem;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 4px 0;
+    color: #ff5252;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.requirement-met {
+    color: #4caf50;
+}
+
+.requirement .v-icon {
+    font-size: 12px !important;
 }
 </style>
