@@ -148,20 +148,17 @@
                                 @error="handleImageError"
                               ></v-img>
                             </v-avatar>
-                            <span class="author-name">{{ post.authorNickName }}</span>
+                            <span class="author-name">{{ truncateNickname(post.authorNickName) }}</span>
                           </div>
                           <div class="post-stats">
                             <span class="stat-item">
-                              <v-icon small>mdi-eye</v-icon>
-                              {{ post.viewCount }}
+                              <v-icon size="12">mdi-eye</v-icon> {{ post.viewCount }}
                             </span>
                             <span class="stat-item">
-                              <v-icon small>mdi-heart</v-icon>
-                              {{ post.likesCount }}
+                              <v-icon size="12">mdi-heart</v-icon> {{ post.likesCount }}
                             </span>
                             <span class="stat-item">
-                              <v-icon small>mdi-comment</v-icon>
-                              {{ post.countOfComment }}
+                              <v-icon size="12">mdi-comment</v-icon> {{ post.countOfComment }}
                             </span>
                           </div>
                         </div>
@@ -186,8 +183,8 @@
 
           <!-- 게시판 섹션들 -->
           <v-row>
-            <!-- 전체게시판 섹션 -->
-            <v-col cols="12" md="6">
+            <!-- 전체게시판 섹션 (크게) -->
+            <v-col cols="12">
               <div class="board-section">
                 <div class="board-header">
                   <div class="board-icon-wrapper">
@@ -212,25 +209,27 @@
                           ></v-img>
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
-                        <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
                         <span class="category-tag" :class="getCategoryClass(post.categoryId)">
                           {{ getActualCategoryName(post) }}
                         </span>
                       </div>
                       <div class="post-stats">
-                        <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-heart</v-icon> {{ post.likesCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-comment</v-icon> {{ post.countOfComment }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-eye</v-icon> {{ post.viewCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-heart</v-icon> {{ post.likesCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-comment</v-icon> {{ post.countOfComment }}</span>
                       </div>
                     </div>
-                    <div class="post-title">{{ post.title }}</div>
+                    <div class="post-title">
+                      {{ post.title }}
+                      <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </v-col>
 
             <!-- 자유게시판 섹션 -->
-            <v-col cols="12" md="6">
+            <v-col cols="12">
               <div class="board-section">
                 <div class="board-header">
                   <div class="board-icon-wrapper free">
@@ -256,14 +255,11 @@
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
-                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
-                          {{ getActualCategoryName(post) }}
-                        </span>
                       </div>
                       <div class="post-stats">
-                        <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-heart</v-icon> {{ post.likesCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-comment</v-icon> {{ post.countOfComment }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-eye</v-icon> {{ post.viewCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-heart</v-icon> {{ post.likesCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-comment</v-icon> {{ post.countOfComment }}</span>
                       </div>
                     </div>
                     <div class="post-title">{{ post.title }}</div>
@@ -299,14 +295,11 @@
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
-                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
-                          {{ getActualCategoryName(post) }}
-                        </span>
                       </div>
                       <div class="post-stats">
-                        <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-heart</v-icon> {{ post.likesCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-comment</v-icon> {{ post.countOfComment }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-eye</v-icon> {{ post.viewCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-heart</v-icon> {{ post.likesCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-comment</v-icon> {{ post.countOfComment }}</span>
                       </div>
                     </div>
                     <div class="post-title">{{ post.title }}</div>
@@ -342,14 +335,11 @@
                         </v-avatar>
                         <span class="author-name">{{ post.authorNickName }}</span>
                         <span class="post-time">· {{ formatDate(post.createdTime) }}</span>
-                        <span class="category-tag" :class="getCategoryClass(post.categoryId)">
-                          {{ getActualCategoryName(post) }}
-                        </span>
                       </div>
                       <div class="post-stats">
-                        <span class="stat-item"><v-icon x-small>mdi-eye</v-icon> {{ post.viewCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-heart</v-icon> {{ post.likesCount }}</span>
-                        <span class="stat-item"><v-icon x-small>mdi-comment</v-icon> {{ post.countOfComment }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-eye</v-icon> {{ post.viewCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-heart</v-icon> {{ post.likesCount }}</span>
+                        <span class="stat-item"><v-icon size="12">mdi-comment</v-icon> {{ post.countOfComment }}</span>
                       </div>
                     </div>
                     <div class="post-title">{{ post.title }}</div>
@@ -496,7 +486,7 @@ export default {
 
     async fetchRecentPosts() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=0&size=5`);
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=0&size=4`);
         this.recentPosts = response.data.result.content.slice(0, 10);
       } catch (error) {
         console.log("전체 게시물 로딩 실패", error);
@@ -505,7 +495,7 @@ export default {
 
     async fetchPopularPosts() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/1?page=0&size=5`);
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/1?page=0&size=4`);
         this.popularPosts = response.data.result.content.slice(0, 10);
       } catch (error) {
         console.error('자유게시판 게시물 로딩 실패:', error);
@@ -514,7 +504,7 @@ export default {
 
     async fetchInformationPosts() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/2?page=0&size=5`);
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/2?page=0&size=4`);
         this.informationPosts = response.data.result.content.slice(0, 10);
       } catch (error) {
         console.error('정보 게시물 로딩 실패:', error);
@@ -523,7 +513,7 @@ export default {
 
     async fetchAlgorithmPosts() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/3?page=0&size=5`);
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/3?page=0&size=4`);
         this.algorithmPosts = response.data.result.content.slice(0, 10);
       } catch (error) {
         console.error('알고리즘 게시물 로딩 실패:', error);
@@ -697,7 +687,12 @@ export default {
       
       // categoryId로 판단
       return this.getCategoryName(post.categoryId);
-    }
+    },
+
+    // 닉네임을 6글자로 제한하는 메소드 추가
+    truncateNickname(nickname) {
+      return nickname.length > 6 ? nickname.slice(0, 6) + '...' : nickname;
+    },
   },
 
   mounted() {
@@ -893,7 +888,11 @@ export default {
 
 .author-name {
   font-size: 0.9rem;
-  color: #64748b;
+  color: #1e293b;
+  max-width: 100px; /* 최대 너비 설정 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .post-stats {
@@ -904,14 +903,15 @@ export default {
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   color: #64748b;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
 }
 
 .stat-item .v-icon {
-  font-size: 16px !important;
-  color: #64748b;
+  font-size: 12px !important;
+  height: 12px !important;
+  width: 12px !important;
 }
 
 .post-card {
@@ -948,10 +948,29 @@ export default {
 }
 
 .post-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
+  margin-left: 0;
+  padding-left: 0;
+  position: absolute;
+  left: 12px;
+  top: 45px;
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: #334155;
+  line-height: 1.2;
+  max-width: calc(100% - 24px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.post-time {
+  color: #64748b;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .post-stats {
@@ -1167,9 +1186,9 @@ export default {
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
 }
 
 .post-title {
