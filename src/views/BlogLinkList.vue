@@ -6,9 +6,9 @@
           <v-card-title class="text-center text-h5">
             블로그 링크 조회
           </v-card-title>
-          <v-row align="center">
+          <v-row align="center" justify="center" class="px-4 py-4">
             <!-- 검색 옵션 선택 -->
-            <v-col cols="3">
+            <v-col cols="8" sm="2" class="text-center">
               <v-select
                   v-model="searchType"
                   :items="searchOptions"
@@ -16,16 +16,25 @@
                   item-value="value"
                   outlined
                   dense
+                  hide-details
+                  class="search-select"
+                  bg-color="grey-lighten-4"
+                  variant="outlined"
               ></v-select>
             </v-col>
             <!-- 검색 입력창 -->
-            <v-col cols="7">
+            <v-col cols="12" sm="6" class="text-center">
               <v-text-field
                   v-model="searchKeyword"
                   label="검색어 입력"
                   outlined
                   dense
+                  hide-details
                   clearable
+                  class="search-input"
+                  bg-color="grey-lighten-4"
+                  variant="outlined"
+                  prepend-inner-icon="mdi-magnify"
                   @update:model-value="search"
               ></v-text-field>
             </v-col>
@@ -178,3 +187,21 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.search-select {
+  border-radius: 8px;
+}
+
+.search-input {
+  border-radius: 8px;
+}
+
+.search-button {
+  height: 40px;
+  border-radius: 8px;
+  text-transform: none;
+  margin-left: -24px;
+  min-width: 80px;
+}
+</style>

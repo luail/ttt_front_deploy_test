@@ -62,7 +62,7 @@
 
           <!-- 제출 버튼 -->
           <v-card-actions>
-            <v-btn color="purple" class="secondary" @click="postCreate()">제출</v-btn>
+            <v-btn color="purple" variant="elevated" class="secondary white--text" @click="postCreate()">제출</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>

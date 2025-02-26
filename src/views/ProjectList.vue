@@ -25,6 +25,7 @@
                   label="검색어 입력"
                   outlined
                   dense
+                  hide-details
                   clearable
                   background-color="white"
                   @keyup.enter="searchProjects"
