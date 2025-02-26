@@ -103,64 +103,59 @@
             <div class="header-cell text-center" style="width: 60px">링크</div>
           </div>
 
-          <!-- 가상 스크롤 테이블 본문 -->
-          <v-virtual-scroll
-            ref="virtualScroll"
-            :items="sortedAndFilteredProjects"
-            :height="400"
-            item-height="48"
-            class="virtual-scroll-container"
-          >
-            <template v-slot:default="{ item }">
-              <div class="table-row" @click="goToProjectDetail(item.id)">
-                <div class="cell text-center" style="width: 70px">{{ item.batch }}</div>
-                <div class="cell text-truncate" style="width: 120px">{{ item.teamName }}</div>
-                <div class="cell" style="width: 140px">
-                  <v-chip small :color="getProjectTypeColor(item.projectType)" text-color="white">
-                    {{ item.projectType }}
+          <!-- 가상 스크롤을 일반 테이블 본문으로 변경 -->
+          <div class="table-body">
+            <div v-for="item in sortedAndFilteredProjects" 
+                 :key="item.id" 
+                 class="table-row" 
+                 @click="goToProjectDetail(item.id)">
+              <div class="cell text-center" style="width: 70px">{{ item.batch }}</div>
+              <div class="cell text-truncate" style="width: 120px">{{ item.teamName }}</div>
+              <div class="cell" style="width: 140px">
+                <v-chip small :color="getProjectTypeColor(item.projectType)" text-color="white">
+                  {{ item.projectType }}
+                </v-chip>
+              </div>
+              <div class="cell text-truncate" style="width: 140px">{{ item.serviceName }}</div>
+              <div class="cell" style="width: 220px">
+                <div class="feature-container">
+                  <v-chip
+                    v-for="(feature, index) in item.primaryFeatureList"
+                    :key="index"
+                    small
+                    outlined
+                    :class="{ 'selected-chip': feature.featureName === selectedFeature }"
+                    @click.stop="toggleFeature(feature.featureName)"
+                  >
+                    {{ feature.featureName || '기능 없음' }}
                   </v-chip>
                 </div>
-                <div class="cell text-truncate" style="width: 140px">{{ item.serviceName }}</div>
-                <div class="cell" style="width: 220px">
-                  <div class="feature-container">
-                    <v-chip
-                      v-for="(feature, index) in item.primaryFeatureList"
-                      :key="index"
-                      small
-                      outlined
-                      :class="{ 'selected-chip': feature.featureName === selectedFeature }"
-                      @click.stop="toggleFeature(feature.featureName)"
-                    >
-                      {{ feature.featureName || '기능 없음' }}
-                    </v-chip>
-                  </div>
-                </div>
-                <div class="cell text-center" style="width: 90px">
-                  <v-icon small color="pink lighten-1" class="mr-1">mdi-eye</v-icon>
-                  {{ item.viewCount || 0 }}
-                </div>
-                <div class="cell text-center" style="width: 90px">
-                  <v-icon small color="pink lighten-1" class="mr-1">mdi-heart</v-icon>
-                  {{ item.likesCounts || 0 }}
-                </div>
-                <div class="cell text-center" style="width: 70px">
-                  <v-icon small color="blue lighten-1" class="mr-1">mdi-comment</v-icon>
-                  {{ item.commentCounts || 0 }}
-                </div>
-                <div class="cell text-center" style="width: 60px">
-                  <v-icon
-                    v-if="item.link"
-                    small
-                    class="link-icon"
-                    color="grey"
-                    @click.stop="openLink(item.link)"
-                  >
-                    mdi-link-variant
-                  </v-icon>
-                </div>
               </div>
-            </template>
-          </v-virtual-scroll>
+              <div class="cell text-center" style="width: 90px">
+                <v-icon small color="pink lighten-1" class="mr-1">mdi-eye</v-icon>
+                {{ item.viewCount || 0 }}
+              </div>
+              <div class="cell text-center" style="width: 90px">
+                <v-icon small color="pink lighten-1" class="mr-1">mdi-heart</v-icon>
+                {{ item.likesCounts || 0 }}
+              </div>
+              <div class="cell text-center" style="width: 70px">
+                <v-icon small color="blue lighten-1" class="mr-1">mdi-comment</v-icon>
+                {{ item.commentCounts || 0 }}
+              </div>
+              <div class="cell text-center" style="width: 60px">
+                <v-icon
+                  v-if="item.link"
+                  small
+                  class="link-icon"
+                  color="grey"
+                  @click.stop="openLink(item.link)"
+                >
+                  mdi-link-variant
+                </v-icon>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- 페이지네이션 -->
