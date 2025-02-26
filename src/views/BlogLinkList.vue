@@ -40,12 +40,8 @@
             </v-col>
 
             <!-- 검색 버튼 -->
-            <v-col cols="12" sm="2" class="text-center">
-              <v-btn 
-                :color="'#6200ea'" 
-                class="search-button font-weight-bold" 
-                elevation="2"
-                @click="search">
+            <v-col cols="2">
+              <v-btn color="purple" class="text-white font-weight-bold" @click="search">
                 검색
               </v-btn>
             </v-col>

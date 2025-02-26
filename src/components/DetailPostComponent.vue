@@ -321,10 +321,6 @@ export default {
     // 컴포넌트가 생성될 때 스크롤을 맨 위로 이동
     window.scrollTo(0, 0);
     
-    // 카테고리 리스트 불러오기
-    const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
-    this.categoryList = [{categoryName: "전체게시판", categoryId: 0}, ...sideBarResponse.data.result];
-
     // 게시글 상세 정보 불러오기
     await this.refreshPost();
 
@@ -333,15 +329,7 @@ export default {
     if (token) {
       const decodedToken = jwtDecode(token);
       this.userId = decodedToken.sub;
-      this.isAuthor = this.thisPost.authorId === this.userId;
-      
-      // 사용자 프로필 이미지 가져오기
-      try {
-        const userResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/profile`);
-        this.userProfileImage = userResponse.data.profileImage;
-      } catch (error) {
-        console.log("프로필 이미지 로드 실패", error);
-      }
+      this.isAuthor = this.thisPost.userId === this.userId;
     }
   },
 
