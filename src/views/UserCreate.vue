@@ -239,17 +239,44 @@
                             </v-carousel-item>
                             <!-- step 6 -->
                             <v-carousel-item>
-                                <v-text-field
-                                label="nickName"
-                                v-model="nickName"
-                                prepend-icon="mdi-rename"
-                                required
-                                :rules="nicknameRules"
-                                @input="validateNickname"
-                                @keydown.enter.prevent
-                                />
+                                <div class="nickname-container">
+                                    <div class="nickname-fields">
+                                        <v-text-field
+                                            label="nickname"
+                                            v-model="nickname"
+                                            prepend-icon="mdi-account"
+                                            required
+                                            class="nickname-input"
+                                            @input="resetNicknameCheck"
+                                        />
+                                        <v-btn
+                                            small
+                                            :loading="isCheckingNickname"
+                                            :disabled="!isNicknameLengthValid || isCheckingNickname"
+                                            @click="checkNickname"
+                                            class="check-btn"
+                                            :color="isNicknameAvailable ? 'success' : 'primary'"
+                                        >
+                                            중복확인
+                                        </v-btn>
+                                    </div>
+                                    <div class="nickname-requirements">
+                                        <div :class="['requirement', { 'requirement-met': isNicknameLengthValid }]">
+                                            <v-icon x-small>{{ isNicknameLengthValid ? 'mdi-check' : 'mdi-close' }}</v-icon>
+                                            <span>2-8자 이내</span>
+                                        </div>
+                                        <div class="requirement" v-if="nicknameCheckMessage">
+                                            <v-icon x-small :color="isNicknameAvailable ? 'success' : 'error'">
+                                                {{ isNicknameAvailable ? 'mdi-check' : 'mdi-close' }}
+                                            </v-icon>
+                                            <span :class="{ 'success--text': isNicknameAvailable, 'error--text': !isNicknameAvailable }">
+                                                {{ nicknameCheckMessage }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="btn-group">
-                                    <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isNicknameValid">
+                                    <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
                                         다음
                                     </v-btn>
                                 </div>
@@ -294,7 +321,7 @@ export default {
             isVerified: false,  // 인증 성공 여부
             verifyError: false,  // 인증 실패 여부
             showHint: true, // 힌트 표시 여부
-            nickName:"",
+            nickname:"",
             blogLink:"",
             batch:"",
             trueOrFalse:false,
@@ -305,7 +332,6 @@ export default {
                 v => (v && v.length >= 2) || '닉네임은 2자 이상이어야 합니다',
                 // 필요한 다른 규칙들 추가
             ],
-            isNicknameValid: false,
             passwordRules: [
                 v => !!v || '비밀번호를 입력해주세요',
                 v => (v && v.length >= 8) || '비밀번호는 최소 8자 이상이어야 합니다',
@@ -318,6 +344,9 @@ export default {
             isIdAvailable: false,
             idCheckMessage: '',
             isEmailValid: false,
+            isCheckingNickname: false,
+            isNicknameAvailable: false,
+            nicknameCheckMessage: '',
         }
     },
     computed: {
@@ -328,7 +357,7 @@ export default {
                 case 5: return this.loginId.trim() !== "" && this.isIdAvailable;
                 case 7: return this.isPasswordValid && this.password === this.passwordCheck.trim();
                 case 9: return this.isVerified;
-                case 11: return this.isNicknameValid;
+                case 11: return this.isNicknameLengthValid && this.isNicknameAvailable;
                 case 13: return this.batch.trim() !== "";
                 default: return true;
             }
@@ -365,7 +394,11 @@ export default {
         },
         passwordsMatch() {
             return this.password === this.passwordCheck && this.password !== '';
-        }
+        },
+        isNicknameLengthValid() {
+            const length = this.nickname?.trim().length || 0;
+            return length >= 2 && length <= 8;
+        },
     },
     methods: {
         nextStep() {
@@ -387,7 +420,7 @@ export default {
                     loginId:this.loginId, 
                     password:this.password,
                     phoneNumber:this.phoneNumber, 
-                    nickName:this.nickName, 
+                    nickName:this.nickname, 
                     blogLink:this.blogLink, 
                     batch:this.batch,
                     authCode:this.authCode
@@ -459,8 +492,42 @@ export default {
         resetModal() {
             this.trueOrFalse=false
         },
-        validateNickname() {
-            this.isNicknameValid = this.nickName.length >= 2;
+        resetNicknameCheck() {
+            this.isNicknameAvailable = false;
+            this.nicknameCheckMessage = '';
+        },
+        async checkNickname() {
+            if (!this.isNicknameLengthValid) {
+                this.nicknameCheckMessage = '닉네임은 2-8자 이내여야 합니다.';
+                return;
+            }
+
+            this.isCheckingNickname = true;
+            try {
+                const response = await axios.get(
+                    `${process.env.VUE_APP_API_BASE_URL}/user/checkNickName`,
+                    { params: { nickName: this.nickname } }
+                );
+
+                if (response.data.result) {
+                    this.isNicknameAvailable = true;
+                    this.nicknameCheckMessage = '사용 가능한 닉네임입니다.';
+                } else {
+                    this.isNicknameAvailable = false;
+                    this.nicknameCheckMessage = '이미 사용 중인 닉네임입니다.';
+                }
+            } catch (error) {
+                console.error('닉네임 중복 확인 실패:', error);
+                this.isNicknameAvailable = false;
+                this.nicknameCheckMessage = '중복 확인 중 오류가 발생했습니다.';
+            } finally {
+                this.isCheckingNickname = false;
+            }
+        },
+        validateEmail() {
+            // 이메일 정규식 패턴
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            this.isEmailValid = emailPattern.test(this.email);
         },
         // ID 중복 확인 리셋
         resetIdCheck() {
@@ -494,11 +561,6 @@ export default {
             } finally {
                 this.isCheckingId = false;
             }
-        },
-        validateEmail() {
-            // 이메일 정규식 패턴
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            this.isEmailValid = emailPattern.test(this.email);
         },
     },
     watch: {
@@ -968,6 +1030,48 @@ export default {
     border-radius: 8px;
     font-size: 0.75rem;
     margin-top: 8px;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 4px 0;
+    color: #ff5252;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.requirement-met {
+    color: #4caf50;
+}
+
+.requirement .v-icon {
+    font-size: 12px !important;
+}
+
+.nickname-container {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.nickname-fields {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.nickname-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.nickname-requirements {
+    margin-top: 8px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 0.75rem;
 }
 
 .requirement {
