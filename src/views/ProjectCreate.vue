@@ -141,7 +141,8 @@
       <v-card-actions class="pt-6">
         <v-spacer></v-spacer>
         <v-btn
-          color="primary"
+          color="purple"
+          class="neon-btn"
           x-large
           min-width="150"
           @click="saveProject"
@@ -373,7 +374,17 @@ export default {
     display: block;  /* 블록 요소로 변경 (여백 조정) */
     margin: 0 auto;  /* 중앙 정렬 */
   }
+.neon-btn {
+  font-size: 1rem !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
 
-
+.neon-btn:hover {
+  background-color: #7c3aed !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(150, 64, 255, 0.7);
+  color: #ffffff !important;
+}
 </style> 
 

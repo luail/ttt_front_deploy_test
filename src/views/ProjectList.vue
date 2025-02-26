@@ -33,7 +33,7 @@
             </v-col>
             <v-col cols="2" class="d-flex">
               <!-- <v-btn color="primary" class="mr-2" @click="searchProjects">검색</v-btn> -->
-              <v-btn @click="goToProjectCreate">생성</v-btn>
+              <v-btn @click="goToProjectCreate" color="purple" class="neon-btn">생성</v-btn>
             </v-col>
           </v-row>
 
@@ -366,5 +366,15 @@ beforeRouteLeave(to, from, next) {
 
 .link-icon:hover {
   color: #1976d2 !important;
+}
+
+.neon-btn {
+  font-size: 1rem !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.neon-btn:hover {
+  transform: scale(1.05);
 }
 </style>

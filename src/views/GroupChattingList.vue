@@ -5,7 +5,7 @@
             <v-col cols="8">
                 <!-- 채팅방 목록 헤더 -->
                 <div class="board-header">
-                    <h2 class="board-title" style="margin-left: 20px;">Toks</h2>
+                    <h2 class="board-title" style="margin-left: 20px;">Lounge</h2>
                     
                     <div class="search-area">
                         <v-text-field

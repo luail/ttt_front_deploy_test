@@ -5,7 +5,7 @@
             <v-col cols="12" md="4" class="chat-list-column">
                 <v-card class="chat-list-card" elevation="0">
                     <v-card-title class="text-center text-h6">
-                        My Tok
+                        My Lounge
                     </v-card-title>
                     <v-card-text>
                         <div class="chat-rooms">
