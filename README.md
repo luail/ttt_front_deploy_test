@@ -38,7 +38,7 @@
       <td align="center"><img src="./src/assets/pic/1.webp" width="180px"/></td>
       <td align="center"><img src="./src/assets/pic/2.webp" width="180px"/></td>
       <td align="center"><img src="./src/assets/pic/3.webp" width="180px"/></td>
-      <td align="center"><img src="./src/assets/pic/4.webp" width="180px"/></td>
+      <td align="center"><img src="./src/assets/pic/소병윤.png" width="180px"/></td>
       <td align="center"><img src="./src/assets/pic/5.webp" width="180px"/></td>
     </tr>
     <tr>

@@ -28,9 +28,7 @@
         <!-- 사용자 정보 -->
         <div class="profile-info text-center">
           <h3 class="username text-h5 font-weight-bold text-purple">{{ localUserName }}</h3>
-          <p class="text-subtitle-1 grey--text text--darken-1 mb-4 profile-bio">
-            짧은 소개글을 여기에 입력하세요.
-          </p>
+
         </div>
       </div>
 
@@ -161,6 +159,7 @@ export default {
           alert("프로필 이미지가 변경되었습니다!");
           this.profileImageUrl = response.data.imageUrl; // 새 프로필 이미지로 업데이트
           localStorage.setItem("profileImageUrl", response.data.imageUrl); // 로컬스토리지에 저장
+          window.location.reload()
         } else {
           alert("이미지는 업로드되었지만, 서버에서 URL을 반환하지 않았습니다.");
         }
