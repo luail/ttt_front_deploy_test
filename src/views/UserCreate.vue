@@ -5,7 +5,7 @@
                 <v-card>
                     <v-card-title class="text-h5 text-center">
                         Tic Tac Toc
-                    </v-card-title><br>
+                    </v-card-title>
                     <v-card-text>
                         <v-carousel 
                             v-model="step" 
@@ -108,13 +108,14 @@
                             </v-carousel-item>
                             <v-carousel-item>
                                 <v-card-title class="text-h5 text-center">
-                                    다같이 힘내서 최고의 프로젝트를 만들어봅시다.
+                                    다같이 힘내서 최고의<br> 프로젝트를 만들어봅시다.
                                 </v-card-title>
                             </v-carousel-item>
                             <!-- step 5 --> 
                             <v-carousel-item>
                                 
                                 <!-- 전화번호 입력 -->
+                                <div class="input-group">
                                     <v-text-field
                                     label="phone number"
                                     v-model="phoneNumber"
@@ -124,94 +125,81 @@
                                     :hint="showHint ? `- 빼고 입력해주세요.` : ''"
                                     persistent-hint
                                     @input="showHint = !phoneNumber"
+                                    class="mb-0"
                                     />
-                                    <v-btn @click="sendAuthCode" :disabled="authSent || isVerified" color="primary">
+                                    <v-btn @click="sendAuthCode" :disabled="authSent || isVerified" color="primary" class="mt-n2">
                                     인증요청
                                     </v-btn>
+                                </div>
 
-                                    <!-- 인증번호 입력 (전송 후 표시) -->
-                                    <div v-if="authSent">
+                                <!-- 인증번호 입력 (전송 후 표시) -->
+                                <div v-if="authSent" class="input-group">
                                     <v-text-field
                                         label="인증번호"
                                         v-model="authCode"
                                         prepend-icon="mdi-key"
                                         :disabled="isVerified"
                                         required
+                                        class="mb-0"
                                     />
-                                    <v-btn @click="verifyAuthCode" :disabled="isVerified" color="success">
+                                    <v-btn @click="verifyAuthCode" :disabled="isVerified" color="success" class="mt-n2">
                                     인증확인
                                     </v-btn>
-                                    </div>
+                                </div>
 
-                                    <!-- 인증 결과 표시 -->
-                                    <p v-if="isVerified" class="text-green">인증 완료! 수정 불가</p>
-                                    <p v-if="verifyError" class="text-red">인증 실패! 다시 입력해주세요.</p>
-                                    <div class="btn-group">
-                                        <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
-                                            다음
-                                        </v-btn>
-                                    </div>
-                                </v-carousel-item>
-                                <v-carousel-item>
-                                    <v-card-title class="text-h5 text-center">
-                                        개그튼거.
-                                    </v-card-title>
-                                </v-carousel-item>
-                                <!-- step 6 -->
-                                <v-carousel-item>
-                                    <v-text-field
-                                    label="nickName"
-                                    v-model="nickName"
-                                    prepend-icon="mdi-rename"
-                                    required
-                                    />
-                                    <div class="btn-group">
-                                        <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
-                                            다음
-                                        </v-btn>
-                                    </div>
-                                </v-carousel-item>
+                                <!-- 인증 결과 표시 -->
+                                <p v-if="isVerified" class="text-green">인증 완료! 수정 불가</p>
+                                <p v-if="verifyError" class="text-red">인증 실패! 다시 입력해주세요.</p>
+                                <div class="btn-group">
+                                    <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
+                                        다음
+                                    </v-btn>
+                                </div>
+                            </v-carousel-item>
+                            <v-carousel-item>
+                                <v-card-title class="text-h5 text-center">
+                                    개그튼거.
+                                </v-card-title>
+                            </v-carousel-item>
+                            <!-- step 6 -->
+                            <v-carousel-item>
+                                <v-text-field
+                                label="nickName"
+                                v-model="nickName"
+                                prepend-icon="mdi-rename"
+                                required
+                                :rules="nicknameRules"
+                                @input="validateNickname"
+                                @keydown.enter.prevent
+                                />
+                                <div class="btn-group">
+                                    <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isNicknameValid">
+                                        다음
+                                    </v-btn>
+                                </div>
+                            </v-carousel-item>
                                 
-                                <v-carousel-item>
-                                    <v-card-title class="text-h5 text-center">
-                                        죄송합니다.
-                                    </v-card-title>
-                                </v-carousel-item>
-                                <!-- step 7 -->
-                                <v-carousel-item>
-                                    <v-text-field
-                                    label="batch"
-                                    v-model="batch"
-                                    prepend-icon="mdi-flag"
-                                    required
-                                    />
-                                    <div class="btn-group">
-                                        <v-btn color="primary" class="next-btn" @click="nextStep" :disabled="!isStepValid">
-                                            다음
-                                        </v-btn>
-                                    </div>
-                                </v-carousel-item>
-                                <v-row>
-                                    <v-col cols="12">
-                                        <v-btn color="#c0c1ff" block @click="create()">제출</v-btn>
-                                    </v-col>
-                                </v-row>
+                            <v-carousel-item>
+                                <v-card-title class="text-h5 text-center">
+                                    죄송합니다.
+                                </v-card-title>
+                            </v-carousel-item>
+                            <!-- step 7 -->
+                            <v-carousel-item>
+                                <v-text-field
+                                label="batch"
+                                v-model="batch"
+                                prepend-icon="mdi-flag"
+                                required
+                                />
+                                    <v-btn color="#c0c1ff" block @click="create()">가입완료</v-btn>
+                            </v-carousel-item>
                         </v-carousel>
                     </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
     </v-container>
-    <v-dialog v-model="trueOrFalse" max-width="400px" @keydown.enter="resetModal()">
-        <v-card>
-            <v-card-text class="error-message">
-                {{errorMessage}}
-            </v-card-text>
-            <v-card-actions>
-                <v-btn color="c0c1ff" @click="resetModal()">확인</v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
 </template>
 <script>
 import axios from 'axios';
@@ -236,18 +224,25 @@ export default {
             trueOrFalse:false,
             errorMessage:"",
             step: 0,
+            nicknameRules: [
+                v => !!v || '닉네임을 입력해주세요',
+                v => (v && v.length >= 2) || '닉네임은 2자 이상이어야 합니다',
+                // 필요한 다른 규칙들 추가
+            ],
+            isNicknameValid: false,
         }
     },
     computed: {
         isStepValid() {
             switch (this.step) {
-                case 1: return this.name.trim() !== "";  // 이름 입력 확인
-                case 3: return this.email.trim() !== "" && this.blogLink.trim() !== "";  // 이메일 & 블로그 링크 둘 다 입력 확인
-                case 5: return this.loginId.trim() !== "";  // 로그인 ID 입력 확인
-                case 7: return this.password.trim() !== "" && this.password === this.passwordCheck.trim();  // 비밀번호 확인
-                case 9: return this.isVerified;  // 인증 여부 확인
-                case 11: return this.nickName.trim() !== "" && this.batch.trim() !== "";  // 닉네임 & 기수 입력 확인
-                default: return true;  // UI 단계 자동 이동
+                case 1: return this.name.trim() !== ""; 
+                case 3: return this.email.trim() !== "" && this.blogLink.trim() !== "";
+                case 5: return this.loginId.trim() !== "";
+                case 7: return this.password.trim() !== "" && this.password === this.passwordCheck.trim();
+                case 9: return this.isVerified;
+                case 11: return this.isNicknameValid;  // batch 검증 제거, 닉네임만 검증
+                case 13: return this.batch.trim() !== "";  // batch는 마지막 단계에서 검증
+                default: return true;
             }
         }
     },
@@ -258,7 +253,7 @@ export default {
             }
         },
         autoSlideUI() {
-            if ([0, 2, 4, 6, 8, 10].includes(this.step)) { 
+            if ([0, 2, 4, 6, 8, 10, 12].includes(this.step)) { 
                 setTimeout(() => {
                     this.step++;
                 }, 2000);  // 1000ms -> 2000ms로 증가
@@ -342,11 +337,14 @@ export default {
         },
         resetModal() {
             this.trueOrFalse=false
+        },
+        validateNickname() {
+            this.isNicknameValid = this.nickName.length >= 2;
         }
     },
     watch: {
         step(newStep, oldStep) {
-            if ([0, 2, 4, 6, 8, 10].includes(newStep) && newStep !== oldStep) {
+            if ([0, 2, 4, 6, 8, 10, 12].includes(newStep) && newStep !== oldStep) {
                 this.autoSlideUI();
             }
         }
@@ -405,12 +403,14 @@ export default {
     background: rgba(255, 255, 255, 0.99); /* 거의 불투명하게 변경 */
     backdrop-filter: blur(20px);
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    height: 520px;
+    height: 450px;  /* 카드 높이 축소 */
     max-width: 800px;
     margin: 0 auto;
     position: relative;
     z-index: 1;
-    overflow: hidden;
+    overflow: visible;  /* overflow 제거 */
+    display: flex;        /* flex 추가 */
+    flex-direction: column; /* 세로 방향 정렬 */
 }
 
 /* TTT 배경 패턴 - 더 선명하게 수정 */
@@ -453,11 +453,29 @@ export default {
     border-radius: 3px;
 }
 
-/* 텍스트 필드 컨테이너 스타일 */
+/* 카드 컨텐츠 중앙 정렬 */
+.v-card-text {
+    flex: 1;             /* 남은 공간 차지 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* 텍스트 필드 간격 최소화 */
 :deep(.v-text-field) {
-    margin-bottom: 2.5rem;
-    transition: transform 0.3s ease;
-    padding-top: 24px; /* 라벨을 위한 상단 여백 추가 */
+    margin-bottom: 0 !important;     /* 하단 마진 제거 */
+    padding-top: 8px !important;     /* 상단 패딩 축소 */
+    margin-top: -8px !important;     /* 상단 마진 음수값으로 더 붙이기 */
+}
+
+/* 텍스트 필드 내부 여백 조정 */
+:deep(.v-input__control) {
+    min-height: unset !important;    /* 최소 높이 제거 */
+}
+
+:deep(.v-field__field) {
+    padding-top: 8px !important;     /* 필드 내부 패딩 축소 */
 }
 
 /* 텍스트 필드 기본 스타일 */
@@ -576,10 +594,10 @@ export default {
 
 /* 버튼 그룹 스타일 */
 .btn-group {
-    margin-top: 2rem;
-    display: flex;
-    justify-content: flex-end;
-    gap: 16px;
+    margin-top: auto;    /* 상단 여백 자동 */
+    padding: 16px;       /* 여백 추가 */
+    width: 100%;
+    text-align: center;
 }
 
 /* 제출 버튼 스타일 */
@@ -643,6 +661,40 @@ export default {
 
 /* 캐러셀 트랜지션 속도 조정 */
 :deep(.v-carousel__item) {
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;  /* 기본 0.6s에서 0.8s로 증가 */
+    height: 100% !important;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* 인증 버튼 컨테이너 스타일 */
+.verification-btn {
+    margin-top: -8px !important;     /* 상단 마진을 음수값으로 설정 */
+    margin-bottom: 8px !important;   /* 하단 여백 최소화 */
+}
+
+/* 인증번호 입력 필드와 버튼 컨테이너 */
+.verification-group {
+    display: flex;
+    align-items: flex-start;         /* 상단 정렬 */
+    gap: 8px;                        /* 요소 간 간격 */
+    margin-top: -8px !important;     /* 상단 마진 음수값 */
+}
+
+/* 인증번호 입력 필드 */
+.verification-group :deep(.v-text-field) {
+    flex: 1;                         /* 남은 공간 차지 */
+    margin-bottom: 0 !important;     /* 하단 마진 제거 */
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;  /* 요소 간 간격 최소화 */
+}
+
+.v-btn {
+    margin-top: -8px !important;  /* 버튼 위치 위로 당기기 */
 }
 </style>
