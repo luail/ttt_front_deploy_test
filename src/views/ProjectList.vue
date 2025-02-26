@@ -32,141 +32,107 @@
         </v-col>
       </v-row>
 
-      <!-- 커스텀 테이블 헤더 -->
-      <v-card-text>
-        <div class="custom-table">
-          <div class="table-header">
-            <div class="header-cell text-center" 
-                 :class="{ 'active-sort': sortBy === 'batch' }" 
-                 style="width: 70px" 
-                 @click="sort('batch')">
-              기수
-              <v-icon small class="sort-icon" v-if="sortBy === 'batch'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell text-truncate" 
-                 :class="{ 'active-sort': sortBy === 'teamName' }"
-                 style="width: 120px" 
-                 @click="sort('teamName')">
-              팀명
-              <v-icon small class="sort-icon" v-if="sortBy === 'teamName'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell" 
-                 :class="{ 'active-sort': sortBy === 'projectType' }"
-                 style="width: 140px" 
-                 @click="sort('projectType')">
-              프로젝트 유형
-              <v-icon small class="sort-icon" v-if="sortBy === 'projectType'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell text-truncate" 
-                 :class="{ 'active-sort': sortBy === 'serviceName' }"
-                 style="width: 140px" 
-                 @click="sort('serviceName')">
-              서비스명
-              <v-icon small class="sort-icon" v-if="sortBy === 'serviceName'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell" style="width: 220px">기능 키워드</div>
-            <div class="header-cell text-center" 
-                 :class="{ 'active-sort': sortBy === 'viewCount' }"
-                 style="width: 90px" 
-                 @click="sort('viewCount')">
-              조회수
-              <v-icon small class="sort-icon" v-if="sortBy === 'viewCount'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell text-center" 
-                 :class="{ 'active-sort': sortBy === 'likesCounts' }"
-                 style="width: 90px" 
-                 @click="sort('likesCounts')">
-              좋아요
-              <v-icon small class="sort-icon" v-if="sortBy === 'likesCounts'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell text-center" 
-                 :class="{ 'active-sort': sortBy === 'commentCounts' }"
-                 style="width: 70px" 
-                 @click="sort('commentCounts')">
-              댓글
-              <v-icon small class="sort-icon" v-if="sortBy === 'commentCounts'">
-                {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
-              </v-icon>
-            </div>
-            <div class="header-cell text-center" style="width: 60px">링크</div>
-          </div>
-
-          <!-- 가상 스크롤을 일반 테이블 본문으로 변경 -->
-          <div class="table-body">
-            <div v-for="item in sortedAndFilteredProjects" 
-                 :key="item.id" 
-                 class="table-row" 
-                 @click="goToProjectDetail(item.id)">
-              <div class="cell text-center" style="width: 70px">{{ item.batch }}</div>
-              <div class="cell text-truncate" style="width: 120px">{{ item.teamName }}</div>
-              <div class="cell" style="width: 140px">
-                <v-chip small :color="getProjectTypeColor(item.projectType)" text-color="white">
-                  {{ item.projectType }}
-                </v-chip>
+          <!-- 테이블 영역 -->
+          <div class="table-container">
+            <div class="custom-table">
+              <!-- 테이블 헤더 -->
+              <div class="table-row header">
+                <div class="header-cell sortable" @click="sort('batch')" :data-sorted="sortBy === 'batch'">
+                  기수
+                  <v-icon small class="sort-icon">{{ getSortIcon('batch') }}</v-icon>
+                </div>
+                <div class="header-cell sortable" @click="sort('teamName')">
+                  팀명
+                  <v-icon small class="sort-icon">{{ getSortIcon('teamName') }}</v-icon>
+                </div>
+                <div class="header-cell sortable" @click="sort('projectType')">
+                  프로젝트 유형
+                  <v-icon small class="sort-icon">{{ getSortIcon('projectType') }}</v-icon>
+                </div>
+                <div class="header-cell sortable" @click="sort('serviceName')">
+                  서비스명
+                  <v-icon small class="sort-icon">{{ getSortIcon('serviceName') }}</v-icon>
+                </div>
+                <div class="header-cell" style="width: 220px">기능 키워드</div>
+                <div class="header-cell sortable" @click="sort('viewCount')">
+                  조회수
+                  <v-icon small class="sort-icon">{{ getSortIcon('viewCount') }}</v-icon>
+                </div>
+                <div class="header-cell sortable" @click="sort('likesCounts')">
+                  좋아요
+                  <v-icon small class="sort-icon">{{ getSortIcon('likesCounts') }}</v-icon>
+                </div>
+                <div class="header-cell sortable" @click="sort('commentCounts')">
+                  댓글
+                  <v-icon small class="sort-icon">{{ getSortIcon('commentCounts') }}</v-icon>
+                </div>
+                <div class="header-cell" style="width: 60px">링크</div>
               </div>
-              <div class="cell text-truncate" style="width: 140px">{{ item.serviceName }}</div>
-              <div class="cell" style="width: 220px">
-                <div class="feature-container">
-                  <v-chip
-                    v-for="(feature, index) in item.primaryFeatureList"
-                    :key="index"
-                    small
-                    outlined
-                    :class="{ 'selected-chip': feature.featureName === selectedFeature }"
-                    @click.stop="toggleFeature(feature.featureName)"
-                  >
-                    {{ feature.featureName || '기능 없음' }}
-                  </v-chip>
+
+              <!-- 테이블 본문 -->
+              <div class="table-body">
+                <div v-for="item in sortedAndFilteredProjects" 
+                     :key="item.id" 
+                     class="table-row" 
+                     @click="goToProjectDetail(item.id)">
+                  <div class="cell text-center" style="width: 70px">{{ item.batch }}</div>
+                  <div class="cell" style="width: 120px">{{ item.teamName }}</div>
+                  <div class="cell" style="width: 140px">
+                    <v-chip small :color="getProjectTypeColor(item.projectType)" text-color="white">
+                      {{ item.projectType }}
+                    </v-chip>
+                  </div>
+                  <div class="cell" style="width: 140px">{{ item.serviceName }}</div>
+                  <div class="cell" style="width: 220px">
+                    <div class="feature-container">
+                      <v-chip
+                        v-for="(feature, index) in item.primaryFeatureList"
+                        :key="index"
+                        small
+                        outlined
+                        :class="{ 'selected-chip': feature.featureName === selectedFeature }"
+                        @click.stop="toggleFeature(feature.featureName)"
+                      >
+                        {{ feature.featureName || '기능 없음' }}
+                      </v-chip>
+                    </div>
+                  </div>
+                  <div class="cell text-center" style="width: 90px">
+                    <v-icon small color="pink lighten-1" class="mr-1">mdi-eye</v-icon>
+                    {{ item.viewCount || 0 }}
+                  </div>
+                  <div class="cell text-center" style="width: 90px">
+                    <v-icon small color="pink lighten-1" class="mr-1">mdi-heart</v-icon>
+                    {{ item.likesCounts || 0 }}
+                  </div>
+                  <div class="cell text-center" style="width: 70px">
+                    <v-icon small color="blue lighten-1" class="mr-1">mdi-comment</v-icon>
+                    {{ item.commentCounts || 0 }}
+                  </div>
+                  <div class="cell text-center" style="width: 60px">
+                    <v-icon
+                      v-if="item.link"
+                      small
+                      class="link-icon"
+                      color="grey"
+                      @click.stop="openLink(item.link)"
+                    >
+                      mdi-link-variant
+                    </v-icon>
+                  </div>
                 </div>
               </div>
-              <div class="cell text-center" style="width: 90px">
-                <v-icon small color="pink lighten-1" class="mr-1">mdi-eye</v-icon>
-                {{ item.viewCount || 0 }}
-              </div>
-              <div class="cell text-center" style="width: 90px">
-                <v-icon small color="pink lighten-1" class="mr-1">mdi-heart</v-icon>
-                {{ item.likesCounts || 0 }}
-              </div>
-              <div class="cell text-center" style="width: 70px">
-                <v-icon small color="blue lighten-1" class="mr-1">mdi-comment</v-icon>
-                {{ item.commentCounts || 0 }}
-              </div>
-              <div class="cell text-center" style="width: 60px">
-                <v-icon
-                  v-if="item.link"
-                  small
-                  class="link-icon"
-                  color="grey"
-                  @click.stop="openLink(item.link)"
-                >
-                  mdi-link-variant
-                </v-icon>
-              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 페이지네이션 -->
-        <div class="d-flex justify-center mt-4">
-          <v-pagination
-            v-model="page"
-            :length="Math.ceil(filteredProjects.length / itemsPerPage)"
-            :total-visible="7"
-          ></v-pagination>
-        </div>
-      </v-card-text>
+          <!-- 페이지네이션 -->
+          <div class="pagination-container">
+            <v-pagination
+              v-model="currentPage"
+              :length="Math.ceil(filteredProjects.length / 8)"
+              :total-visible="8"
+            ></v-pagination>
+          </div>
     </v-card>
 
     <!-- 수정 팝업 다이얼로그 -->
@@ -192,18 +158,18 @@ export default {
       selectedFeature: null,
       sortDirection: "asc",
       page:1,
-      itemsPerPage: 10, //한 페이지당 표시될 프로젝트 개수
+      itemsPerPage: 8, //한 페이지당 표시될 프로젝트 개수
       currentPage: 1, //현재 보고 있는 페이지 번호
       isLoading: false,
       isLastPage: false,
-      searchType: 'optional',
       searchOptions: [
-        { text: "선택", value: "optional" },
-        { text: "기수", value: "batch" },
-        { text: "프로젝트 유형", value: "projectType" },
-        { text: "서비스명", value: "serviceName" },
-        { text: "기능명", value: "featureName" }
+        { text: '전체', value: 'optional' },
+        { text: '기수', value: 'batch' },
+        { text: '프로젝트 유형', value: 'projectType' },
+        { text: '서비스명', value: 'serviceName' },
+        { text: '기능명', value: 'featureName' }
       ],
+      searchType: 'optional',
       searchKeyword: '',
       selectAll: false,
       sortBy: '',
@@ -241,7 +207,7 @@ export default {
       totalPages: 0,  //전체 페이지 개수
       tableOptions: {
         page: 1,
-        itemsPerPage: 10,
+        itemsPerPage: 8,
         sortBy: [],
         sortDesc: [],
         groupBy: [],
@@ -345,8 +311,8 @@ export default {
       return result;
     },
     sortedAndFilteredProjects() {
-      const start = (this.page - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
+      const start = (this.page - 1) * 8;
+      const end = start + 8;
       
       let result = [...this.filteredProjects];
       
@@ -396,7 +362,7 @@ export default {
     initializeTableOptions() {
       this.tableOptions = {
         page: 1,
-        itemsPerPage: 10,
+        itemsPerPage: 8,
         sortBy: [],
         sortDesc: [],
         groupBy: [],
@@ -549,298 +515,285 @@ export default {
         }
       }, 0);
     },
+    getSortIcon(column) {
+      if (this.sortBy !== column) return 'mdi-sort';
+      return this.sortDesc ? 'mdi-sort-descending' : 'mdi-sort-ascending';
+    },
   }
 };
 </script>
 
 <style scoped>
-/* 테이블 컨테이너 스타일 수정 */
+/* 전체 컨텐츠 래퍼 */
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* 카드 타이틀 */
+.v-card-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: #2c3e50;
+  padding: 24px 0 !important;
+  letter-spacing: 0.5px;
+}
+
+/* 검색 영역 컨테이너 */
+.search-area {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  margin: 0 24px 20px 24px;
+}
+
+/* 검색 select 박스 현대적 스타일링 */
+.search-select {
+  width: 130px !important;
+}
+
+.search-select :deep(.v-field) {
+  border-radius: 8px;
+  background-color: #f5f5f5 !important;
+  border: 1px solid transparent;
+}
+
+.search-select :deep(.v-field.v-field--focused) {
+  border: 1px solid #9c27b0;
+  background-color: white !important;
+}
+
+.search-select :deep(.v-field__outline) {
+  display: none;
+}
+
+/* 검색 입력창 현대적 스타일링 */
+.search-input {
+  width: 280px !important;
+}
+
+.search-input :deep(.v-field) {
+  border-radius: 8px;
+  background-color: #f5f5f5 !important;
+  border: 1px solid transparent;
+}
+
+.search-input :deep(.v-field.v-field--focused) {
+  border: 1px solid #9c27b0;
+  background-color: white !important;
+}
+
+.search-input :deep(.v-field__outline) {
+  display: none;
+}
+
+/* 생성 버튼 */
+.neon-btn {
+  height: 40px;
+  min-width: 80px;
+  margin-left: -25px;  /* 버튼을 검색창 쪽으로 더 가깝게 이동 */
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  background-color: #3a3af4 !important;
+  color: white !important;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.neon-btn:hover {
+  background-color: #2828d4 !important;  /* 호버 시 살짝 어두워짐 */
+  transform: translateY(-1px);
+}
+
+.neon-btn:active {
+  transform: translateY(1px);
+}
+
+/* 검색 영역 반응형 */
+@media (max-width: 768px) {
+  .search-area {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .search-select,
+  .search-input {
+    width: 100% !important;
+    margin-left: 0;
+  }
+}
+
+/* 테이블 컨테이너 */
+.table-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* 테이블 기본 */
 .custom-table {
+  width: 98%;
+  max-width: 1300px;
+  margin: 0 auto;
+  background: white;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   overflow: hidden;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  background: white;
 }
 
-/* 테이블 헤더와 행 공통 스타일 */
-.table-header,
+/* 테이블 행 */
 .table-row {
   display: flex;
   width: 100%;
-  justify-content: space-between;
-  align-items: stretch;
-  padding: 0 16px;
-  box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
+  min-height: 48px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  align-items: center;
 }
 
-/* 가상 스크롤 컨테이너 스타일 */
-.virtual-scroll-container {
-  width: 100%;
-}
-
-/* 셀 공통 스타일 */
+/* 모든 셀 공통 */
 .header-cell,
 .cell {
   display: flex;
   align-items: center;
   padding: 12px 8px;
-  box-sizing: border-box;
-}
-
-/* 각 컬럼별 너비 고정 (기존 스타일 유지하면서 box-sizing 추가) */
-.header-cell[style*="width"],
-.cell[style*="width"] {
-  box-sizing: border-box;
-  flex-shrink: 0; /* 너비 고정 */
-}
-
-/* 테이블 행 스타일 수정 */
-.table-row {
-  display: flex;
-  width: 100%;
   min-height: 48px;
-  height: auto;
-  align-items: stretch;
-  padding: 0 16px;
-  box-sizing: border-box;
-  position: relative; /* 가상 요소 위치 기준 */
 }
 
-/* 행 구분선 추가 */
-.table-row:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 50px; /* 왼쪽 여백 */
-  right: 50px; /* 오른쪽 여백 */
-  bottom: 0;
-  height: 1px;
-  background-color: rgba(0, 0, 0, 0.06); /* 희미한 구분선 */
+/* 각 컬럼별 너비와 정렬 */
+/* 기수 */
+.header-cell:first-child {
+  flex: 0 0 80px;
+  padding-left: 32px;
+  text-align: right;
+  justify-content: flex-end;
 }
 
-/* 행 호버 효과 수정 */
-.table-row:hover {
-  background-color: rgba(0, 0, 0, 0.02); /* 더 부드러운 호버 효과 */
-}
-
-/* 기수 셀 스타일 수정 */
-.header-cell[style*="width: 70px"],
-.cell[style*="width: 70px"] {
-  min-width: 70px !important;
-  width: 70px !important;
-  justify-content: center;
+.cell:first-child {
+  flex: 0 0 80px;
+  padding-left: 16px;
   text-align: center;
-  padding: 12px 4px;
-  box-sizing: border-box;
+  justify-content: center;
 }
 
-/* 기능 키워드 컨테이너 스타일 수정 */
+/* 팀명 */
+.header-cell:nth-child(2),
+.cell:nth-child(2) {
+  flex: 0 0 160px;
+  justify-content: center;
+}
+
+/* 프로젝트 유형 */
+.header-cell:nth-child(3),
+.cell:nth-child(3) {
+  flex: 0 0 140px;
+  justify-content: center;
+}
+
+/* 서비스명 */
+.header-cell:nth-child(4),
+.cell:nth-child(4) {
+  flex: 0 0 180px;
+  justify-content: center;
+}
+
+/* 기능 키워드 */
+.header-cell:nth-child(5),
+.cell:nth-child(5) {
+  flex: 1;
+  min-width: 200px;
+  justify-content: center;
+}
+
+/* 조회수, 좋아요, 댓글 */
+.header-cell:nth-child(6),
+.cell:nth-child(6),
+.header-cell:nth-child(7),
+.cell:nth-child(7),
+.header-cell:nth-child(8),
+.cell:nth-child(8) {
+  flex: 0 0 80px;
+  justify-content: center;
+}
+
+/* 링크 */
+.header-cell:last-child,
+.cell:last-child {
+  flex: 0 0 60px;
+  justify-content: center;
+}
+
+/* 기능 태그 컨테이너 */
 .feature-container {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 4px !important;
-  width: 100%;
-  min-height: 48px;
-  align-content: flex-start;
-}
-
-/* 기능 키워드 칩 스타일 수정 */
-.feature-container .v-chip {
-  height: 32px !important;  /* 28px에서 32px로 증가 */
-  margin: 2px !important;
-  font-size: 12px !important;
-  white-space: normal !important;
-  padding: 0 14px !important;  /* 12px에서 14px로 패딩 증가 */
-}
-
-/* 기능 키워드 셀 스타일 수정 */
-.cell[style*="width: 220px"] {
-  height: auto !important;
-  align-items: flex-start !important;
-  padding: 8px 8px !important;  /* 6px에서 8px로 패딩 증가 */
-  min-height: 48px !important;
-}
-
-/* 다른 셀들의 세로 정렬 수정 */
-.cell {
-  display: flex;
-  align-items: center; /* 세로 중앙 정렬 */
-  height: 100%; /* 부모 높이에 맞춤 */
-}
-
-/* 선택된 칩 스타일 */
-.selected-chip {
-  background-color: #b7f892 !important;
-  color: black !important;
-}
-
-/* v-virtual-scroll 내부의 테이블 행에 대한 스타일 */
-:deep(.v-virtual-scroll__item) {
-  width: 100%;
-}
-
-.search-area {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.v-chip {
-  margin: 2px;
-  align-self: center;
-}
-
-.v-chip-group {
-  flex-wrap: wrap;
-}
-
-.v-btn.v-btn--icon.small {
-  width: 24px;
-  height: 24px;
-}
-
-.link-icon {
-  font-size: 16px !important;
-  cursor: pointer;
-}
-
-.link-icon:hover {
-  color: #1976d2 !important;
-}
-
-/* 생성 버튼 스타일 수정 */
-.neon-btn {
-  background-color: #6200ea !important;
-  color: white !important;
-  font-size: 0.95rem !important;
-  font-weight: 500 !important;
-  padding: 0 20px !important;
-  height: 36px !important;
-  border-radius: 8px !important;
-  letter-spacing: 0.5px !important;
-  text-transform: none !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 3px 5px rgba(98, 0, 234, 0.2) !important;
-}
-
-.neon-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(98, 0, 234, 0.3) !important;
-  background-color: #7c4dff !important;
-}
-
-.neon-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 5px rgba(98, 0, 234, 0.2) !important;
-}
-
-/* 테이블 셀 고정 너비 */
-::v-deep td {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-
-/* 정렬 아이콘 스타일 */
-.sort-icon {
-  color: rgba(0, 0, 0, 0.87) !important;
-  opacity: 0.87 !important;
-  transition: transform 0.2s;
-  font-size: 16px !important;
-  margin-left: 2px !important;
-  vertical-align: middle !important;
-}
-
-/* 컬럼 너비 조정 */
-.header-cell[style*="width: 60px"],
-.cell[style*="width: 60px"] {
-  min-width: 60px !important;
-  width: 60px !important;
-}
-
-.header-cell[style*="width: 90px"],
-.cell[style*="width: 90px"] {
-  min-width: 90px !important;
-  width: 90px !important;
-}
-
-.header-cell[style*="width: 120px"],
-.cell[style*="width: 120px"] {
-  min-width: 120px !important;
-  width: 120px !important;
-}
-
-.header-cell[style*="width: 140px"],
-.cell[style*="width: 140px"] {
-  min-width: 140px !important;
-  width: 140px !important;
-}
-
-.header-cell[style*="width: 220px"],
-.cell[style*="width: 220px"] {
-  min-width: 220px !important;
-  width: 220px !important;
-}
-
-/* 아이콘과 숫자가 있는 셀 스타일 수정 */
-.cell.text-center {
-  display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4px;
-  padding: 12px 4px;
-  box-sizing: border-box;
-  flex-shrink: 0;
 }
 
-/* 아이콘 정렬 */
-.v-icon {
-  margin: 0 2px;
+/* 태그 스타일 */
+.v-chip {
+  margin: 2px 4px;
 }
 
-/* 정렬 가능한 헤더 셀 스타일 */
-.header-cell {
-  cursor: default;
-  user-select: none;
-}
-
-.header-cell[style*="width"] {
-  position: relative;
-  transition: background-color 0.2s;
-}
-
-/* 정렬 가능한 헤더에 호버 효과 */
-.header-cell[style*="width"]:hover {
-  background-color: rgba(98, 0, 234, 0.04);
+/* 정렬 가능한 헤더 스타일 */
+.header-cell.sortable {
   cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+  position: relative;
 }
 
-/* 정렬 가능한 헤더에 작은 화살표 표시 */
-.header-cell[style*="width"]::after {
-  content: '↕';
-  opacity: 0;
+.header-cell.sortable:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* 정렬 아이콘 */
+.sort-icon {
   margin-left: 4px;
-  font-size: 10px;
+  font-size: 16px;
+  opacity: 0;
   transition: opacity 0.2s;
-  display: inline-block;
-  vertical-align: middle;
 }
 
-.header-cell[style*="width"]:hover:not(.active-sort)::after {
-  opacity: 0.3;
+.header-cell.sortable:hover .sort-icon,
+.header-cell.sortable.sorted .sort-icon {
+  opacity: 1;
 }
 
-/* 현재 정렬중인 컬럼 스타일 */
-.header-cell.active-sort {
-  color: #6200ea;
-  font-weight: 500;
+/* 페이지네이션 컨테이너 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;  /* 상하 여백 줄임 */
 }
 
-.header-cell.active-sort::after {
-  content: none;
+/* 페이지네이션 크기 조정 */
+.v-pagination :deep(.v-btn) {
+  min-width: 32px !important;  /* 버튼 너비 축소 */
+  width: 32px;
+  height: 32px !important;    /* 버튼 높이 축소 */
+  margin: 0 4px;              /* 버튼 간격 조정 */
+  padding: 0 !important;
+}
+
+/* 페이지 숫자 크기 조정 */
+.v-pagination :deep(.v-btn__content) {
+  font-size: 0.875rem;  /* 글자 크기 축소 */
+}
+
+/* 호버 효과 */
+.table-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* 정렬 아이콘이 있는 헤더 */
+.header-cell {
+  white-space: nowrap;
 }
 </style>
 
