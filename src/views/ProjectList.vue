@@ -173,7 +173,16 @@ export default {
   async created() {
     const savedPage = localStorage.getItem('currentPage');
     this.currentPage = savedPage ? parseInt(savedPage) : 1;
-    await this.fetchProjects();
+    
+    // URL 쿼리 파라미터 확인
+    const { searchType, searchKeyword } = this.$route.query;
+    if (searchType && searchKeyword) {
+      this.searchType = searchType;
+      this.searchKeyword = searchKeyword;
+      await this.searchProjects();  // 검색 실행
+    } else {
+      await this.fetchProjects();
+    }
   },
   computed: {
     filteredProjects() {
