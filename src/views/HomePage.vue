@@ -14,15 +14,24 @@
           </div>
           <div class="hero-stats">
             <div class="stat-item">
-              <div class="stat-number">{{ totalPosts }}+</div>
+              <div class="stat-number">
+                <span class="number">{{ displayPosts }}</span>
+                <span class="plus-mark">+</span>
+              </div>
               <div class="stat-label">지금까지의 게시글</div>
             </div>
             <div class="stat-item">
-              <div class="stat-number">{{ totalUsers }}+</div>
+              <div class="stat-number">
+                <span class="number">{{ displayUsers }}</span>
+                <span class="plus-mark">+</span>
+              </div>
               <div class="stat-label">활동하는 멤버</div>
             </div>
             <div class="stat-item">
-              <div class="stat-number">{{ totalRooms }}+</div>
+              <div class="stat-number">
+                <span class="number">{{ displayRooms }}</span>
+                <span class="plus-mark">+</span>
+              </div>
               <div class="stat-label">실시간 채팅</div>
             </div>
           </div>
@@ -106,7 +115,7 @@
         <!-- 메인 컨텐츠 영역 -->
         <v-col cols="12" lg="9" class="pl-lg-8">
           <!-- 일일 트렌딩 섹션 -->
-          <section class="trending-section mb-8" style="margin-top: -16px;">
+          <section class="trending-section mb-8" style="margin-top: 1rem;">
             <div class="section-header">
               <h2>🔥 일일 트렌딩</h2>
             </div>
@@ -428,7 +437,10 @@ export default {
       totalRooms: 0,  // 전체 채팅방 수 추가
       trendingPosts: [],
       currentTrendingPage: 0,
-      trendingInterval: null
+      trendingInterval: null,
+      displayPosts: 0,
+      displayUsers: 0,
+      displayRooms: 0,
     }
   },
 
@@ -706,6 +718,40 @@ export default {
           searchKeyword: batchNumber
         }
       });
+    },
+
+    animateValue(start, end, duration, updateCallback) {
+      const startTimestamp = performance.now();
+      
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTimestamp;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // easeOutQuart 이징 함수 적용
+        const easeProgress = 1 - Math.pow(1 - progress, 4);
+        const current = Math.floor(start + (end - start) * easeProgress);
+        
+        updateCallback(current);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    },
+
+    async startCountAnimation() {
+      await Promise.all([
+        this.fetchTotalPosts(),
+        this.fetchTotalUsers(),
+        this.fetchTotalRooms()
+      ]);
+
+      // 2000ms -> 1500ms로 변경
+      this.animateValue(0, this.totalPosts, 1500, (val) => this.displayPosts = val);
+      this.animateValue(0, this.totalUsers, 1500, (val) => this.displayUsers = val);
+      this.animateValue(0, this.totalRooms, 1500, (val) => this.displayRooms = val);
     }
   },
 
@@ -714,6 +760,7 @@ export default {
     if (this.trendingInterval) {
       clearInterval(this.trendingInterval);
     }
+    this.startCountAnimation();
   },
 }
 </script>
@@ -727,12 +774,14 @@ export default {
 .hero-section {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
-  padding: 2rem 0;
+  padding-top: 0.5rem;
+  padding-bottom: 2rem;
   text-align: center;
+  margin-top: -1rem;
 }
 
 .hero-text {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .hero-text h1 {
@@ -751,7 +800,7 @@ export default {
 }
 
 .hero-stats {
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   display: flex;
   justify-content: center;
   gap: 4rem;
@@ -762,23 +811,38 @@ export default {
 }
 
 .stat-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  gap: 4px; /* 숫자와 + 사이의 간격 */
+}
+
+.number {
   font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
   color: white;
+}
+
+.plus-mark {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-right: 4px; /* + 기호와 텍스트 사이의 간격 */
 }
 
 .stat-label {
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
+  margin-top: 0.25rem;
 }
 
 .category-section {
   display: grid;
   grid-template-columns: repeat(3, 280px);
   gap: 2rem;
-  margin-top: -3rem;
-  margin-bottom: 3rem;
+  margin-top: -5.5rem;
+  margin-bottom: 4rem;
   justify-content: center;
 }
 
@@ -789,7 +853,7 @@ export default {
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  height: 180px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -829,7 +893,8 @@ export default {
 }
 
 .trending-section {
-  margin-top: 0;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
 }
 
 .trending-container {
@@ -1057,7 +1122,7 @@ export default {
 }
 
 .main-content {
-  padding-top: 2rem;
+  padding-top: 3rem;
   padding-bottom: 3rem;
 }
 
