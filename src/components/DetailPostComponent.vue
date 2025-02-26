@@ -606,6 +606,21 @@ export default {
   line-height: 1.8;
   color: #2d3748;
 }
+/* 일단 작동안함 */
+.post-content img {
+  max-width: 100%; /* 본문 너비에 맞게 조정 */
+  height: auto; /* 비율 유지하며 크기 조정 */
+  display: block; /* 블록 요소로 설정하여 레이아웃 유지 */
+  object-fit: contain; /* 비율 유지하며 잘리지 않도록 설정 */
+}
+/* 퀼에디터를 통해 업로드된 이미지는 사실상 html태그니까 위에 img설정이 안먹히고 아래 설정히 먹힘 */
+::v-deep(.post-content img) {
+  max-width: 100% !important; /* 본문 크기에 맞게 조정 */
+  height: auto !important; /* 비율 유지 */
+  display: block !important; /* 레이아웃 유지 */
+  margin: 10px auto !important; /* 중앙 정렬 */
+  object-fit: contain !important; /* 비율 유지하며 잘리지 않도록 */
+}
 
 .like-btn {
   border-radius: 20px;
