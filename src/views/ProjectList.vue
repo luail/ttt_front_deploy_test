@@ -6,8 +6,9 @@
           <v-card-title class="text-center text-h5">
             전체 프로젝트 조회
           </v-card-title>
-          <v-row align="center">
-            <v-col cols="2">
+          <v-row align="center" justify="center" class="px-4 py-4">
+            <!-- 검색 옵션 선택 -->
+            <v-col cols="12" sm="2" md="2" class="text-center">
               <v-select
                   v-model="searchType"
                   :items="searchOptions"
@@ -15,23 +16,42 @@
                   item-value="value"
                   outlined
                   dense
+                  hide-details
+                  class="search-select"
+                  bg-color="grey-lighten-4"
+                  variant="outlined"
               ></v-select>
             </v-col>
-            <v-col cols="8">
+            <!-- 검색 입력창 -->
+            <v-col cols="12" sm="7" md="8" class="text-center">
               <v-text-field
                   v-model="searchKeyword"
                   label="검색어 입력"
                   outlined
                   dense
+                  hide-details
                   clearable
+                  class="search-input"
+                  bg-color="grey-lighten-4"
+                  variant="outlined"
+                  prepend-inner-icon="mdi-magnify"
                   @keyup.enter="searchProjects"
               ></v-text-field>
             </v-col>
-            <v-col cols="2" class="d-flex justify-space-between">
-              <v-btn color="primary" class="text-white font-weight-bold" @click="searchProjects">
+            <!-- 버튼 그룹 -->
+            <v-col cols="12" sm="3" md="2" class="text-center d-flex gap-2">
+              <v-btn 
+                  :color="'#6200ea'" 
+                  class="search-button font-weight-bold flex-grow-1" 
+                  elevation="2"
+                  @click="searchProjects">
                 검색
               </v-btn>
-              <v-btn @click="goToProjectCreate">
+              <v-btn 
+                  :color="'#DA5A2A'"
+                  class="create-button font-weight-bold flex-grow-1" 
+                  elevation="2"
+                  @click="goToProjectCreate">
                 생성
               </v-btn>
             </v-col>
@@ -334,5 +354,27 @@ export default {
 
 .sortable-header {
   cursor: pointer;
+}
+
+.search-select {
+  border-radius: 8px;
+  width: 100%;
+}
+
+.search-input {
+  border-radius: 8px;
+  width: 100%;
+}
+
+.search-button, .create-button {
+  height: 36px;
+  border-radius: 8px;
+  text-transform: none;
+  min-width: 70px;
+  padding: 0 16px;
+}
+
+.gap-2 {
+  gap: 8px;
 }
 </style>
