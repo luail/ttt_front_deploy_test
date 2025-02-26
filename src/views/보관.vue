@@ -1,87 +1,78 @@
 <template>
   <v-container class="pt-0">
     <v-row>
+      <!-- 왼쪽 사이드바 -->
+      <v-col cols="2">
+        <div class="category-sidebar">
+          <h3 class="sidebar-title">카테고리</h3>
+          <v-list class="category-list pa-0">
+            <v-list-item
+              v-for="category in categoryList"
+              :key="category.categoryId"
+              @click="selectedBoard(category.categoryId)"
+              :class="{ 'active-category': category.categoryId === selectedCategory }"
+              class="category-item"
+              dense
+            >
+              <v-list-item-content>
+                <v-list-item-title 
+                  :class="{ 'selected-text': category.categoryId === selectedCategory }"
+                >
+                  {{ category.categoryName }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </div>
+      </v-col>
+
       <!-- 메인 컨텐츠 -->
       <v-col cols="8">
         <v-card class="post-container">
-          <div class="post-title pa-6 pb-2">
-            <div class="d-flex justify-space-between align-center">
-              <h1>프로젝트 개요</h1>
-              <div v-if="isAuthor" class="post-actions">
-                <v-btn
-                  color="primary"
-                  text
-                  class="mr-2"
-                  @click="editProject"
-                >
-                  수정
-                </v-btn>
-                <v-btn
-                  color="error"
-                  text
-                  @click="deleteProject"
-                >
-                  삭제
-                </v-btn>
-              </div>
-            </div>
-          </div>
           <!-- 게시글 헤더 -->
           <div class="post-header pa-6">
-            <!-- 프로젝트 정보 테이블 -->
-            <div class="project-info-table">
-              <div class="info-row">
-                <div class="info-label">과제타입</div>
-                <div class="info-value">
-                  <!-- {{ thisProject.projectType }} -->
-                  <span class="remaining-time">{{ thisProject.projectType }}</span>
-                  <!-- <span class="status-tag">{{ thisProject.projectType }}</span> -->
+            <div class="d-flex">
+              <div class="category-tag">{{ thisPost.categoryName || '' }}</div>
+            </div>
+            
+            <div class="d-flex align-center mt-4">
+              <v-avatar size="36" class="mr-3">
+                <v-img
+                  :src="thisPost.profileImageOfAuthor || require('@/assets/basicProfileImage.png')"
+                  :alt="thisPost.authorNickName"
+                  class="profile-image"
+                ></v-img>
+              </v-avatar>
+              <div>
+                <div class="author-name">
+                  {{ thisPost.authorNickName }}
+                  <v-icon v-if="!isAuthor" class="ml-2" @click="gotoChat(thisPost.postUserId)">mdi-forum-outline</v-icon>
                 </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">서비스명</div>
-                <div class="info-value">
-                  <span class="remaining-time">{{ thisProject.serviceName }}</span>
+                <div class="post-meta">
+                  {{ formatDate(thisPost.createdTime) }} · 조회 {{ thisPost.viewCount || 0 }}
                 </div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">팀명</div>
-                <div class="remaining-time">{{ thisProject.teamName }}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">주제</div>
-                <div class="status-tag">{{ thisProject.domain }}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">링크</div>
-                <div class="info-value">{{ thisProject.link }}</div>
-              </div>
-              <div class="info-row">
-                <div class="info-label">올린이</div>
-                <div class="info-value">{{ thisProject.userName }}</div>
-                <v-icon v-if="!isAuthor" class="ml-2" @click="gotoChat(thisProject.userRealId)">mdi-forum-outline</v-icon>
               </div>
             </div>
           </div>
 
           <!-- 게시글 제목 -->
           <div class="post-title pa-6 pb-2">
-            <h1>프로젝트 소개</h1>
+            <h1>{{ thisPost.title }}</h1>
           </div>
 
           <!-- 게시글 내용 -->
-          <div class="post-content pa-6" v-html="thisProject.explanation"></div>
+          <div class="post-content pa-6" v-html="thisPost.contents"></div>
 
           <!-- 좋아요 & 공유 버튼 -->
           <v-card-actions class="post-actions pa-6">
             <v-btn
               text
-              :color="thisProject.liked ? 'primary' : ''"
+              :color="thisPost.liked ? 'primary' : ''"
               @click="toggleLike"
               class="like-btn"
             >
-              <v-icon left>{{ thisProject.liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
-              {{ thisProject.likesCount || 0 }}
+              <v-icon left>{{ thisPost.liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
+              {{ thisPost.likesCount || 0 }}
             </v-btn>
           </v-card-actions>
 
@@ -117,8 +108,8 @@
             </div>
 
             <!-- 댓글 목록 -->
-            <div v-if="thisProject.commentList && thisProject.commentList.length > 0" class="comments-container">
-              <div v-for="comment in thisProject.commentList" :key="comment.commentId" class="comment-item">
+            <div v-if="thisPost.commentList && thisPost.commentList.length > 0" class="comments-container">
+              <div v-for="comment in thisPost.commentList" :key="comment.commentId" class="comment-item">
                 <!-- 댓글 헤더 -->
                 <div class="comment-header">
                   <img :src="comment.profileImageOfCommentAuthor || require('@/assets/basicProfileImage.png')" class="comment-avatar" />
@@ -308,8 +299,8 @@ dayjs.locale('ko');
 export default {
   data() {
     return {
-      thisProject: {},
-      commetList:[],
+      categoryList: [],
+      thisPost: {},
       userId: '',
       userProfileImage: '',
       newComment: '',
@@ -329,7 +320,7 @@ export default {
   async created() {
     // 컴포넌트가 생성될 때 스크롤을 맨 위로 이동
     window.scrollTo(0, 0);
-
+    
     // 게시글 상세 정보 불러오기
     await this.refreshPost();
 
@@ -338,18 +329,7 @@ export default {
     if (token) {
       const decodedToken = jwtDecode(token);
       this.userId = decodedToken.sub;
-      console.log("로그인아이디"+this.userId)
-      this.isAuthor = this.thisProject.userId === this.userId;
-      console.log("맞혀봐")
-      console.log(this.isAuthor)
-      
-      // 사용자 프로필 이미지 가져오기
-      // try {
-      //   const userResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/profile`);
-      //   this.userProfileImage = userResponse.data.profileImage;
-      // } catch (error) {
-      //   console.log("프로필 이미지 로드 실패", error);
-      // }
+      this.isAuthor = this.thisPost.userId === this.userId;
     }
   },
 
@@ -359,9 +339,9 @@ export default {
       try {
         const comment = {
           contents: this.newComment,
-          projectId: this.$route.params.id
+          postId: this.$route.params.id
         };
-        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/createforp`, comment);
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/create`, comment);
         this.newComment = '';
         await this.refreshPost();
       } catch (error) {
@@ -374,10 +354,10 @@ export default {
       try {
         const reply = {
           contents: this.newReply,
-          projectId: this.$route.params.id,
+          postId: this.$route.params.id,
           parentId: parentId
         };
-        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/createforp`, reply);
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/create`, reply);
         this.newReply = '';
         this.replyCommentVisible[parentId] = false;
         await this.refreshPost();
@@ -446,10 +426,8 @@ export default {
     // 게시글 새로고침
     async refreshPost() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/detailsee/${this.$route.params.id}`);
-        this.thisProject = response.data.result;
-        console.log("디프")
-        console.log(this.thisProject);
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/detail/${this.$route.params.id}`);
+        this.thisPost = response.data.result;
       } catch (error) {
         console.log("게시글 새로고침 실패", error);
       }
@@ -467,19 +445,23 @@ export default {
         : formattedDate.format('YYYY-MM-DD');
     },
 
+    // 왼쪽 사이드바 게시판 이동
+    selectedBoard(boardId){  
+      this.$router.push(`/ttt/post/list/${boardId}`);
+    },
+
     // 좋아요 누르면, 아이콘 색깔, 좋아요 개수 변화
     async toggleLike(){
       try{
-        const projectId = this.$route.params.id
-        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/Likes/projectLike/${projectId}`);
-        console.log("조아여")
+        const postId = this.$route.params.id
+        const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/Likes/add/${postId}`);
         console.log(response);
-        this.thisProject.liked=response.data.result.liked;
-        this.thisProject.likesCount=response.data.result.likesCount;
+        this.thisPost.liked=response.data.result.liked;
+        this.thisPost.likesCount=response.data.result.likesCount;
       }catch(error){
         console.log("좋아요 실패",error);
       }  
-      },
+    },
 
     async gotoChat(otherUserId) {
       const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/private/create?otherUserId=${otherUserId}`) 
@@ -518,10 +500,10 @@ export default {
       try {
         const nestedReply = {
           contents: this.newNestedReply,
-          Id: this.$route.params.id,
+          postId: this.$route.params.id,
           parentId: parentId
         };
-        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/createforp`, nestedReply);
+        await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/create`, nestedReply);
         this.newNestedReply = '';
         this.replyCommentVisible[parentId] = false;
         await this.refreshPost();
@@ -554,21 +536,6 @@ export default {
     cancelNestedReplyEdit() {
       this.editingNestedReplyId = null;
       this.editingNestedReplyContent = '';
-    },
-
-    async editProject() {
-      this.$router.push(`/ttt/project/update/${this.$route.params.id}`);
-    },
-    
-    async deleteProject() {
-      if (confirm('정말로 이 프로젝트를 삭제하시겠습니까?')) {
-        try {
-          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/project/delete/${this.$route.params.id}`);
-          this.$router.push('/ttt/project/find');
-        } catch (error) {
-          console.log("프로젝트 삭제 실패", error);
-        }
-      }
     },
   }
 }
@@ -1013,59 +980,6 @@ export default {
 .nested-reply-form {
   margin-left: 32px;
   margin-top: 8px;
-}
-
-/* 프로젝트 정보 테이블 스타일 */
-.project-info-table {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-
-.info-row {
-  display: flex;
-  padding: 8px 0;
-  align-items: center;
-}
-
-.info-row:not(:last-child) {
-  border-bottom: 1px solid #e9ecef;
-}
-
-.info-label {
-  width: 80px;
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.info-value {
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.remaining-time {
-  color: #9C27B0;
-  font-weight: 500;
-}
-
-.status-tag {
-  background-color: #E3F2FD;
-  color: #1976D2;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.duration {
-  color: #666;
-  font-size: 13px;
 }
 </style>
 
