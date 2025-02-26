@@ -14,10 +14,14 @@
         <v-btn small class="profile-upload-btn" color="primary" @click="selectProfileImage">
           사진 등록
         </v-btn>
+<<<<<<< Updated upstream
         <!-- 사용자 정보 -->
         <div class="profile-info">
           <h3 class="username">{{ localUserName }}</h3>
         </div>
+=======
+        
+>>>>>>> Stashed changes
       </div>
 
       <v-divider class="my-4"></v-divider>
