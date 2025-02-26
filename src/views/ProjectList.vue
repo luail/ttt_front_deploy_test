@@ -143,33 +143,33 @@ export default {
       searchKeyword: '',
       selectAll: false,
       headers: [
-        { title: '기수', key: 'batch', align: 'center', width: '90px', sortable: true },
-        { title: '팀명', key: 'teamName', width: '200px', sortable: true },
-        { title: '프로젝트 유형', key: 'projectType', width: '150px', sortable: true },
-        { title: '서비스명', key: 'serviceName', width: '150px', sortable: true },
-        { title: '기능 키워드', key: 'primaryFeatureList', width: '300px', sortable: false },
+        { title: '기수', key: 'batch', align: 'center', width: '8%', sortable: true },
+        { title: '팀명', key: 'teamName', width: '10%', sortable: true },
+        { title: '프로젝트 유형', key: 'projectType', width: '14%', sortable: true },
+        { title: '서비스명', key: 'serviceName', width: '12%', sortable: true },
+        { title: '기능 키워드', key: 'primaryFeatureList', width: '20%', sortable: false },
         { 
           title: '조회수', 
           key: 'viewCount', 
           align: 'center', 
-          width: '100px', 
+          width: '10%', 
           sortable: true 
         },
         { 
           title: '좋아요', 
           key: 'likesCounts', 
           align: 'center', 
-          width: '100px', 
+          width: '10%', 
           sortable: true 
         },
         { 
           title: '댓글', 
           key: 'commentCounts', 
           align: 'center', 
-          width: '100px', 
+          width: '8%', 
           sortable: true 
         },
-        { title: '링크', key: 'link', align: 'center', width: '80px', sortable: false },
+        { title: '링크', key: 'link', align: 'center', width: '8%', sortable: false },
       ],
       totalItems: 0, //백엔드에서 가져온 전체 프로젝트 개수
       totalPages: 0  //전체 페이지 개수
@@ -319,6 +319,7 @@ beforeRouteLeave(to, from, next) {
 
 <style>
 .custom-table {
+  width: 100%;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
 }
