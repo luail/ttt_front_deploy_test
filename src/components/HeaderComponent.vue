@@ -9,7 +9,7 @@
               <h1 class="logo">
                 <span class="highlight">T</span><span class="small-text">ik</span>
                 <span class="highlight">T</span><span class="small-text">ak</span>
-                <span class="highlight">T</span><span class="small-text">alk</span>
+                <span class="highlight">T</span><span class="small-text">ok</span>
               </h1>
             </router-link>
           </v-col>
