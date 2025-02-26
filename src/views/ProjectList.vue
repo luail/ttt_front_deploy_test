@@ -6,9 +6,8 @@
       </v-card-title>
       
       <!-- 검색 영역 -->
-      <v-row align="center">
-        <v-spacer></v-spacer>
-        <v-col cols="9">
+      <v-row align="center" justify="center" class="pl-12">
+        <v-col cols="6">
           <div class="search-area">
             <v-select
               v-model="searchType"
@@ -28,54 +27,74 @@
             ></v-text-field>
           </div>
         </v-col>
-        <v-col cols="2" class="d-flex justify-end pe-12">
+        <v-col cols="2" class="d-flex align-center">
           <v-btn @click="goToProjectCreate" color="purple" class="neon-btn">생성</v-btn>
         </v-col>
-        <v-spacer></v-spacer>
       </v-row>
 
       <!-- 커스텀 테이블 헤더 -->
       <v-card-text>
         <div class="custom-table">
           <div class="table-header">
-            <div class="header-cell text-center" style="width: 70px" @click="sort('batch')">
+            <div class="header-cell text-center" 
+                 :class="{ 'active-sort': sortBy === 'batch' }" 
+                 style="width: 70px" 
+                 @click="sort('batch')">
               기수
               <v-icon small class="sort-icon" v-if="sortBy === 'batch'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
               </v-icon>
             </div>
-            <div class="header-cell text-truncate" style="width: 120px" @click="sort('teamName')">
+            <div class="header-cell text-truncate" 
+                 :class="{ 'active-sort': sortBy === 'teamName' }"
+                 style="width: 120px" 
+                 @click="sort('teamName')">
               팀명
               <v-icon small class="sort-icon" v-if="sortBy === 'teamName'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
               </v-icon>
             </div>
-            <div class="header-cell" style="width: 140px" @click="sort('projectType')">
+            <div class="header-cell" 
+                 :class="{ 'active-sort': sortBy === 'projectType' }"
+                 style="width: 140px" 
+                 @click="sort('projectType')">
               프로젝트 유형
               <v-icon small class="sort-icon" v-if="sortBy === 'projectType'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
               </v-icon>
             </div>
-            <div class="header-cell text-truncate" style="width: 140px" @click="sort('serviceName')">
+            <div class="header-cell text-truncate" 
+                 :class="{ 'active-sort': sortBy === 'serviceName' }"
+                 style="width: 140px" 
+                 @click="sort('serviceName')">
               서비스명
               <v-icon small class="sort-icon" v-if="sortBy === 'serviceName'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
               </v-icon>
             </div>
             <div class="header-cell" style="width: 220px">기능 키워드</div>
-            <div class="header-cell text-center" style="width: 90px" @click="sort('viewCount')">
+            <div class="header-cell text-center" 
+                 :class="{ 'active-sort': sortBy === 'viewCount' }"
+                 style="width: 90px" 
+                 @click="sort('viewCount')">
               조회수
               <v-icon small class="sort-icon" v-if="sortBy === 'viewCount'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
               </v-icon>
             </div>
-            <div class="header-cell text-center" style="width: 90px" @click="sort('likesCounts')">
+            <div class="header-cell text-center" 
+                 :class="{ 'active-sort': sortBy === 'likesCounts' }"
+                 style="width: 90px" 
+                 @click="sort('likesCounts')">
               좋아요
               <v-icon small class="sort-icon" v-if="sortBy === 'likesCounts'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
               </v-icon>
             </div>
-            <div class="header-cell text-center" style="width: 70px" @click="sort('commentCounts')">
+            <div class="header-cell text-center" 
+                 :class="{ 'active-sort': sortBy === 'commentCounts' }"
+                 style="width: 70px" 
+                 @click="sort('commentCounts')">
               댓글
               <v-icon small class="sort-icon" v-if="sortBy === 'commentCounts'">
                 {{ sortDesc ? 'mdi-arrow-down' : 'mdi-arrow-up' }}
@@ -689,14 +708,30 @@ export default {
   color: #1976d2 !important;
 }
 
+/* 생성 버튼 스타일 수정 */
 .neon-btn {
-  font-size: 1rem !important;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  background-color: #6200ea !important;
+  color: white !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  padding: 0 20px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  letter-spacing: 0.5px !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 3px 5px rgba(98, 0, 234, 0.2) !important;
 }
 
 .neon-btn:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(98, 0, 234, 0.3) !important;
+  background-color: #7c4dff !important;
+}
+
+.neon-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(98, 0, 234, 0.2) !important;
 }
 
 /* 테이블 셀 고정 너비 */
@@ -708,9 +743,11 @@ export default {
 
 /* 정렬 아이콘 스타일 */
 .sort-icon {
-  position: relative !important;
-  margin-left: 4px !important;
-  display: inline-flex !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+  opacity: 0.87 !important;
+  transition: transform 0.2s;
+  font-size: 16px !important;
+  margin-left: 2px !important;
   vertical-align: middle !important;
 }
 
@@ -759,6 +796,48 @@ export default {
 /* 아이콘 정렬 */
 .v-icon {
   margin: 0 2px;
+}
+
+/* 정렬 가능한 헤더 셀 스타일 */
+.header-cell {
+  cursor: default;
+  user-select: none;
+}
+
+.header-cell[style*="width"] {
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+/* 정렬 가능한 헤더에 호버 효과 */
+.header-cell[style*="width"]:hover {
+  background-color: rgba(98, 0, 234, 0.04);
+  cursor: pointer;
+}
+
+/* 정렬 가능한 헤더에 작은 화살표 표시 */
+.header-cell[style*="width"]::after {
+  content: '↕';
+  opacity: 0;
+  margin-left: 4px;
+  font-size: 10px;
+  transition: opacity 0.2s;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.header-cell[style*="width"]:hover:not(.active-sort)::after {
+  opacity: 0.3;
+}
+
+/* 현재 정렬중인 컬럼 스타일 */
+.header-cell.active-sort {
+  color: #6200ea;
+  font-weight: 500;
+}
+
+.header-cell.active-sort::after {
+  content: none;
 }
 </style>
 

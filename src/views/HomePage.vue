@@ -378,69 +378,21 @@ export default {
   
   data() {
     return {
-      currentBanner: 0,
-      banners: [
-        {
-          image: require('@/assets/tttad.png'),
-          link: 'https://www.inflearn.com/users/1014633/@bradkim',
-          bgColor: '#00C853'
-        },
-        {
-          image: require('@/assets/birthdayAdd.png'),  // 두 번째 배너 이미지
-          bgColor: '#1976D2'
-        },
-        {
-          image: require('@/assets/kakaohacademy.png'),  // 세 번째 배너 이미지
-          bgColor: '#FFC107'
-        }
-      ],
-      topWriters: [],
-      topBatches: [],
-      recentPosts: [],
-      popularPosts: [],
-      informationPosts: [],
-      algorithmPosts: [],
-      activeChats: [],
-      categories: [
-        {
-          name: '전체게시판',
-          icon: 'mdi-view-list',
-          color: 'primary',
-          description: '모든 게시글 모음',
-          categoryId: '0'  // 전체게시판
-        },
-        {
-          name: '자유게시판',
-          icon: 'mdi-account-group',
-          color: 'success',
-          description: '개발자들의 소통 공간',
-          categoryId: '1'  // 자유게시판
-        },
-        {
-          name: '정보게시판',
-          icon: 'mdi-information',
-          color: 'warning',
-          description: '개발자 정보 공유',
-          categoryId: '2'  // 정보게시판
-        },
-        {
-          name: '알고리즘',
-          icon: 'mdi-code-brackets',
-          color: 'error',
-          description: '알고리즘 문제 해결',
-          categoryId: '3'  // 알고리즘 게시판
-        }
-      ],
-      batchRanks: [], // 배치 랭킹 데이터
-      totalUsers: 0,  // 전체 사용자 수 추가
-      totalPosts: 0,  // 전체 게시글 수 추가
-      totalRooms: 0,  // 전체 채팅방 수 추가
-      trendingPosts: [],
-      currentTrendingPage: 0,
-      trendingInterval: null,
+      totalPosts: 0,
+      totalUsers: 0,
+      totalRooms: 0,
       displayPosts: 0,
       displayUsers: 0,
       displayRooms: 0,
+      topWriters: [],
+      batchRanks: [],
+      recentPosts: [],      // posts.recent 대신 직접 사용
+      popularPosts: [],     // posts.popular 대신 직접 사용
+      informationPosts: [], // posts.information 대신 직접 사용
+      algorithmPosts: [],   // posts.algorithm 대신 직접 사용
+      trendingPosts: [],
+      currentTrendingPage: 0,
+      trendingInterval: null
     }
   },
 
@@ -457,23 +409,7 @@ export default {
   },
 
   async created() {
-    try {
-      await this.fetchTrendingPosts(); // 먼저 트렌딩 포스트를 가져오도록 수정
-      await Promise.all([
-        this.fetchRecentPosts(),
-        this.fetchPopularPosts(),
-        this.fetchInformationPosts(),
-        this.fetchAlgorithmPosts(),
-        this.topRanker(),
-        this.fetchBatchRanks(),
-        this.getChatRoom(),
-        this.fetchTotalUsers(),
-        this.fetchTotalPosts(),
-        this.fetchTotalRooms()
-      ]);
-    } catch (error) {
-      console.error('데이터 로딩 중 오류 발생:', error);
-    }
+    await this.fetchData();
   },
 
   methods: {
@@ -486,60 +422,76 @@ export default {
             return dayjs().diff(formattedDate,'hour')<24 ? formattedDate.fromNow() : formattedDate.format('YYYY-MM-DD');
         },
 
-    async topRanker(){
-          const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/rankingfive`)
-          this.topWriters = response.data.result;
-    },   
-
-    async fetchBatchRanks() {
+    async fetchData() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/batchRank`);
-        this.batchRanks = response.data.result;
+        // 1. 필수 데이터만 병렬로 요청
+        const [
+          postsCount, 
+          usersCount, 
+          roomsCount,
+          recent,
+          popular,
+          information,
+          algorithm,
+          trending,
+          writers,
+          batches
+        ] = await Promise.all([
+          // 통계 데이터
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/total/count`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/total/user`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/total/rooms`),
+          // 게시글 데이터
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/1?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/2?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/3?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/popular/like`),
+          // 랭킹 데이터
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/rankingfive`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/batchRank`)
+        ]);
+
+        // 2. 데이터 설정
+        // 통계 데이터
+        this.totalPosts = postsCount.data.result;
+        this.totalUsers = usersCount.data.result;
+        this.totalRooms = roomsCount.data.result;
+
+        // 게시글 데이터
+        this.recentPosts = recent.data.result.content;
+        this.popularPosts = popular.data.result.content;
+        this.informationPosts = information.data.result.content;
+        this.algorithmPosts = algorithm.data.result.content;
+        this.trendingPosts = trending.data.result;
+
+        // 랭킹 데이터
+        this.topWriters = writers.data.result;
+        this.batchRanks = batches.data.result;
+
+        // 3. 애니메이션 시작
+        this.startCountAnimation();
+        this.startTrendingSlideshow();
+
       } catch (error) {
-        console.error('배치 랭크 로딩 실패:', error);
+        console.error('데이터 로딩 실패:', error);
       }
     },
 
-    async fetchRecentPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=0&size=4`);
-        this.recentPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.log("전체 게시물 로딩 실패", error);
+    // 트렌딩 슬라이드쇼 최적화
+    startTrendingSlideshow() {
+      if (this.trendingInterval) {
+        clearInterval(this.trendingInterval);
       }
+      this.trendingInterval = setInterval(this.nextTrendingPage, 10000);
     },
 
-    async fetchPopularPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/1?page=0&size=4`);
-        this.popularPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.error('자유게시판 게시물 로딩 실패:', error);
-      }
-    },
-
-    async fetchInformationPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/2?page=0&size=4`);
-        this.informationPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.error('정보 게시물 로딩 실패:', error);
-      }
-    },
-
-    async fetchAlgorithmPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/3?page=0&size=4`);
-        this.algorithmPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.error('알고리즘 게시물 로딩 실패:', error);
-      }
-    },
-
-    async getChatRoom(){
-     const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/list`);
-     this.activeChats = response.data.result.content;
-     console.log(this.activeChats)
+    // 카운트 애니메이션 최적화
+    startCountAnimation() {
+      const duration = 1500;
+      this.animateValue(0, this.totalPosts, duration, val => this.displayPosts = val);
+      this.animateValue(0, this.totalUsers, duration, val => this.displayUsers = val);
+      this.animateValue(0, this.totalRooms, duration, val => this.displayRooms = val);
     },
 
     getMedalColor(index) {
@@ -588,57 +540,10 @@ export default {
       return (this.currentTrendingPage * 3) + index;
     },
 
-    startTrendingSlideshow() {
-      this.trendingInterval = setInterval(() => {
-        this.nextTrendingPage();
-      }, 10000);
-    },
-
     resetTrendingInterval() {
       if (this.trendingInterval) {
         clearInterval(this.trendingInterval);
         this.startTrendingSlideshow();
-      }
-    },
-
-    async fetchTotalUsers() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/total/user`);
-        this.totalUsers = response.data.result;
-      } catch (error) {
-        console.error('전체 사용자 수 로딩 실패:', error);
-      }
-    },
-
-    async fetchTotalPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/total/count`);
-        this.totalPosts = response.data.result;
-      } catch (error) {
-        console.error('전체 게시글 수 로딩 실패:', error);
-      }
-    },
-
-    async fetchTotalRooms() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/total/rooms`);
-        this.totalRooms = response.data.result;
-      } catch (error) {
-        console.error('전체 채팅방 수 로딩 실패:', error);
-      }
-    },
-
-    async fetchTrendingPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/popular/like`);
-        console.log('트렌딩 포스트 응답:', response.data); // 데이터 확인용
-        if (response.data && response.data.result) {
-          this.trendingPosts = response.data.result;
-          this.startTrendingSlideshow();
-        }
-      } catch (error) {
-        console.error('트렌딩 게시글 로딩 실패:', error);
-        this.trendingPosts = [];
       }
     },
 
@@ -739,29 +644,14 @@ export default {
       };
       
       requestAnimationFrame(animate);
-    },
-
-    async startCountAnimation() {
-      await Promise.all([
-        this.fetchTotalPosts(),
-        this.fetchTotalUsers(),
-        this.fetchTotalRooms()
-      ]);
-
-      // 2000ms -> 1500ms로 변경
-      this.animateValue(0, this.totalPosts, 1500, (val) => this.displayPosts = val);
-      this.animateValue(0, this.totalUsers, 1500, (val) => this.displayUsers = val);
-      this.animateValue(0, this.totalRooms, 1500, (val) => this.displayRooms = val);
     }
   },
 
-  mounted() {
-    this.startTrendingSlideshow();
+  beforeUnmount() {
     if (this.trendingInterval) {
       clearInterval(this.trendingInterval);
     }
-    this.startCountAnimation();
-  },
+  }
 }
 </script>
 
