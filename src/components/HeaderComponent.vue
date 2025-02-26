@@ -81,11 +81,14 @@
 
           <!-- 우측 메뉴 -->
           <v-col cols="4" class="d-flex justify-end align-center">
-            <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea" :class="{ 'pulse': isNewMessage }">
-              <v-icon>
-                {{ hasUnreadMessages ? 'mdi-message-badge' : 'mdi-message-outline' }}
-              </v-icon>
-            </v-btn>
+            <!-- 메시지 아이콘을 로그인 상태일 때만 표시 -->
+            <template v-if="isLoggedIn">
+              <v-btn icon class="chat-icon mr-2" to="/ttt/chatpage" color="#6200ea" :class="{ 'pulse': isNewMessage }">
+                <v-icon>
+                  {{ hasUnreadMessages ? 'mdi-message-badge' : 'mdi-message-outline' }}
+                </v-icon>
+              </v-btn>
+            </template>
 
             <!-- 로그인 상태 -->
             <template v-if="isLoggedIn">
@@ -260,7 +263,7 @@ export default {
         
         // 기존 로그아웃 로직
         localStorage.clear();
-        window.location.href = '/';
+        window.location.href = '/ttt';
     },
     async fetchProfileImage() {
       try {
