@@ -9,7 +9,7 @@
           <v-row align="center">
             <v-col cols="2">
               <!-- 검색창 -->
-              <v-select
+              <!-- <v-select
                   v-model="searchType"
                   :items="searchOptions"
                   item-title="text"
@@ -17,10 +17,10 @@
                   outlined
                   dense
                   background-color="white"
-              ></v-select>
+              ></v-select> -->
             </v-col>
             <v-col cols="8">
-              <v-text-field
+              <!-- <v-text-field
                   v-model="searchKeyword"
                   label="검색어 입력"
                   outlined
@@ -28,10 +28,10 @@
                   clearable
                   background-color="white"
                   @keyup.enter="searchProjects"
-              ></v-text-field>
+              ></v-text-field> -->
             </v-col>
             <v-col cols="2" class="d-flex">
-              <v-btn color="primary" class="mr-2" @click="searchProjects">검색</v-btn>
+              <!-- <v-btn color="primary" class="mr-2" @click="searchProjects">검색</v-btn> -->
               <v-btn @click="goToProjectCreate">생성</v-btn>
             </v-col>
           </v-row>
@@ -41,8 +41,7 @@
             <v-data-table
                 :headers="headers"
                 :items="filteredProjects"
-                :items-per-page="pageSize"
-                hide-default-footer
+                :items-per-page="10"
                 class="elevation-1 custom-table"
             >
               <template v-slot:item="{ item }">
@@ -74,6 +73,10 @@
                         {{ feature.featureName || '기능 없음' }}
                       </v-chip>
                     </v-chip-group>
+                  </td>
+                  <td class="text-center">
+                    <v-icon small color="pink lighten-1" class="mr-1">mdi-eye</v-icon>
+                    {{ item.viewCount || 0 }}
                   </td>
                   <td class="text-center">
                     <v-icon small color="pink lighten-1" class="mr-1">mdi-heart</v-icon>
@@ -109,16 +112,6 @@
         @close="editDialogVisible = false"
         @updated="handleProjectUpdated"
     />
-
-    <!-- 페이지네이션 -->
-    <div class="text-center pt-4">
-      <v-pagination
-        v-model="currentPage"
-        :length="totalPages"
-        :total-visible="7"
-        @click="handlePageChange(currentPage)"
-      ></v-pagination>
-    </div>
   </v-container>
 </template>
 
@@ -135,7 +128,7 @@ export default {
       selectedFeature: null,
       sortDirection: "asc",
       page:1,
-      pageSize: 10, //한 페이지당 표시될 프로젝트 개수
+      pageSize: 25, //한 페이지당 표시될 프로젝트 개수
       currentPage: 1, //현재 보고 있는 페이지 번호
       isLoading: false,
       isLastPage: false,
@@ -149,14 +142,33 @@ export default {
       searchKeyword: '',
       selectAll: false,
       headers: [
-        { title: '기수', key: 'batch', align: 'center', width: '80px' },
-        { title: '팀명', key: 'teamName', width: '200px' },
-        { title: '프로젝트 유형', key: 'projectType', width: '120px' },
-        { title: '서비스명', key: 'serviceName', width: '150px' },
-        { title: '기능 키워드', key: 'primaryFeatureList', width: '300px' },
-        { title: '좋아요', key: 'likeCount', align: 'center', width: '100px' },
-        { title: '댓글', key: 'commentCount', align: 'center', width: '100px' },
-        { title: '링크', key: 'link', align: 'center', width: '80px' },
+        { title: '기수', key: 'batch', align: 'center', width: '90px', sortable: true },
+        { title: '팀명', key: 'teamName', width: '200px', sortable: true },
+        { title: '프로젝트 유형', key: 'projectType', width: '150px', sortable: true },
+        { title: '서비스명', key: 'serviceName', width: '150px', sortable: true },
+        { title: '기능 키워드', key: 'primaryFeatureList', width: '300px', sortable: false },
+        { 
+          title: '조회수', 
+          key: 'viewCount', 
+          align: 'center', 
+          width: '100px', 
+          sortable: true 
+        },
+        { 
+          title: '좋아요', 
+          key: 'likesCounts', 
+          align: 'center', 
+          width: '100px', 
+          sortable: true 
+        },
+        { 
+          title: '댓글', 
+          key: 'commentCounts', 
+          align: 'center', 
+          width: '100px', 
+          sortable: true 
+        },
+        { title: '링크', key: 'link', align: 'center', width: '80px', sortable: false },
       ],
       totalItems: 0, //백엔드에서 가져온 전체 프로젝트 개수
       totalPages: 0  //전체 페이지 개수
@@ -179,32 +191,28 @@ export default {
     }
   },
   beforeRouteEnter(to, from, next) {
-    next(vm => {
-    if (!from.name) { // 새로고침일 경우 유지
-      return;
+  next(vm => {
+    const savedPage = localStorage.getItem('currentPage');
+    if (savedPage) {
+      vm.currentPage = parseInt(savedPage);
+    } else {
+      vm.currentPage = 1;
     }
-
-    // 다른 화면에서 들어온 경우 1페이지로 초기화
-    localStorage.removeItem('currentPage');
-    vm.currentPage = 1;
   });
+},
+
+beforeRouteLeave(to, from, next) {
+  localStorage.setItem('currentPage', this.currentPage);
+  next();
 },
   methods: {
     async fetchProjects() {
       try {
-        let params = {
-          size: this.pageSize,
-          page: this.currentPage - 1, //API는 0부처 시작하는 페이지 인덱스를 사용하니까
-          ...this.getSearchParams()
-        };
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/find`, { params });
-        console.log(response);
-        
-        this.projectList = response.data.result.content;
-        this.totalPages = response.data.result.totalPages;
-        this.totalItems = response.data.result.totalElements;
+        // 기본 프로젝트 목록을 가져오는 API 호출
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/listAll`);
+        this.projectList = response.data.result;
       } catch (e) {
-        console.log("데이터 불러오기 실패", e);
+        console.error("데이터 불러오기 실패", e);
       }
     },
     toggleAll() {
@@ -225,8 +233,33 @@ export default {
       this.fetchProjects();
     },
     async searchProjects() {
-      this.currentPage = 1;
-      await this.fetchProjects();
+      try {
+        let url = `${process.env.VUE_APP_API_BASE_URL}/project/listAll`;
+        
+        // 검색 타입이 'optional'이 아니고 검색어가 있는 경우에만 검색 수행
+        if (this.searchType !== 'optional' && this.searchKeyword.trim()) {
+          const params = new URLSearchParams();
+          
+          switch(this.searchType) {
+            case 'batch':
+              params.append('batch', this.searchKeyword.trim());
+              break;
+            case 'projectType':
+              params.append('projectType', this.searchKeyword.trim());
+              break;
+            case 'serviceName':
+              params.append('serviceName', this.searchKeyword.trim());
+              break;
+          }
+          
+          url += '?' + params.toString();
+        }
+        
+        const response = await axios.get(url);
+        this.projectList = response.data.result;
+      } catch (error) {
+        console.error("검색 실패:", error);
+      }
     },
     formatUrl(url) {
       if (!url || url.trim() === "") return null;
@@ -235,10 +268,10 @@ export default {
     async toggleFeature(featureName) {
       this.selectedFeature = this.selectedFeature === featureName ? null : featureName;
       const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/listAll`);
-      console.log("프로젝트")
-      console.log(response);
       this.projectList = response.data.result;
     },
+
+    
     goToProjectCreate() {
       this.$router.replace(`/ttt/project/create`);
     },
@@ -277,7 +310,7 @@ export default {
       }
     },
     goToProjectDetail(projectId) {
-      this.$router.push(`/ttt/project/detail/${projectId}`);
+      window.open(`/ttt/project/detail/${projectId}`, '_blank');
     }
   }
 };

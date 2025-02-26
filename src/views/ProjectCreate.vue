@@ -14,6 +14,7 @@
             <div class="text-body-2 font-weight-medium mb-2">기수</div>
             <v-text-field
               v-model="project.batch"
+              label="숫자만 입력하세요(ex.11)"
               type="number"
               outlined
               dense
@@ -26,6 +27,7 @@
             <div class="text-body-2 font-weight-medium mb-2">팀명</div>
             <v-text-field
               v-model="project.teamName"
+              label="팀명을 입력해주세요"
               outlined
               dense
               hide-details="auto"
@@ -37,6 +39,7 @@
             <div class="text-body-2 font-weight-medium mb-2">서비스명</div>
             <v-text-field
               v-model="project.serviceName"
+              label="서비스명(or 프로젝트명)을 입력해주세요"
               outlined
               dense
               hide-details="auto"
@@ -49,6 +52,7 @@
             <v-select
               v-model="project.projectType"
               :items="projectTypeOptions"
+              label="프로젝트 유형을 선택해주세요"
               outlined
               dense
               hide-details="auto"
@@ -71,27 +75,6 @@
                 @drop="handleImageDrop"
               />
             </v-card-text>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <!-- 상세 정보 섹션 -->
         <div class="mb-6">
           <div class="text-subtitle-1 font-weight-medium mb-4">상세 정보</div>
@@ -100,9 +83,10 @@
             <div class="text-body-2 font-weight-medium mb-2">링크</div>
             <v-text-field
               v-model="project.link"
+              label="깃허브 레포지토리 링크를 입력해주세요"
               outlined
               dense
-              hide-details="auto"
+              persistent-hint
               background-color="white"
             ></v-text-field>
           </div>
@@ -111,6 +95,7 @@
             <div class="text-body-2 font-weight-medium mb-2">프로젝트 주제</div>
             <v-text-field
               v-model="project.domain"
+              label="프로젝트 주제를 입력해주세요(ex.숙박플랫폼, 커뮤니티사이트, 호텔예약시스템 등)"
               outlined
               dense
               hide-details="auto"
@@ -126,6 +111,7 @@
             <div class="text-body-2 font-weight-medium mb-2">주요 기능 입력</div>
             <v-text-field
               v-model="featureInput"
+              label="주요 기능을 입력해주세요(ex.채팅, Oath로그인, 실시간영상전송)"
               hint="콤마(,)로 구분하여 여러 기능을 한 번에 입력할 수 있습니다"
               persistent-hint
               outlined

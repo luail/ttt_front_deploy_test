@@ -228,7 +228,7 @@ export default {
       projectType: "",
       link: "",
       domain: "",
-      contents: "",
+      explanation: "",
       primaryFeatureList: []
     });
     const projectTypeOptions = ref([]);
@@ -274,8 +274,6 @@ export default {
         const projectId = router.currentRoute.value.params.id;
         const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/project/detailsee/${projectId}`);
         const projectData = response.data.result;
-        console.log("아자아자")
-        console.log(projectData)
         
         // 데이터 매핑
         project.batch = projectData.batch;
@@ -284,8 +282,13 @@ export default {
         project.projectType = projectData.projectType;
         project.link = projectData.link;
         project.domain = projectData.domain;
-        project.contents = projectData.explanation;
+        project.explanation = projectData.explanation;
         project.primaryFeatureList = projectData.primaryFeatureList || [];
+
+        // Quill 에디터에 내용 설정
+        if (editorInstance.value) {
+          editorInstance.value.root.innerHTML = projectData.explanation;
+        }
       } catch (error) {
         console.error("❌ 프로젝트 데이터 불러오기 실패:", error);
       }
@@ -313,6 +316,8 @@ export default {
         domain: project.domain,
         primaryFeatureSaveReqList: project.primaryFeatureList
       };
+      console.log("체크")
+      console.log(projectData)
 
       try {
         const projectId = router.currentRoute.value.params.id;

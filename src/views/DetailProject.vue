@@ -1,11 +1,30 @@
 <template>
   <v-container class="pt-0">
-    <v-row>
+    <v-row justify="center">
       <!-- 메인 컨텐츠 -->
-      <v-col cols="8">
+      <v-col cols="8" class="mx-auto">
         <v-card class="post-container">
           <div class="post-title pa-6 pb-2">
-            <h1>프로젝트 개요</h1>
+            <div class="d-flex justify-space-between align-center">
+              <h1>프로젝트 개요</h1>
+              <div v-if="isAuthor" class="post-actions">
+                <v-btn
+                  color="primary"
+                  text
+                  class="mr-2"
+                  @click="editProject"
+                >
+                  수정
+                </v-btn>
+                <v-btn
+                  color="error"
+                  text
+                  @click="deleteProject"
+                >
+                  삭제
+                </v-btn>
+              </div>
+            </div>
           </div>
           <!-- 게시글 헤더 -->
           <div class="post-header pa-6">
@@ -35,7 +54,19 @@
               </div>
               <div class="info-row">
                 <div class="info-label">링크</div>
-                <div class="info-value">{{ thisProject.link }}</div>
+                <div class="info-value">
+                  <v-icon
+                    v-if="thisProject.link"
+                    small
+                    color="primary"
+                    class="link-icon"
+                    @click="openProjectLink(thisProject.link)"
+                    style="cursor: pointer"
+                  >
+                    mdi-link-variant
+                  </v-icon>
+                  <span v-else class="no-link">링크 없음</span>
+                </div>
               </div>
               <div class="info-row">
                 <div class="info-label">올린이</div>
@@ -499,7 +530,7 @@ export default {
       try {
         const nestedReply = {
           contents: this.newNestedReply,
-          Id: this.$route.params.id,
+          projectId: this.$route.params.id,
           parentId: parentId
         };
         await axios.post(`${process.env.VUE_APP_API_BASE_URL}/comment/createforp`, nestedReply);
@@ -536,6 +567,33 @@ export default {
       this.editingNestedReplyId = null;
       this.editingNestedReplyContent = '';
     },
+
+    async editProject() {
+      this.$router.push(`/ttt/project/update/${this.$route.params.id}`);
+    },
+    
+    async deleteProject() {
+      if (confirm('정말로 이 프로젝트를 삭제하시겠습니까?')) {
+        try {
+          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/project/delete/${this.$route.params.id}`);
+          this.$router.push('/ttt/project/find');
+        } catch (error) {
+          console.log("프로젝트 삭제 실패", error);
+        }
+      }
+    },
+
+    openProjectLink(url) {
+      const formattedUrl = this.formatUrl(url);
+      if (formattedUrl) {
+        window.open(formattedUrl, '_blank');
+      }
+    },
+
+    formatUrl(url) {
+      if (!url || url.trim() === "") return null;
+      return url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+    }
   }
 }
 </script>
@@ -1031,6 +1089,21 @@ export default {
 
 .duration {
   color: #666;
+  font-size: 13px;
+}
+
+.link-icon {
+  transition: color 0.2s;
+}
+
+.link-icon:hover {
+  color: #1976D2 !important;
+  transform: scale(1.1);
+}
+
+.no-link {
+  color: #999;
+  font-style: italic;
   font-size: 13px;
 }
 </style>
