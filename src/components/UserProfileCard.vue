@@ -25,11 +25,15 @@
         >
         사진 등록
         </v-btn>
+<<<<<<< Updated upstream
         <!-- 사용자 정보 -->
         <div class="profile-info text-center">
           <h3 class="username text-h5 font-weight-bold text-purple">{{ localUserName }}</h3>
 
         </div>
+=======
+        
+>>>>>>> Stashed changes
       </div>
 
       <v-divider class="my-4" color="#d4a5f0"></v-divider> <!-- 보라색 구분선 -->
