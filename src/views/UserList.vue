@@ -7,6 +7,9 @@
                         회원목록
                     </v-card-title>
                     <v-card-text>
+                      <p v-if="isForbidden" class="text-center text-red text-h5">
+                        관리자만 확인할 수 있는 페이지입니다.
+                      </p>
                         <v-table>
                             <thead>
                                 <tr>
@@ -43,6 +46,7 @@ export default {
             currentPage: 0,
             isLoading:false,
             isLastPage:false,
+            isForbidden:false,
         }
     },
     async created() {
@@ -59,6 +63,7 @@ export default {
                 }
                 const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/list`, {params})
                 const additonalData = response.data.result.content
+
                 if(additonalData.length == 0) {
                     this.isLastPage=true
                     return
@@ -67,7 +72,12 @@ export default {
                 this.currentPage++;
                 this.isLoading=false
             } catch(e) {
+              if (e.response && e.response.status === 403) {
+                console.log("관리자 권한 없음.");
+                this.isForbidden = true;
+              }else{
                 console.log(e)
+              }
             }
         },
         scrollPagenation() {

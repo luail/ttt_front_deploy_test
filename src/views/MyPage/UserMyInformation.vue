@@ -124,7 +124,7 @@
                       disabled
                       dense
                       outlined
-                      prepend-inner-icon="mdi-numeric"
+                      prepend-inner-icon="mdi-flag"
                       class="readonly-input"
                       rounded
                   ></v-text-field>

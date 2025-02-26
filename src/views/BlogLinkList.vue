@@ -32,7 +32,7 @@
 
             <!-- 검색 버튼 -->
             <v-col cols="2">
-              <v-btn color="primary" class="text-white font-weight-bold" @click="search">
+              <v-btn color="purple" class="text-white font-weight-bold" @click="search">
                 검색
               </v-btn>
             </v-col>
