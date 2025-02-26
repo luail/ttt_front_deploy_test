@@ -7,34 +7,29 @@
             Beyond SW Camp 프로젝트
           </v-card-title>
           <v-row align="center">
-            <v-col cols="2">
-              <!-- 검색창 -->
-              <!-- <v-select
-                  v-model="searchType"
-                  :items="searchOptions"
-                  item-title="text"
-                  item-value="value"
-                  outlined
-                  dense
-                  background-color="white"
-              ></v-select> -->
-            </v-col>
-            <v-col cols="8">
-              <!-- <v-text-field
+            <v-spacer></v-spacer>
+            <v-col cols="9">
+              <div class="search-area">
+                <select v-model="searchType" class="search-select">
+                  <option v-for="option in searchOptions" 
+                          :key="option.value" 
+                          :value="option.value">
+                      {{ option.text }} 
+                  </option>
+                </select>
+                <input 
                   v-model="searchKeyword"
-                  label="검색어 입력"
-                  outlined
-                  dense
-                  hide-details
-                  clearable
-                  background-color="white"
+                  type="text"
+                  placeholder="검색어를 입력하세요"
+                  class="search-input"
                   @keyup.enter="searchProjects"
-              ></v-text-field> -->
+                >
+              </div>
             </v-col>
-            <v-col cols="2" class="d-flex">
-              <!-- <v-btn color="primary" class="mr-2" @click="searchProjects">검색</v-btn> -->
+            <v-col cols="2" class="d-flex justify-end pe-12">
               <v-btn @click="goToProjectCreate" color="purple" class="neon-btn">생성</v-btn>
             </v-col>
+            <v-spacer></v-spacer>
           </v-row>
 
           
@@ -182,13 +177,32 @@ export default {
   },
   computed: {
     filteredProjects() {
-      return this.selectedFeature
-        ? this.projectList.filter(project =>
-            project.primaryFeatureList.some(feature => 
-              feature.featureName === this.selectedFeature
-            )
+      let filtered = this.projectList;
+      
+      // 검색어가 있고 검색 타입이 선택되었을 때
+      if (this.searchKeyword && this.searchType !== 'optional') {
+        filtered = this.projectList.filter(project => {
+          if (this.searchType === 'batch') {
+            return project.batch.toString().includes(this.searchKeyword);
+          } else if (this.searchType === 'projectType') {
+            return project.projectType.toLowerCase().includes(this.searchKeyword.toLowerCase());
+          } else if (this.searchType === 'serviceName') {
+            return project.serviceName.toLowerCase().includes(this.searchKeyword.toLowerCase());
+          }
+          return true;
+        });
+      }
+      
+      // 기능 키워드 필터링
+      if (this.selectedFeature) {
+        filtered = filtered.filter(project =>
+          project.primaryFeatureList.some(feature => 
+            feature.featureName === this.selectedFeature
           )
-        : this.projectList; //?
+        );
+      }
+      
+      return filtered;
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -377,5 +391,36 @@ beforeRouteLeave(to, from, next) {
 
 .neon-btn:hover {
   transform: scale(1.05);
+}
+
+/* 검색 영역 스타일 추가 */
+.search-area {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  width: 100%;
+}
+
+.search-select {
+  width: 100px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+}
+
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .search-area {
+    flex-direction: column;
+    max-width: 100%;
+  }
 }
 </style>
