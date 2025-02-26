@@ -94,15 +94,22 @@ export default {
       editorOptions: {
         placeholder: "내용을 입력하세요...",
         modules: {
-          toolbar: [
-            ['bold', 'italic', 'underline', 'strike'], // 텍스트 스타일
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 리스트
-            [{ size: ["small", false, "large", "huge"] }],
-            [{color:[]},{background:[]}],
-            ['link', 'image'], // 링크, 이미지
-            [{ 'align': [] }], // 정렬 옵션
-            ['clean'] // 포맷 초기화
-          ],
+          toolbar: {
+            container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'color': [] }, { 'background': [] }],
+        ['image'],
+        [{ size: ["small", false, "large", "huge"] }],
+        [{ 'align': [] }],
+        ['clean']
+      ],
+      handlers: {
+        image: this.handleImageUpload // **툴바의 이미지 버튼을 클릭하면 실행**
+      },
+          
+          },
+
           syntax:{
             highlight : (text) => hljs.highlightAuto(text).value
           },
@@ -110,7 +117,7 @@ export default {
         formats: [
         'bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block',
         'header', 'list', 'bullet', 'script', 'indent', 'direction',
-        'size', 'color', 'background', 'link', 'image', 'align', 'ordered', 'clean'
+        'size', 'color', 'background', 'image', 'align', 'ordered', 'clean'
     ]
       },
       content:"",
@@ -186,6 +193,39 @@ export default {
         console.warn("Editor instance is not ready yet")
       }
     },
+
+    async handleImageUpload(){
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.click();
+
+      input.onchange = async() =>{
+        const file = input.files[0];
+        if(!file) return;
+
+        const formData = new FormData();
+        formData.append("attachments", file);
+
+        try{
+          const response = await axios.post(
+            `${process.env.VUE_APP_API_BASE_URL}/post/drag-image`,formData,
+            { headers: {"Content-Type":"multipart/form-data"}}
+          );
+
+          const imageUrl = response.data.result;
+          this.attachments.push(file);
+
+          const editor = this.$refs.quillEditor.getQuill();
+          const range = editor.getSelection();
+          editor.insertEmbed(range.index,"image",imageUrl);
+
+        } catch(error){
+          console.log("이미지 업로드 실패",error);
+        }
+      };
+    },
+
 
     async handleImageDrop(event) {
       // 퀼에디터의 드롭 동작을 인식하기 위해 기본 드롭동작을 막음
@@ -301,7 +341,6 @@ export default {
 ::v-deep .ql-editor img {
   max-width: 100%;
   height: auto;
-  display: block;
-  margin: 0 auto;
+  display: inline-block;
 }
 </style>
