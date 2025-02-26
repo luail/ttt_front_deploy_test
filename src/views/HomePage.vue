@@ -88,7 +88,11 @@
               </div>
               <v-divider></v-divider>
               <div class="ranking-list pa-2">
-                <div v-for="(batch, index) in batchRanks" :key="index" class="ranking-item">
+                <div v-for="(batch, index) in batchRanks" 
+                     :key="index" 
+                     class="ranking-item"
+                     @click="goToBatchProjects(batch.batch)"
+                     style="cursor: pointer;">
                   <div class="user-info">
                     <div class="user-name">{{ batch.batch }}기</div>
                     <div class="user-points">{{ batch.averageRankingPoint }}p</div>
@@ -693,6 +697,16 @@ export default {
     truncateNickname(nickname) {
       return nickname.length > 6 ? nickname.slice(0, 6) + '...' : nickname;
     },
+
+    goToBatchProjects(batchNumber) {
+      this.$router.push({
+        path: '/ttt/project/find',
+        query: {
+          searchType: 'batch',
+          searchKeyword: batchNumber
+        }
+      });
+    }
   },
 
   mounted() {
@@ -1036,8 +1050,10 @@ export default {
 
 .sticky-container {
   position: sticky;
-  top: 24px;
+  top: 84px; /* 상단 여백 증가 */
   padding-right: 12px;
+  height: auto; /* 자동 높이 설정 */
+  overflow: visible; /* overflow 제거 */
 }
 
 .main-content {
@@ -1265,15 +1281,18 @@ export default {
 }
 
 .ranking-card {
-  overflow: hidden;
+  overflow: visible; /* overflow 제거 */
   box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+  background: white;
+  margin-bottom: 1rem;
+  width: 100%; /* 너비 설정 */
 }
 
 .ranking-list {
   padding: 0;
   background: white;
   border-radius: 8px;
-  overflow: hidden;
+  width: 100%; /* 너비 설정 */
 }
 
 .ranking-item {
@@ -1281,12 +1300,12 @@ export default {
   align-items: center;
   padding: 12px 16px;
   margin-bottom: 0;
-  border-radius: 0;
   background: white;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
-  border-left: 3px solid rgba(71, 85, 105, 0.6);
   border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 .ranking-item:last-child {
@@ -1294,7 +1313,12 @@ export default {
 }
 
 .ranking-item:hover {
-  background: #f8fafc;
+  background-color: #f5f7fa;
+  transform: translateX(5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border-left: 2px solid #2563eb;
+  padding-left: 15px;
+  border-radius: 0 4px 4px 0;
 }
 
 .user-info {
