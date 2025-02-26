@@ -74,6 +74,10 @@
               <v-icon left>{{ thisPost.liked ? 'mdi-thumb-up' : 'mdi-thumb-up-outline' }}</v-icon>
               {{ thisPost.likesCount || 0 }}
             </v-btn>
+            <div v-if="isAuthor" class="edit-post">
+              <button class="action-btn edit" @click="editPost">수정</button>
+              <button class="action-btn delete" @click="deletePost">삭제</button>
+            </div>
           </v-card-actions>
 
           <!-- 댓글 섹션 -->
@@ -321,6 +325,10 @@ export default {
     // 컴포넌트가 생성될 때 스크롤을 맨 위로 이동
     window.scrollTo(0, 0);
     
+    // 카테고리 리스트 불러오기
+    const sideBarResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/category/all`);
+    this.categoryList = [{categoryName: "전체게시판", categoryId: 0}, ...sideBarResponse.data.result];
+
     // 게시글 상세 정보 불러오기
     await this.refreshPost();
 
@@ -329,7 +337,15 @@ export default {
     if (token) {
       const decodedToken = jwtDecode(token);
       this.userId = decodedToken.sub;
-      this.isAuthor = this.thisPost.userId === this.userId;
+      this.isAuthor = this.thisPost.authorId === this.userId;
+      
+      // 사용자 프로필 이미지 가져오기
+      try {
+        const userResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/profile`);
+        this.userProfileImage = userResponse.data.profileImage;
+      } catch (error) {
+        console.log("프로필 이미지 로드 실패", error);
+      }
     }
   },
 
@@ -537,6 +553,21 @@ export default {
       this.editingNestedReplyId = null;
       this.editingNestedReplyContent = '';
     },
+
+    editPost() {
+      this.$router.push(`/ttt/post/update/${this.$route.params.id}`);
+    },
+
+    async deletePost() {
+       if(confirm("정말로 삭제하시겠습니까?")){
+        try{
+          await axios.delete(`${process.env.VUE_APP_API_BASE_URL}/post/delete/${this.$route.params.id}`);
+          this.$router.push(`/ttt/post/list/0`);
+        }catch(error){
+          console.log("게시글 삭제 실패", error);
+        }
+      }
+    }
   }
 }
 </script>
@@ -981,5 +1012,8 @@ export default {
   margin-left: 32px;
   margin-top: 8px;
 }
-</style>
 
+.edit-post{
+  margin-left: 550px;
+}
+</style>

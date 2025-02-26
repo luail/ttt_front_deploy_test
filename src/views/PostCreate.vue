@@ -161,8 +161,6 @@ export default {
             console.log(this.file)
           })
         }
-
-
         const response = await axios.post(
           `${process.env.VUE_APP_API_BASE_URL}/post/create`,
           formData,
@@ -172,6 +170,7 @@ export default {
         this.$router.push(`/ttt/post/list/0`);
       } catch (error) {
         console.log('게시물 생성 실패:', error);
+        alert(error.response.data.status_message);
       }
     },
     // 에디터가 준비되었을 때 인스턴스 저장
@@ -209,6 +208,7 @@ export default {
 
       }catch(error){
         console.log("드래그 이미지업로드 실패",error);
+        alert(error.response.data.status_message);
       }
     }
   }
