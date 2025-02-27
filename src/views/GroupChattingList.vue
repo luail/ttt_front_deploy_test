@@ -207,7 +207,7 @@ export default {
                 this.isLoading = true;
                 this.currentPage = 0;
                 this.isLastPage = false;
-                this.chatRoomList = [];
+                this.displayedRooms = [];
                 
                 let params = {
                     size: this.pageSize,
@@ -222,7 +222,7 @@ export default {
                     `${process.env.VUE_APP_API_BASE_URL}/chat/room/group/list`,
                     { params }
                 );
-                this.chatRoomList = response.data.result.content;
+                this.displayedRooms = response.data.result.content;
                 this.currentPage = 1;
                 this.isLastPage = response.data.result.last;
                 this.isLoading = false;
