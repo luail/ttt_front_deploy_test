@@ -12,11 +12,13 @@
       <!-- 오른쪽 게시글 목록 -->
       <v-col cols="8">
         <v-card class="pa-4">
-          <v-card-title class="title-text">📜 내가 작성한 게시글</v-card-title>
+          <v-card-title class="title-text">
+            📜 내가 작성한 게시글
+          </v-card-title>
           <v-divider></v-divider>
           <v-card-text v-if="postDetail.length">
             <v-row>
-              <v-col v-for="myPost in postDetail" :key="myPost.postUserId" cols="12">
+              <v-col v-for="myPost in sortedPosts" :key="myPost.postUserId" cols="12">
                 <v-card class="post-card" @click="goToDetailPost(myPost.postId)">
                   <v-card-text>
                     <!-- 게시글 정보 -->
@@ -85,7 +87,18 @@ export default {
     return {
       userDetail: {}, // 유저 정보 저장
       postDetail: [],
+      sortOrder: '최신순',
+      sortOptions: ['최신순', '오래된순'],
     };
+  },
+  computed: {
+    sortedPosts() {
+      return [...this.postDetail].sort((a, b) => {
+        const dateA = new Date(a.createdTime[0], a.createdTime[1] - 1, a.createdTime[2]);
+        const dateB = new Date(b.createdTime[0], b.createdTime[1] - 1, b.createdTime[2]);
+        return dateB - dateA;
+      });
+    }
   },
   async created() {
     try {
