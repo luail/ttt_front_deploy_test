@@ -6,7 +6,7 @@
         <div class="hero-content">
           <div class="hero-text">
             <h1 class="logo text-center">
-              <span class="highlight">T</span><span class="small-text">ic</span>
+              <span class="highlight">T</span><span class="small-text">ik</span>
               <span class="highlight">T</span><span class="small-text">ak</span>
               <span class="highlight">T</span><span class="small-text">ok</span>
             </h1>
