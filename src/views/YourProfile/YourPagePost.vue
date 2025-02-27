@@ -16,7 +16,7 @@
           <v-card-text v-if="postDetail.length">
             <v-row>
               <v-col v-for="myPost in postDetail" :key="myPost.postId" cols="12">
-                <v-card class="post-card" @click="goToDetailPost(myPost.postId)">
+                <v-card class="post-card" >
                   <v-card-text>
                     <!-- 게시글 정보 -->
                     <v-row no-gutters class="align-center">
@@ -38,16 +38,19 @@
                     <!-- 제목 -->
                     <v-row no-gutters>
                       <v-col>
-                        <h3 class="post-title">
+                        <h3 class="post-title" 
+                            @click="goToPost(myPost.postId)" 
+                            style="cursor: pointer;">
                           {{ myPost.title }}
                         </h3>
                       </v-col>
                     </v-row>
 
-                    <!-- 게시글 내용 미리보기 -->
                     <v-row no-gutters>
                       <v-col>
-                        <p class="text-preview">
+                        <p class="post-preview" 
+                          @click="goToPost(myPost.postId)"
+                          style="cursor: pointer;">
                           {{ truncatedContent(removeHtmlTags(myPost.contents), 100) }}
                         </p>
                       </v-col>
@@ -141,6 +144,16 @@ export default {
       if (!dateArray || dateArray.length < 6) return "";
       return `${dateArray[0]}-${String(dateArray[1]).padStart(2, "0")}-${String(dateArray[2]).padStart(2, "0")}`;
     },
+    goToPost(postId) {
+    if (!postId) {
+
+      console.error("❌ 게시글 ID가 정의되지 않았습니다.");
+      return;
+    }
+    this.$router.push(`/ttt/post/${postId}`).catch(err => {
+      console.error("❌ 게시글 상세 이동 실패:", err);
+    });
+   }
   },
 };
 </script>
@@ -207,28 +220,28 @@ export default {
 }
 
 /* 제목 스타일 */
-.clickable-title {
+.post-title {
   font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   transition: color 0.2s;
 }
 
-.clickable-title:hover {
+.post-title:hover {
   color: #6200ea;
   text-decoration: underline;
 }
 
 /* 내용 스타일 */
-.clickable-content {
+.post-preview {
   font-size: 14px;
   color: #666;
   cursor: pointer;
   transition: color 0.2s;
 }
 
-.clickable-content:hover {
-  color: #333;
+.post-preview:hover {
+  color: #1976D2;
 }
 
 /* 좋아요 및 댓글 정보 */
@@ -250,10 +263,10 @@ export default {
   .post-card {
     padding: 10px;
   }
-  .clickable-title {
+  .post-title {
     font-size: 16px;
   }
-  .clickable-content {
+  .post-preview {
     font-size: 12px;
   }
   .post-meta {

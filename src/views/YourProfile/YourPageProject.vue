@@ -95,7 +95,7 @@ export default {
         console.error("프로젝트 ID가 정의되지 않았습니다.");
         return;
       }
-      this.$router.push(`/ttt/project/user/${encodeURIComponent(this.nickName)}`);
+      this.$router.push(`/ttt/project/detail/${projectId}`);
     },
   },
 };

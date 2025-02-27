@@ -416,6 +416,7 @@ export default {
             nicknameCheckMessage: '',
             showPassword: false,
             showConfirmPassword: false,
+            forbiddenWords: [], // 금지된 단어 목록
         }
     },
     computed: {
@@ -572,6 +573,13 @@ export default {
                 return;
             }
 
+            // 금지어 검사
+            if (this.containsForbiddenWord(this.nickname)) {
+                this.isNicknameAvailable = false;
+                this.nicknameCheckMessage = '부적절한 단어가 포함되어 있습니다.';
+                return;
+            }
+
             this.isCheckingNickname = true;
             try {
                 const response = await axios.get(
@@ -632,6 +640,26 @@ export default {
                 this.isCheckingId = false;
             }
         },
+        async loadForbiddenWords() {
+            try {
+                const response = await fetch('/forbidden-words.txt');
+                if (!response.ok) {
+                    throw new Error('금지어 목록을 불러오는데 실패했습니다');
+                }
+                const text = await response.text();
+                this.forbiddenWords = text.split('\n')
+                    .map(word => word.trim())
+                    .filter(word => word); // 빈 줄 제거
+            } catch (error) {
+                console.error('금지어 목록을 불러오는데 실패했습니다:', error);
+            }
+        },
+        containsForbiddenWord(text) {
+            if (!text) return false;
+            return this.forbiddenWords.some(word => 
+                text.toLowerCase().includes(word.toLowerCase())
+            );
+        },
     },
     watch: {
         step(newStep, oldStep) {
@@ -642,6 +670,7 @@ export default {
     },
     mounted() {
         this.autoSlideUI();
+        this.loadForbiddenWords(); // 컴포넌트 마운트 시 금지어 목록 로드
     }
 }
 </script>
