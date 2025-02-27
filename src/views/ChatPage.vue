@@ -5,7 +5,7 @@
             <v-col cols="12" md="4" class="chat-list-column">
                 <v-card class="chat-list-card" elevation="0">
                     <v-card-title class="text-center text-h6">
-                        My Lounge
+                        내 라운지 
                     </v-card-title>
                     <v-card-text>
                         <div class="chat-rooms">
@@ -109,7 +109,7 @@
                     <h3 class="leave-title">채팅방 나가기</h3>
                     <p class="leave-description">
                         정말로 나갈거에요? 🥺<br>
-                        다른 삼티들이 슬퍼할 거예요 😢
+                        다른 사람들이 슬퍼할 거예요 😢
                     </p>
                 </v-card-text>
                 <v-card-actions class="leave-actions">
