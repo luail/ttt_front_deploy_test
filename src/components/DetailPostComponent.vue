@@ -38,7 +38,7 @@
             <div class="d-flex align-center mt-4">
               <v-avatar size="36" class="mr-3">
                 <v-img
-                  :src="thisPost.profileImageOfAuthor || require('@/assets/basicProfileImage.png')"
+                  :src="thisPost.authorImage || require('@/assets/basicProfileImage.png')"
                   :alt="thisPost.authorNickName"
                   class="profile-image"
                 ></v-img>
@@ -444,6 +444,9 @@ export default {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/detail/${this.$route.params.id}`);
         this.thisPost = response.data.result;
+        console.log("머지");
+        console.log(this.thisPost)
+      
       } catch (error) {
         console.log("게시글 새로고침 실패", error);
       }
@@ -573,9 +576,35 @@ export default {
 </script>
 
 <style scoped>
+
+::v-deep(.post-content .ql-size-huge) {
+  font-size: 2.5rem !important;
+}
+
+::v-deep(.post-content .ql-size-large) {
+  font-size: 1.75rem !important;
+}
+
+::v-deep(.post-content .ql-size-small) {
+  font-size: 0.75rem !important;
+}
+
+
 .post-container {
   border-radius: 8px;
   overflow: hidden;
+}
+
+::v-deep(.post-content h1) {
+  font-size: 2rem !important;
+}
+
+::v-deep(.post-content h2) {
+  font-size: 1.5rem !important;
+}
+
+::v-deep(.post-content p) {
+  font-size: 1rem !important;
 }
 
 .category-tag {
