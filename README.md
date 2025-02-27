@@ -188,8 +188,7 @@
 ![CSS3](https://img.shields.io/badge/CSS3-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![figma](https://img.shields.io/badge/figma-2F5EF5?style=for-the-badge)
 <img src="https://img.shields.io/badge/Vuetify-1867C0?style=for-the-badge&logo=vuetify&logoColor=#1867C0">
-<img src="https://img.shields.io/badge/webrtc-333333?style=for-the-badge&logo=webrtc&logoColor=#1867C0">
-<img src="https://img.shields.io/badge/Geolocation-ED1C24?style=for-the-badge&logo=maplibre&logoColor=#1867C0">
+
 
 
 ###  DB
