@@ -404,7 +404,7 @@ export default {
 
 /* 검색 select 박스 */
 .search-select {
-    width: 130px !important;
+    width: 110px !important;
 }
 
 .search-select :deep(.v-field) {
@@ -424,14 +424,14 @@ export default {
 
 /* 검색 입력창 */
 .search-input {
-    width: 600px !important;  /* 크기를 대폭 늘림 */
+    width: 400px !important;  /* 크기를 대폭 늘림 */
 }
 
 .search-input :deep(.v-field) {
     border-radius: 8px;
     background-color: #f5f5f5 !important;
     border: 1px solid transparent;
-    min-width: 600px !important;  /* 내부 필드의 최소 너비도 설정 */
+    min-width: 400px !important;  /* 내부 필드의 최소 너비도 설정 */
 }
 
 .search-input :deep(.v-field.v-field--focused) {
@@ -447,7 +447,7 @@ export default {
 .search-btn {
     height: 40px;
     min-width: 80px;
-    margin-left: -80px;
+    margin-left: -70px;
     border-radius: 8px;
     text-transform: none;
     font-weight: 500;

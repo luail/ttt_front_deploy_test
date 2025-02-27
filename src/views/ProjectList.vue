@@ -6,8 +6,8 @@
       </v-card-title>
       
       <!-- 검색 영역 -->
-      <v-row align="center" justify="center" class="pl-12">
-        <v-col cols="6">
+      <v-row align="center" justify="center">
+        <v-col cols="8">
           <div class="search-area">
             <v-select
               v-model="searchType"
@@ -16,7 +16,7 @@
               item-value="value"
               hide-details
               class="search-select"
-              style="max-width: 150px"
+              style="max-width: 180px"
             ></v-select>
             <v-text-field
               v-model="searchKeyword"
@@ -28,7 +28,7 @@
           </div>
         </v-col>
         <v-col cols="2" class="d-flex align-center">
-          <v-btn @click="goToProjectCreate" color="purple" class="neon-btn">생성</v-btn>
+          <v-btn @click="goToProjectCreate" color="purple" class="neon-btn">프로젝트 등록</v-btn>
         </v-col>
       </v-row>
 
@@ -264,6 +264,11 @@ export default {
       handler() {
         this.resetScroll();
       }
+    },
+    currentPage: {
+      handler(newPage) {
+        this.fetchPageData(newPage);
+      }
     }
   },
   async created() {
@@ -311,15 +316,14 @@ export default {
       return result;
     },
     sortedAndFilteredProjects() {
-      const start = (this.page - 1) * 8;
+      const start = (this.currentPage - 1) * 8;
       const end = start + 8;
       
       let result = [...this.filteredProjects];
       
-      // 항상 기본 정렬 상태 유지 (기수 기준 내림차순)
-      result.sort((a, b) => {
-        // 사용자가 선택한 정렬이 있는 경우
-        if (this.sortBy) {
+      // 정렬 로직
+      if (this.sortBy) {
+        result.sort((a, b) => {
           let compareA = a[this.sortBy];
           let compareB = b[this.sortBy];
           
@@ -331,15 +335,11 @@ export default {
             compareB = String(compareB || '').toLowerCase();
           }
           
-          if (this.sortDesc) {
-            return compareB > compareA ? 1 : -1;
-          } else {
-            return compareA > compareB ? 1 : -1;
-          }
-        }
-        // 기본 정렬: 기수 기준 내림차순
-        return (Number(b.batch) || 0) - (Number(a.batch) || 0);
-      });
+          return this.sortDesc 
+            ? (compareB > compareA ? 1 : -1)
+            : (compareA > compareB ? 1 : -1);
+        });
+      }
       
       return result.slice(start, end);
     }
@@ -436,8 +436,8 @@ export default {
       } else {
         this.selectedFeature = featureName;
       }
-      this.page = 1;
-      this.resetScroll();
+      this.currentPage = 1;
+      this.fetchPageData(1);
     },
     filterByFeature(projects) {
       if (!this.selectedFeature) return projects;
@@ -505,7 +505,8 @@ export default {
         this.sortBy = column;
         this.sortDesc = false;
       }
-      this.resetScroll();
+      this.currentPage = 1;
+      this.fetchPageData(1);
     },
     resetScroll() {
       setTimeout(() => {
@@ -518,6 +519,40 @@ export default {
     getSortIcon(column) {
       if (this.sortBy !== column) return 'mdi-sort';
       return this.sortDesc ? 'mdi-sort-descending' : 'mdi-sort-ascending';
+    },
+    async fetchPageData(page) {
+      try {
+        const params = new URLSearchParams({
+          page: page,
+          size: 8
+        });
+
+        // 정렬 정보 추가
+        if (this.sortBy) {
+          params.append('sort', this.sortBy);
+          params.append('direction', this.sortDesc ? 'desc' : 'asc');
+        }
+
+        // 검색 조건 추가
+        if (this.searchType !== 'optional' && this.searchKeyword) {
+          params.append('searchType', this.searchType);
+          params.append('keyword', this.searchKeyword);
+        }
+
+        // 기능 키워드 필터 추가
+        if (this.selectedFeature) {
+          params.append('feature', this.selectedFeature);
+        }
+
+        const response = await axios.get(
+          `${process.env.VUE_APP_API_BASE_URL}/project/listAll?${params.toString()}`
+        );
+        
+        this.projectList = response.data.result;
+        this.totalItems = response.data.totalCount || this.projectList.length;
+      } catch (error) {
+        console.error("페이지 데이터 조회 실패:", error);
+      }
     },
   }
 };
@@ -546,11 +581,13 @@ export default {
   align-items: center;
   padding: 16px 24px;
   margin: 0 24px 20px 24px;
+  width: 100%;
 }
 
 /* 검색 select 박스 현대적 스타일링 */
 .search-select {
-  width: 130px !important;
+  min-width: 180px;
+  margin-right: 16px;
 }
 
 .search-select :deep(.v-field) {
@@ -570,7 +607,8 @@ export default {
 
 /* 검색 입력창 현대적 스타일링 */
 .search-input {
-  width: 280px !important;
+  flex: 1;
+  min-width: 300px;
 }
 
 .search-input :deep(.v-field) {
@@ -592,7 +630,7 @@ export default {
 .neon-btn {
   height: 40px;
   min-width: 80px;
-  margin-left: -25px;  /* 버튼을 검색창 쪽으로 더 가깝게 이동 */
+  margin-left: 130px;  /* 버튼을 검색창 쪽으로 더 가깝게 이동 */
   border-radius: 8px;
   text-transform: none;
   font-weight: 500;
@@ -794,6 +832,27 @@ export default {
 /* 정렬 아이콘이 있는 헤더 */
 .header-cell {
   white-space: nowrap;
+}
+
+/* 선택된 기능 키워드 칩 스타일 수정 */
+.selected-chip {
+  background-color: #7C4DFF !important; /* 보라색 배경 */
+  color: white !important; /* 흰색 텍스트 */
+  border: none !important; /* 테두리 제거 */
+  font-weight: 500 !important; /* 글자 두께 증가 */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; /* 그림자 효과 */
+}
+
+/* 일반 기능 키워드 칩 스타일 */
+.v-chip.v-chip--outlined {
+  border-color: #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+/* 호버 효과 */
+.v-chip.v-chip--outlined:hover {
+  background-color: #f5f5f5;
+  border-color: #9575CD;
 }
 </style>
 
