@@ -45,7 +45,7 @@
             <v-col cols="12" md="7" class="chat-main-column">
                 <v-card class="chat-card" elevation="0">
                     <v-card-title class="chat-room-header">
-                        {{ getChatRoomName(senderNickName, currentChatRoom ? currentChatRoom.roomName : 'Choice Your Tok') }}
+                        {{ getChatRoomName(senderNickName, currentChatRoom ? currentChatRoom.roomName : '라운지를 선택해주세요!') }}
                     </v-card-title>
                     <div class="chat-content-wrapper">
                         <div class="chat-box" ref="chatBox">
