@@ -35,11 +35,11 @@
 <figure>
   <table>
     <tr>
-      <td align="center"><img src="./src/assets/pic/1.webp" width="180px"/></td>
-      <td align="center"><img src="./src/assets/pic/2.webp" width="180px"/></td>
-      <td align="center"><img src="./src/assets/pic/3.webp" width="180px"/></td>
+      <td align="center"><img src="./src/assets/pic/김진영.png" width="180px"/></td>
+      <td align="center"><img src="./src/assets/pic/경수혁.png" width="180px"/></td>
+      <td align="center"><img src="./src/assets/pic/고준혁.jpg" width="180px"/></td>
       <td align="center"><img src="./src/assets/pic/소병윤.png" width="180px"/></td>
-      <td align="center"><img src="./src/assets/pic/5.webp" width="180px"/></td>
+      <td align="center"><img src="./src/assets/pic/정준환.png" width="180px"/></td>
     </tr>
     <tr>
       <td align="center">팀장: <a href="https://github.com/jykim1187">김진영</a></td>
@@ -77,62 +77,100 @@
 <img width="1152" alt="image" src="Hub (1).png">
 
 
+## 🔎 프로젝트 시연
+[프로젝트 시연](https://github.com/beyond-sw-camp/be11-2nd-4dollarExit-TikTakTalk-FE/wiki)
+<br>
+
+
 ## 📧 도메인 주소
 [www.example.com](https://www.example.com)
 <br>
 
-## 🔎 프로젝트 시연
-[프로젝트 시연](https://github.com/4doller-exit/your-project-demo)
-<br>
+[//]: # (### 일반 유저)
 
-### 일반 유저
-#### ✍️ 로그인 및 회원가입
-<details>
-<summary>카카오 소셜 회원가입</summary>
-  <img src="https://github.com/user-attachments/assets/90abeb2c-69b6-4000-a9ef-b3d8918deff8">
-</details>
+[//]: # (#### ✍️ 로그인 및 회원가입)
 
-<details>
-<summary>구글 소셜 회원가입</summary>
-  <img src="https://github.com/user-attachments/assets/6612aa6c-7815-475f-b769-64b4601c23df">
-</details>
+[//]: # (<details>)
 
-<summary>카카오 소셜 로그인</summary>
-  <img src="https://github.com/user-attachments/assets/90abeb2c-69b6-4000-a9ef-b3d8918deff8">
-</details>
+[//]: # (<summary>카카오 소셜 회원가입</summary>)
 
-<details>
-<summary>구글 소셜 로그인 </summary>
-  <img src="https://github.com/user-attachments/assets/6612aa6c-7815-475f-b769-64b4601c23df">
-</details>
+[//]: # (  <img src="https://github.com/user-attachments/assets/90abeb2c-69b6-4000-a9ef-b3d8918deff8">)
 
-#### ✍️ 마이페이지
+[//]: # (</details>)
 
+[//]: # ()
+[//]: # (<details>)
 
+[//]: # (<summary>구글 소셜 회원가입</summary>)
 
-### 홈화면
-<details>
-  <summary> 홈화면 </summary>
-  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
-</details>
+[//]: # (  <img src="https://github.com/user-attachments/assets/6612aa6c-7815-475f-b769-64b4601c23df">)
 
-### 게시글
-<details>
-  <summary> 홈화면 </summary>
-  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
-</details>
+[//]: # (</details>)
 
-### 프로젝트
-<details>
-  <summary> 홈화면 </summary>
-  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
-</details>
+[//]: # ()
+[//]: # (<summary>카카오 소셜 로그인</summary>)
 
-### 채팅
-<details>
-  <summary> 홈화면 </summary>
-  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
-</details>
+[//]: # (  <img src="https://github.com/user-attachments/assets/90abeb2c-69b6-4000-a9ef-b3d8918deff8">)
+
+[//]: # (</details>)
+
+[//]: # ()
+[//]: # (<details>)
+
+[//]: # (<summary>구글 소셜 로그인 </summary>)
+
+[//]: # (  <img src="https://github.com/user-attachments/assets/6612aa6c-7815-475f-b769-64b4601c23df">)
+
+[//]: # (</details>)
+
+[//]: # ()
+[//]: # (#### ✍️ 마이페이지)
+
+[//]: # ()
+[//]: # ()
+[//]: # ()
+[//]: # (### 홈화면)
+
+[//]: # (<details>)
+
+[//]: # (  <summary> 홈화면 </summary>)
+
+[//]: # (  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">)
+
+[//]: # (</details>)
+
+[//]: # ()
+[//]: # (### 게시글)
+
+[//]: # (<details>)
+
+[//]: # (  <summary> 홈화면 </summary>)
+
+[//]: # (  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">)
+
+[//]: # (</details>)
+
+[//]: # ()
+[//]: # (### 프로젝트)
+
+[//]: # (<details>)
+
+[//]: # (  <summary> 홈화면 </summary>)
+
+[//]: # (  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">)
+
+[//]: # (</details>)
+
+[//]: # ()
+[//]: # (### 채팅)
+
+[//]: # (<details>)
+
+[//]: # (  <summary> 홈화면 </summary>)
+
+[//]: # (  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">)
+
+[//]: # (</details>)
 
 ## 🎮 기술 스택
 
