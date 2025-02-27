@@ -85,6 +85,55 @@
 [프로젝트 시연](https://github.com/4doller-exit/your-project-demo)
 <br>
 
+### 일반 유저
+#### ✍️ 로그인 및 회원가입
+<details>
+<summary>카카오 소셜 회원가입</summary>
+  <img src="https://github.com/user-attachments/assets/90abeb2c-69b6-4000-a9ef-b3d8918deff8">
+</details>
+
+<details>
+<summary>구글 소셜 회원가입</summary>
+  <img src="https://github.com/user-attachments/assets/6612aa6c-7815-475f-b769-64b4601c23df">
+</details>
+
+<summary>카카오 소셜 로그인</summary>
+  <img src="https://github.com/user-attachments/assets/90abeb2c-69b6-4000-a9ef-b3d8918deff8">
+</details>
+
+<details>
+<summary>구글 소셜 로그인 </summary>
+  <img src="https://github.com/user-attachments/assets/6612aa6c-7815-475f-b769-64b4601c23df">
+</details>
+
+#### ✍️ 마이페이지
+
+
+
+### 홈화면
+<details>
+  <summary> 홈화면 </summary>
+  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
+</details>
+
+### 게시글
+<details>
+  <summary> 홈화면 </summary>
+  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
+</details>
+
+### 프로젝트
+<details>
+  <summary> 홈화면 </summary>
+  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
+</details>
+
+### 채팅
+<details>
+  <summary> 홈화면 </summary>
+  <img src="https://github.com/user-attachments/assets/0acddd87-a24c-4a11-98ac-344a3287763d">
+</details>
+
 ## 🎮 기술 스택
 
 ### BACKEND
