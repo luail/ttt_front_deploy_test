@@ -14,15 +14,24 @@
           </div>
           <div class="hero-stats">
             <div class="stat-item">
-              <div class="stat-number">{{ totalPosts }}+</div>
+              <div class="stat-number">
+                <span class="number">{{ displayPosts }}</span>
+                <span class="plus-mark">+</span>
+              </div>
               <div class="stat-label">지금까지의 게시글</div>
             </div>
             <div class="stat-item">
-              <div class="stat-number">{{ totalUsers }}+</div>
+              <div class="stat-number">
+                <span class="number">{{ displayUsers }}</span>
+                <span class="plus-mark">+</span>
+              </div>
               <div class="stat-label">활동하는 멤버</div>
             </div>
             <div class="stat-item">
-              <div class="stat-number">{{ totalRooms }}+</div>
+              <div class="stat-number">
+                <span class="number">{{ displayRooms }}</span>
+                <span class="plus-mark">+</span>
+              </div>
               <div class="stat-label">실시간 채팅</div>
             </div>
           </div>
@@ -90,7 +99,11 @@
               </div>
               <v-divider></v-divider>
               <div class="ranking-list pa-2">
-                <div v-for="(batch, index) in batchRanks" :key="index" class="ranking-item">
+                <div v-for="(batch, index) in batchRanks" 
+                     :key="index" 
+                     class="ranking-item"
+                     @click="goToBatchProjects(batch.batch)"
+                     style="cursor: pointer;">
                   <div class="user-info">
                     <div class="user-name">{{ batch.batch }}기</div>
                     <div class="user-points">{{ batch.averageRankingPoint }}p</div>
@@ -104,7 +117,7 @@
         <!-- 메인 컨텐츠 영역 -->
         <v-col cols="12" lg="9" class="pl-lg-8">
           <!-- 일일 트렌딩 섹션 -->
-          <section class="trending-section mb-8" style="margin-top: -16px;">
+          <section class="trending-section mb-8" style="margin-top: 1rem;">
             <div class="section-header">
               <h2>🔥 일일 트렌딩</h2>
             </div>
@@ -367,63 +380,18 @@ export default {
   
   data() {
     return {
-      currentBanner: 0,
-      banners: [
-        {
-          image: require('@/assets/tttad.png'),
-          link: 'https://www.inflearn.com/users/1014633/@bradkim',
-          bgColor: '#00C853'
-        },
-        {
-          image: require('@/assets/birthdayAdd.png'),  // 두 번째 배너 이미지
-          bgColor: '#1976D2'
-        },
-        {
-          image: require('@/assets/kakaohacademy.png'),  // 세 번째 배너 이미지
-          bgColor: '#FFC107'
-        }
-      ],
+      totalPosts: 0,
+      totalUsers: 0,
+      totalRooms: 0,
+      displayPosts: 0,
+      displayUsers: 0,
+      displayRooms: 0,
       topWriters: [],
-      topBatches: [],
-      recentPosts: [],
-      popularPosts: [],
-      informationPosts: [],
-      algorithmPosts: [],
-      activeChats: [],
-      categories: [
-        {
-          name: '전체게시판',
-          icon: 'mdi-view-list',
-          color: 'primary',
-          description: '모든 게시글 모음',
-          categoryId: '0'  // 전체게시판
-        },
-        {
-          name: '자유게시판',
-          icon: 'mdi-account-group',
-          color: 'success',
-          description: '개발자들의 소통 공간',
-          categoryId: '1'  // 자유게시판
-        },
-        {
-          name: '정보게시판',
-          icon: 'mdi-information',
-          color: 'warning',
-          description: '개발자 정보 공유',
-          categoryId: '2'  // 정보게시판
-        },
-        {
-          name: '알고리즘',
-          icon: 'mdi-code-brackets',
-          color: 'error',
-          description: '알고리즘 문제 해결',
-          categoryId: '3'  // 알고리즘 게시판
-        }
-      ],
-      batchRanks: [], // 배치 랭킹 데이터
-      totalUsers: 0,  // 전체 사용자 수 추가
-      totalPosts: 0,  // 전체 게시글 수 추가
-      totalRooms: 0,  // 전체 채팅방 수 추가
+      batchRanks: [],
+      recentPosts: [],      // posts.recent 대신 직접 사용
+      popularPosts: [],     // posts.popular 대신 직접 사용
+      informationPosts: [], // posts.information 대신 직접 사용
+      algorithmPosts: [],   // posts.algorithm 대신 직접 사용
       trendingPosts: [],
       currentTrendingPage: 0,
       trendingInterval: null
@@ -443,23 +411,7 @@ export default {
   },
 
   async created() {
-    try {
-      await this.fetchTrendingPosts(); // 먼저 트렌딩 포스트를 가져오도록 수정
-      await Promise.all([
-        this.fetchRecentPosts(),
-        this.fetchPopularPosts(),
-        this.fetchInformationPosts(),
-        this.fetchAlgorithmPosts(),
-        this.topRanker(),
-        this.fetchBatchRanks(),
-        this.getChatRoom(),
-        this.fetchTotalUsers(),
-        this.fetchTotalPosts(),
-        this.fetchTotalRooms()
-      ]);
-    } catch (error) {
-      console.error('데이터 로딩 중 오류 발생:', error);
-    }
+    await this.fetchData();
   },
 
   methods: {
@@ -472,60 +424,76 @@ export default {
             return dayjs().diff(formattedDate,'hour')<24 ? formattedDate.fromNow() : formattedDate.format('YYYY-MM-DD');
         },
 
-    async topRanker(){
-          const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/rankingfive`)
-          this.topWriters = response.data.result;
-    },   
-
-    async fetchBatchRanks() {
+    async fetchData() {
       try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/batchRank`);
-        this.batchRanks = response.data.result;
+        // 1. 필수 데이터만 병렬로 요청
+        const [
+          postsCount, 
+          usersCount, 
+          roomsCount,
+          recent,
+          popular,
+          information,
+          algorithm,
+          trending,
+          writers,
+          batches
+        ] = await Promise.all([
+          // 통계 데이터
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/total/count`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/total/user`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/total/rooms`),
+          // 게시글 데이터
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/1?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/2?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/3?page=0&size=4`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/popular/like`),
+          // 랭킹 데이터
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/rankingfive`),
+          axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/batchRank`)
+        ]);
+
+        // 2. 데이터 설정
+        // 통계 데이터
+        this.totalPosts = postsCount.data.result;
+        this.totalUsers = usersCount.data.result;
+        this.totalRooms = roomsCount.data.result;
+
+        // 게시글 데이터
+        this.recentPosts = recent.data.result.content;
+        this.popularPosts = popular.data.result.content;
+        this.informationPosts = information.data.result.content;
+        this.algorithmPosts = algorithm.data.result.content;
+        this.trendingPosts = trending.data.result;
+
+        // 랭킹 데이터
+        this.topWriters = writers.data.result;
+        this.batchRanks = batches.data.result;
+
+        // 3. 애니메이션 시작
+        this.startCountAnimation();
+        this.startTrendingSlideshow();
+
       } catch (error) {
-        console.error('배치 랭크 로딩 실패:', error);
+        console.error('데이터 로딩 실패:', error);
       }
     },
 
-    async fetchRecentPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/findAll?page=0&size=4`);
-        this.recentPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.log("전체 게시물 로딩 실패", error);
+    // 트렌딩 슬라이드쇼 최적화
+    startTrendingSlideshow() {
+      if (this.trendingInterval) {
+        clearInterval(this.trendingInterval);
       }
+      this.trendingInterval = setInterval(this.nextTrendingPage, 10000);
     },
 
-    async fetchPopularPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/1?page=0&size=4`);
-        this.popularPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.error('자유게시판 게시물 로딩 실패:', error);
-      }
-    },
-
-    async fetchInformationPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/2?page=0&size=4`);
-        this.informationPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.error('정보 게시물 로딩 실패:', error);
-      }
-    },
-
-    async fetchAlgorithmPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/category/3?page=0&size=4`);
-        this.algorithmPosts = response.data.result.content.slice(0, 10);
-      } catch (error) {
-        console.error('알고리즘 게시물 로딩 실패:', error);
-      }
-    },
-
-    async getChatRoom(){
-     const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/room/group/list`);
-     this.activeChats = response.data.result.content;
-     console.log(this.activeChats)
+    // 카운트 애니메이션 최적화
+    startCountAnimation() {
+      const duration = 1500;
+      this.animateValue(0, this.totalPosts, duration, val => this.displayPosts = val);
+      this.animateValue(0, this.totalUsers, duration, val => this.displayUsers = val);
+      this.animateValue(0, this.totalRooms, duration, val => this.displayRooms = val);
     },
 
     getMedalColor(index) {
@@ -574,57 +542,10 @@ export default {
       return (this.currentTrendingPage * 3) + index;
     },
 
-    startTrendingSlideshow() {
-      this.trendingInterval = setInterval(() => {
-        this.nextTrendingPage();
-      }, 10000);
-    },
-
     resetTrendingInterval() {
       if (this.trendingInterval) {
         clearInterval(this.trendingInterval);
         this.startTrendingSlideshow();
-      }
-    },
-
-    async fetchTotalUsers() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/total/user`);
-        this.totalUsers = response.data.result;
-      } catch (error) {
-        console.error('전체 사용자 수 로딩 실패:', error);
-      }
-    },
-
-    async fetchTotalPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/total/count`);
-        this.totalPosts = response.data.result;
-      } catch (error) {
-        console.error('전체 게시글 수 로딩 실패:', error);
-      }
-    },
-
-    async fetchTotalRooms() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/total/rooms`);
-        this.totalRooms = response.data.result;
-      } catch (error) {
-        console.error('전체 채팅방 수 로딩 실패:', error);
-      }
-    },
-
-    async fetchTrendingPosts() {
-      try {
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/popular/like`);
-        console.log('트렌딩 포스트 응답:', response.data); // 데이터 확인용
-        if (response.data && response.data.result) {
-          this.trendingPosts = response.data.result;
-          this.startTrendingSlideshow();
-        }
-      } catch (error) {
-        console.error('트렌딩 게시글 로딩 실패:', error);
-        this.trendingPosts = [];
       }
     },
 
@@ -708,14 +629,43 @@ export default {
         this.$router.push(`/ttt/user/posts/${encodeURIComponent(nickName)}`);
       }
     },
+    goToBatchProjects(batchNumber) {
+      this.$router.push({
+        path: '/ttt/project/find',
+        query: {
+          searchType: 'batch',
+          searchKeyword: batchNumber
+        }
+      });
+    },
+
+    animateValue(start, end, duration, updateCallback) {
+      const startTimestamp = performance.now();
+      
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTimestamp;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // easeOutQuart 이징 함수 적용
+        const easeProgress = 1 - Math.pow(1 - progress, 4);
+        const current = Math.floor(start + (end - start) * easeProgress);
+        
+        updateCallback(current);
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      
+      requestAnimationFrame(animate);
+    }
   },
 
-  mounted() {
-    this.startTrendingSlideshow();
+  beforeUnmount() {
     if (this.trendingInterval) {
       clearInterval(this.trendingInterval);
     }
-  },
+  }
 }
 </script>
 
@@ -728,12 +678,14 @@ export default {
 .hero-section {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
-  padding: 2rem 0;
+  padding-top: 0.5rem;
+  padding-bottom: 2rem;
   text-align: center;
+  margin-top: -1rem;
 }
 
 .hero-text {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .hero-text h1 {
@@ -752,7 +704,7 @@ export default {
 }
 
 .hero-stats {
-  margin-top: 1.5rem;
+  margin-top: 0.5rem;
   display: flex;
   justify-content: center;
   gap: 4rem;
@@ -763,23 +715,38 @@ export default {
 }
 
 .stat-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  gap: 4px; /* 숫자와 + 사이의 간격 */
+}
+
+.number {
   font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
   color: white;
+}
+
+.plus-mark {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin-right: 4px; /* + 기호와 텍스트 사이의 간격 */
 }
 
 .stat-label {
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.9);
+  margin-top: 0.25rem;
 }
 
 .category-section {
   display: grid;
   grid-template-columns: repeat(3, 280px);
   gap: 2rem;
-  margin-top: -3rem;
-  margin-bottom: 3rem;
+  margin-top: -5.5rem;
+  margin-bottom: 4rem;
   justify-content: center;
 }
 
@@ -790,7 +757,7 @@ export default {
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  height: 180px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -830,7 +797,8 @@ export default {
 }
 
 .trending-section {
-  margin-top: 0;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
 }
 
 .trending-container {
@@ -1051,12 +1019,14 @@ export default {
 
 .sticky-container {
   position: sticky;
-  top: 24px;
+  top: 84px; /* 상단 여백 증가 */
   padding-right: 12px;
+  height: auto; /* 자동 높이 설정 */
+  overflow: visible; /* overflow 제거 */
 }
 
 .main-content {
-  padding-top: 2rem;
+  padding-top: 3rem;
   padding-bottom: 3rem;
 }
 
@@ -1280,15 +1250,18 @@ export default {
 }
 
 .ranking-card {
-  overflow: hidden;
+  overflow: visible; /* overflow 제거 */
   box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+  background: white;
+  margin-bottom: 1rem;
+  width: 100%; /* 너비 설정 */
 }
 
 .ranking-list {
   padding: 0;
   background: white;
   border-radius: 8px;
-  overflow: hidden;
+  width: 100%; /* 너비 설정 */
 }
 
 .ranking-item {
@@ -1296,12 +1269,12 @@ export default {
   align-items: center;
   padding: 12px 16px;
   margin-bottom: 0;
-  border-radius: 0;
   background: white;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
-  border-left: 3px solid rgba(71, 85, 105, 0.6);
   border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  margin-left: 15px;
+  margin-right: 15px;
 }
 
 .ranking-item:last-child {
@@ -1309,7 +1282,12 @@ export default {
 }
 
 .ranking-item:hover {
-  background: #f8fafc;
+  background-color: #f5f7fa;
+  transform: translateX(5px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border-left: 2px solid #2563eb;
+  padding-left: 15px;
+  border-radius: 0 4px 4px 0;
 }
 
 .user-info {

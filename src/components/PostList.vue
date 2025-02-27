@@ -30,23 +30,31 @@
                     <h2 class="board-title">{{ boardTitle }}</h2>
                     
                     <div class="search-area">
-                        <select v-model="searchType" class="search-select">
-                            <option v-for="option in searchOptions" 
-                                    :key="option.value" 
-                                    :value="option.value">
-                                {{ option.text }}
-                            </option>
-                        </select>
-                        <input 
+                        <v-select
+                            v-model="searchType"
+                            :items="searchOptions"
+                            item-title="text"
+                            item-value="value"
+                            class="search-select"
+                            hide-details
+                        ></v-select>
+                        
+                        <v-text-field
                             v-model="searchKeyword"
-                            type="text"
                             placeholder="검색어를 입력하세요"
                             class="search-input"
                             @keyup.enter="searchPosts"
+                            hide-details
+                            style="margin-left: 12px;"
+                        ></v-text-field>
+                        
+                        <v-btn
+                            @click="searchPosts"
+                            class="search-btn"
+                            style="margin-left: 50px;"
                         >
-                        <button @click="searchPosts" class="search-btn">
                             검색
-                        </button>
+                        </v-btn>
                     </div>
 
                     <button @click="createPost" class="write-btn">
@@ -315,7 +323,7 @@ export default {
 .main-container {
     background-color: #f8f9fa;
     min-height: 100vh;
-    padding: 20px;
+    padding: 40px 20px;  /* 상단 패딩 증가 */
 }
 
 /* 카테고리 사이드바 */
@@ -360,7 +368,7 @@ export default {
 
 /* 배너 */
 .banner-container {
-    margin-bottom: 30px;
+    margin: 10px 0 20px 0;  /* 상하 마진 축소 (20px 0 40px 0 → 10px 0 20px 0) */
 }
 
 .banner-img {
@@ -374,63 +382,128 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin: 20px 0 20px 0;  /* 상하 마진 축소 (40px 0 30px 0 → 20px 0 20px 0) */
+    padding: 0 24px;
 }
 
 .board-title {
     font-size: 24px;
     font-weight: 600;
-    color: #333;
+    color: #2c3e50;
+    margin: 0;
+    white-space: nowrap;
 }
 
 /* 검색 영역 */
 .search-area {
     display: flex;
-    gap: 10px;
-    flex: 1;
-    max-width: 600px;
-    margin: 0 20px;
+    align-items: center;
+    padding: 8px 24px;  /* 상하 패딩 축소 (16px → 8px) */
+    margin: 0 24px 10px 24px;  /* 하단 마진 축소 (20px → 10px) */
 }
 
+/* 검색 select 박스 */
 .search-select {
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background: white;
+    width: 110px !important;
 }
 
+.search-select :deep(.v-field) {
+    border-radius: 8px;
+    background-color: #f5f5f5 !important;
+    border: 1px solid transparent;
+}
+
+.search-select :deep(.v-field.v-field--focused) {
+    border: 1px solid #9c27b0;
+    background-color: white !important;
+}
+
+.search-select :deep(.v-field__outline) {
+    display: none;
+}
+
+/* 검색 입력창 */
 .search-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
+    width: 400px !important;  /* 크기를 대폭 늘림 */
 }
 
-.search-btn, .write-btn {
-    padding: 8px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
+.search-input :deep(.v-field) {
+    border-radius: 8px;
+    background-color: #f5f5f5 !important;
+    border: 1px solid transparent;
+    min-width: 400px !important;  /* 내부 필드의 최소 너비도 설정 */
 }
 
+.search-input :deep(.v-field.v-field--focused) {
+    border: 1px solid #9c27b0;
+    background-color: white !important;
+}
+
+.search-input :deep(.v-field__outline) {
+    display: none;
+}
+
+/* 검색 버튼 */
 .search-btn {
-    background: #7c3aed;
-    color: white;
+    height: 40px;
+    min-width: 80px;
+    margin-left: -70px;
+    border-radius: 8px;
+    text-transform: none;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    background-color: #3a3af4 !important;
+    color: white !important;
+    border: none;
+    transition: all 0.2s ease;
 }
 
+.search-btn:hover {
+    background-color: #2828d4 !important;
+    transform: translateY(-1px);
+}
+
+.search-btn:active {
+    transform: translateY(1px);
+}
+
+/* 글쓰기 버튼 스타일 개선 */
 .write-btn {
-    background: #7c3aed;
-    color: white;
+    display: inline-flex;  /* 수정 */
+    align-items: center;
+    justify-content: center;  /* 추가 */
+    gap: 6px;
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 8px;
+    background-color: #3a3af4 !important;
+    color: white !important;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;  /* 추가 */
+    min-width: 100px;  /* 추가 */
 }
 
-.search-btn:hover, .write-btn:hover {
-    opacity: 0.9;
+.write-btn:hover {
+    background-color: #2828d4 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);  /* 추가 */
+}
+
+.write-btn:active {
+    transform: translateY(1px);
+}
+
+.write-btn .v-icon {
+    font-size: 18px;
+    margin-right: 4px;
 }
 
 /* 게시글 목록 */
 .post-list {
+    margin-top: 0;  /* 상단 마진 제거 */
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);

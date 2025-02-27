@@ -7,7 +7,7 @@
                         <h1 class="logo mb-4">
                             <span class="highlight">T</span><span class="small-text">ik </span>
                             <span class="highlight">T</span><span class="small-text">ak </span>
-                            <span class="highlight">T</span><span class="small-text">alk</span>
+                            <span class="highlight">T</span><span class="small-text">ok</span>
                         </h1>
                         <div class="d-flex flex-column align-center">
                             <span class="welcome-text text-h5">TTT에 오신것을 환영합니다</span>

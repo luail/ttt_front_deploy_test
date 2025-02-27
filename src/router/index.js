@@ -3,7 +3,6 @@ import { userRouter } from './userRouter';
 import { chatRouter } from './chatRouter';
 import { postRouter } from './postRouter';
 import HomePage from '@/views/HomePage.vue';
-import {adminRouter} from "@/router/AdminRouter";
 import {ProjectRouter} from "@/router/ProjectRouter";
 
 const routes = [
@@ -15,16 +14,18 @@ const routes = [
         name:'HomePage',
         component:HomePage
     },
-    ...adminRouter,
     ...ProjectRouter
 ]
 
-
 const router = createRouter({
     history: createWebHistory(),
-    routes 
-
-
+    routes,
+    scrollBehavior() {
+        return { 
+            top: 0,
+            behavior: 'smooth'
+        }
+    }
 });
 
 export default router;

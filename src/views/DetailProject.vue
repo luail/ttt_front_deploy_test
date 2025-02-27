@@ -599,6 +599,28 @@ export default {
 </script>
 
 <style scoped>
+::v-deep(.post-content .ql-size-huge) {
+  font-size: 2.5rem !important;
+}
+
+::v-deep(.post-content .ql-size-large) {
+  font-size: 1.75rem !important;
+}
+
+::v-deep(.post-content .ql-size-small) {
+  font-size: 0.75rem !important;
+}
+
+::v-deep(.post-content img) {
+  max-width: 100% !important;  /* 컨테이너 너비에 맞춤 */
+  height: auto !important;      /* 원본 비율 유지 */
+  display: block !important;    /* 인라인 문제 방지 */
+  margin: 10px auto !important; /* 중앙 정렬 */
+  object-fit: contain !important; /* 이미지 잘리지 않게 */
+}
+
+
+
 .post-container {
   border-radius: 8px;
   overflow: hidden;

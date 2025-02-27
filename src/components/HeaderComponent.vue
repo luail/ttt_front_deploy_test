@@ -70,7 +70,7 @@
                   </template>
                   <v-card class="dropdown-menu" flat>
                     <v-list>
-                      <v-list-item to="/ttt/blog/list">블로그</v-list-item>
+<!--                      <v-list-item to="/ttt/blog/list">블로그</v-list-item>-->
                       <v-list-item to="/ttt/user/list">회원목록조회</v-list-item>
                     </v-list>
                   </v-card>
@@ -163,15 +163,7 @@ export default {
       const payload = jwtDecode(token);
       this.isLoggedIn = true;
       this.userRole = payload.role;
-      await this.fetchProfileImage(); // 🔹 프로필 이미지 불러오기
-      
-      // 채팅방 목록 초기화
-      try {
-        const chatListResponse = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`);
-        this.$store.dispatch('setChatList', chatListResponse.data.result);
-      } catch (error) {
-        console.error('채팅방 목록 로드 실패:', error);
-      }
+      await this.fetchProfileImage();
       
       // SSE 연결
       this.connectSSE();

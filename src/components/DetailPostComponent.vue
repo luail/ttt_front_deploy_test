@@ -38,7 +38,7 @@
             <div class="d-flex align-center mt-4">
               <v-avatar size="36" class="mr-3">
                 <v-img
-                  :src="thisPost.profileImageOfAuthor || require('@/assets/basicProfileImage.png')"
+                  :src="thisPost.authorImage || require('@/assets/basicProfileImage.png')"
                   :alt="thisPost.authorNickName"
                   class="profile-image"
                 ></v-img>
@@ -444,6 +444,9 @@ export default {
       try {
         const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/post/detail/${this.$route.params.id}`);
         this.thisPost = response.data.result;
+        console.log("머지");
+        console.log(this.thisPost)
+      
       } catch (error) {
         console.log("게시글 새로고침 실패", error);
       }
@@ -573,9 +576,35 @@ export default {
 </script>
 
 <style scoped>
+
+::v-deep(.post-content .ql-size-huge) {
+  font-size: 2.5rem !important;
+}
+
+::v-deep(.post-content .ql-size-large) {
+  font-size: 1.75rem !important;
+}
+
+::v-deep(.post-content .ql-size-small) {
+  font-size: 0.75rem !important;
+}
+
+
 .post-container {
   border-radius: 8px;
   overflow: hidden;
+}
+
+::v-deep(.post-content h1) {
+  font-size: 2rem !important;
+}
+
+::v-deep(.post-content h2) {
+  font-size: 1.5rem !important;
+}
+
+::v-deep(.post-content p) {
+  font-size: 1rem !important;
 }
 
 .category-tag {
@@ -605,6 +634,21 @@ export default {
   font-size: 1rem;
   line-height: 1.8;
   color: #2d3748;
+}
+/* 일단 작동안함 */
+.post-content img {
+  max-width: 100%; /* 본문 너비에 맞게 조정 */
+  height: auto; /* 비율 유지하며 크기 조정 */
+  display: block; /* 블록 요소로 설정하여 레이아웃 유지 */
+  object-fit: contain; /* 비율 유지하며 잘리지 않도록 설정 */
+}
+/* 퀼에디터를 통해 업로드된 이미지는 사실상 html태그니까 위에 img설정이 안먹히고 아래 설정히 먹힘 */
+::v-deep(.post-content img) {
+  max-width: 100% !important; /* 본문 크기에 맞게 조정 */
+  height: auto !important; /* 비율 유지 */
+  display: block !important; /* 레이아웃 유지 */
+  margin: 10px auto !important; /* 중앙 정렬 */
+  object-fit: contain !important; /* 비율 유지하며 잘리지 않도록 */
 }
 
 .like-btn {
