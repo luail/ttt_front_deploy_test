@@ -1,25 +1,4 @@
 # be11-2nd-4dollarExit-TikTakTalk
-
-## Git Commit Convention
-
-커밋 메시지 형식
-
-### 태그 종류
-
-- **Feat** : 새로운 기능 추가
-- **Fix** : 버그 수정
-- **Docs** : 문서 수정
-- **Style** : 세미콜론 누락 등 코드 변경이 없는 경우
-- **Refactor** : 코드 리팩토링
-- **Test** : 테스트 코드 및 리팩토링 테스트 코드 추가
-
-#### 커밋 메시지 작성 규칙
-
-1. **제목**은 간결하게 작성.
-2. **본문**에는 무엇을 변경했는지 또는 왜 변경했는지를 상세히 기록.
-
----
-
 # 학원 커뮤니티 웹 🌐✨
 <p align="middle" style="margin: 0; padding: 0;">
   <img width="200px" src="./src/assets/pic/4dollar.png">
@@ -202,6 +181,27 @@
 ![GitHub](https://img.shields.io/badge/Github-181717?style=for-the-badge&logo=Github&logoColor=white)
 ![Figma](https://img.shields.io/badge/figma-%23F24E1E.svg?style=for-the-badge&logo=figma&logoColor=white)
 &nbsp;![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)
+
+
+## Git Commit Convention
+
+커밋 메시지 형식
+
+### 태그 종류
+
+- **Feat** : 새로운 기능 추가
+- **Fix** : 버그 수정
+- **Docs** : 문서 수정
+- **Style** : 세미콜론 누락 등 코드 변경이 없는 경우
+- **Refactor** : 코드 리팩토링
+- **Test** : 테스트 코드 및 리팩토링 테스트 코드 추가
+
+#### 커밋 메시지 작성 규칙
+
+1. **제목**은 간결하게 작성.
+2. **본문**에는 무엇을 변경했는지 또는 왜 변경했는지를 상세히 기록.
+
+---
 
 
 
