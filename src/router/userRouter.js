@@ -7,7 +7,8 @@ import UserMyInformation from "@/views/MyPage/UserMyInformation.vue";
 import MyPagePost from "@/views/MyPage/MyPagePost.vue";
 import MyPageLikes from "@/views/MyPage/MyPageLikes.vue";
 import OauthUserCreate from "@/views/OauthUserCreate.vue";
-
+import YourPagePost from "@/views/YourProfile/YourPagePost.vue";
+import YourPageProject from "@/views/YourProfile/YourPageProject.vue";
 export const userRouter= [
     {
         path:'/ttt/user/create',
@@ -53,5 +54,17 @@ export const userRouter= [
         path: '/oauth/user/create',
         name: 'OauthUserCreate',
         component: OauthUserCreate
+    },
+    {
+        path: '/ttt/user/posts/:nickName',
+        name: 'YourPagePost',
+        component: YourPagePost,
+        props: true  // ✅ props 활성화!
+    },
+    {
+        path: '/ttt/project/user/:nickName',
+        name: 'YourPageProject',
+        component: YourPageProject,
+        props: true  // ✅ props 활성화!
     },
 ]

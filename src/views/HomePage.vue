@@ -74,7 +74,9 @@
               <div class="ranking-list pa-2">
                 <div v-for="(writer, index) in topWriters" :key="index" class="ranking-item">
                   <div class="user-info">
-                    <div class="user-name">{{ writer.nickName }}</div>
+                    <div class="user-name cursor-pointer" @click="$router.push(`/ttt/user/posts/${writer.nickName}`)">
+                      {{ writer.nickName }}
+                    </div>
                     <div class="user-points">{{ writer.rankingPoint }}p</div>
                   </div>
                 </div>
