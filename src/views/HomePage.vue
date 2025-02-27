@@ -83,7 +83,9 @@
               <div class="ranking-list pa-2">
                 <div v-for="(writer, index) in topWriters" :key="index" class="ranking-item">
                   <div class="user-info">
-                    <div class="user-name">{{ writer.nickName }}</div>
+                    <div class="user-name cursor-pointer" @click="goToUserPage(writer.nickName)">
+                      {{ writer.nickName }}
+                    </div>
                     <div class="user-points">{{ writer.rankingPoint }}p</div>
                   </div>
                 </div>
@@ -615,6 +617,18 @@ export default {
       return nickname.length > 6 ? nickname.slice(0, 6) + '...' : nickname;
     },
 
+    goToUserPage(nickName) {
+      // localStorage에서 현재 사용자의 닉네임 가져오기
+      const myNickName = localStorage.getItem("nickName");
+      
+      if (nickName === myNickName) {
+        // 내 닉네임이면 myInformation으로 이동
+        this.$router.push('/ttt/user/myInformation');
+      } else {
+        // 다른 사용자면 yourpage로 이동
+        this.$router.push(`/ttt/user/posts/${encodeURIComponent(nickName)}`);
+      }
+    },
     goToBatchProjects(batchNumber) {
       this.$router.push({
         path: '/ttt/project/find',
