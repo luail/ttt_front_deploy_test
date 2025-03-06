@@ -5,7 +5,10 @@
             <v-col cols="12" md="4" class="chat-list-column">
                 <v-card class="chat-list-card" elevation="0">
                     <v-card-title class="text-center text-h6">
-                        내 라운지 
+                        내 라운지
+                        <div class="total-unread-count">
+                            읽지 않은 메시지 {{ totalUnreadCount }}개
+                        </div>
                     </v-card-title>
                     <v-card-text>
                         <div class="chat-rooms">
@@ -22,6 +25,9 @@
                                                 <span>{{ getChatRoomName(senderNickName, chat.roomName) }}</span>
                                                 <span v-if="chat.isGroupChat === 'Y'" class="participant-count">
                                                     ({{ chat.chatPaticipantCount }})
+                                                </span>
+                                                <span v-if="chat.unReadCount > 0" class="unread-indicator">
+                                                    {{ chat.unReadCount }}
                                                 </span>
                                             </div>
                                         </div>
@@ -160,6 +166,9 @@ export default{
     computed: {
         chatList() {
             return this.$store.state.chatList;
+        },
+        totalUnreadCount() {
+            return this.chatList.reduce((total, chat) => total + (chat.unReadCount || 0), 0);
         }
     },
     async created(){
@@ -814,11 +823,12 @@ export default{
 .room-name-container {
     display: flex;
     align-items: center;
-    gap: 4px;  /* 간격을 좀 더 줄임 */
+    gap: 4px;
 }
 
-.room-name-container span {
+.room-name-container span:first-child {
     font-weight: 500;
+    color: #1E293B;
 }
 
 .participant-count {
@@ -826,5 +836,52 @@ export default{
     font-size: 0.85rem;  /* 글자 크기도 살짝 줄임 */
     font-weight: normal;
     opacity: 0.8;  /* 투명도 추가 */
+}
+
+.unread-indicator {
+    background: linear-gradient(135deg, #9155FD, #7934F3);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+    margin-left: 8px;
+    font-weight: 500;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(145, 85, 253, 0.25);
+    animation: scaleIn 0.3s ease-out, pulse 2s infinite;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 2px 8px rgba(145, 85, 253, 0.25);
+    }
+    50% {
+        box-shadow: 0 2px 12px rgba(145, 85, 253, 0.4);
+    }
+    100% {
+        box-shadow: 0 2px 8px rgba(145, 85, 253, 0.25);
+    }
+}
+
+.total-unread-count {
+    font-size: 0.85rem;
+    color: #64748B;
+    font-weight: normal;
+    margin-top: 4px;
 }
 </style>
