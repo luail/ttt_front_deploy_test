@@ -154,22 +154,42 @@ export default {
   },
   computed: {
     hasUnreadMessages() {
-        return this.$store.state.chatList.some(chat => chat.unReadCount > 0);
+        return this.$store.getters.totalUnreadCount > 0;
     }
   },
   async created() {
     const token = localStorage.getItem('token');
     if (token) {
-      const payload = jwtDecode(token);
-      this.isLoggedIn = true;
-      this.userRole = payload.role;
-      await this.fetchProfileImage();
-      
-      // SSE 연결
-      this.connectSSE();
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
-      }
+        const payload = jwtDecode(token);
+        this.isLoggedIn = true;
+        this.userRole = payload.role;
+        
+        try {
+            // 프로필 이미지와 채팅방 목록을 병렬로 가져오기
+            const [profileResponse, chatListResponse] = await Promise.all([
+                axios.get(`${process.env.VUE_APP_API_BASE_URL}/user/myInformation`),
+                axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`)
+            ]);
+            
+            // 프로필 이미지 설정
+            this.profileImageUrl = profileResponse.data.result.profileImage;
+            
+            // 채팅방 목록을 Vuex store에 저장
+            this.$store.dispatch('setChatList', chatListResponse.data.result);
+        } catch (error) {
+            console.error('데이터 로드 실패:', error);
+            if (error.response?.status === 401) {
+                // 토큰이 만료된 경우 처리
+                localStorage.clear();
+                window.location.href = '/ttt/user/login';
+            }
+        }
+        
+        // SSE 연결
+        this.connectSSE();
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
     }
   },
   unmounted() {
@@ -189,7 +209,7 @@ export default {
       const token = localStorage.getItem('token');
       
       const options = {
-        heartbeatTimeout: 120000,  // 2분으로 설정 (서버 설정과 동일)
+        heartbeatTimeout: 120000,
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -200,22 +220,26 @@ export default {
       this.eventSource.onopen = () => {
         console.log('SSE 연결됨');
       };
+
       this.eventSource.addEventListener('connect', (e) => {
         console.log('SSE Connected:', e.data);
       });
+
       this.eventSource.addEventListener('chat-message', (e) => {
         const chatMessage = JSON.parse(e.data);
         
+        // Vuex store를 통해 새 메시지 처리
         this.$store.dispatch('handleNewMessage', chatMessage);
         
-        // 새 메시지가 오면 깜빡임 효과 시작
+        // 새 메시지 알림 효과
         this.isNewMessage = true;
-        // 3초 후 깜빡임 효과 중지
         setTimeout(() => {
           this.isNewMessage = false;
         }, 1000);
 
-        if (Notification.permission === 'granted') {
+        // 브라우저 알림
+        if (Notification.permission === 'granted' && 
+          this.$route.path !== `/ttt/chatpage/${chatMessage.roomId}`) {
           const notification = new Notification('TikTakTalk', {
             body: `${chatMessage.senderNickName}: ${chatMessage.message}`,
             icon: chatMessage.senderImagePath || require('@/assets/basicProfileImage.png'),

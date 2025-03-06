@@ -13,12 +13,10 @@ export default createStore({
         SET_CURRENT_ROOM(state, roomId) {
             state.currentRoomId = roomId;
         },
-        UPDATE_UNREAD_COUNT(state, roomId) {
-            let chatRoom = state.chatList.find(chat => chat.roomId === roomId);
-            
-            // 채팅방이 없으면 새로 채팅방 목록을 가져오도록 함
-            if (!chatRoom) {
-                // 새 메시지가 왔는데 채팅방이 없다면, 채팅방 목록을 새로 가져와야 함
+        UPDATE_UNREAD_COUNT(state, { roomId }) {
+            const chat = state.chatList.find(c => c.roomId === roomId);
+            if (!chat) {
+                // 채팅방이 목록에 없으면 새로 가져오기
                 axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/my/rooms`)
                     .then(response => {
                         state.chatList = response.data.result;
@@ -27,7 +25,10 @@ export default createStore({
                 return;
             }
             
-            chatRoom.unReadCount += 1;
+            // 현재 채팅방이 아닌 경우에만 안 읽은 메시지 수 증가
+            if (state.currentRoomId !== roomId) {
+                chat.unReadCount = (chat.unReadCount || 0) + 1;
+            }
         }
     },
     actions: {
@@ -37,10 +38,15 @@ export default createStore({
         setCurrentRoom({ commit }, roomId) {
             commit('SET_CURRENT_ROOM', roomId);
         },
-        handleNewMessage({ commit, state }, message) {
-            if (state.currentRoomId !== message.roomId) {
-                commit('UPDATE_UNREAD_COUNT', message.roomId);
-            }
+        handleNewMessage({ commit }, message) {
+            commit('UPDATE_UNREAD_COUNT', {
+                roomId: message.roomId
+            });
+        }
+    },
+    getters: {
+        totalUnreadCount: state => {
+            return state.chatList.reduce((total, chat) => total + (chat.unReadCount || 0), 0);
         }
     }
 }) 
