@@ -16,7 +16,7 @@ export default {
     },
     methods: {
         async sendCodeToBackend(code) {
-            const response = await axios.post("http://localhost:8080/ttt/user/kakao/doLogin", { code })
+            const response = await axios.post("https://server.tiktaktok.site/user/kakao/doLogin", { code })
             const kakaoUserInfo = {
                 ...response.data.result,
                 socialType: "KAKAO"

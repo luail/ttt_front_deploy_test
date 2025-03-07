@@ -210,7 +210,7 @@ export default{
         connectWebsocket(){
             if(this.stompClient && this.stompClient.connected) return;
             // sockjs는 websocket을 내장한 향상된 js 라이브러리. http엔드포인트 사용.
-            const sockJs = new SockJS(`http://localhost:8080/connect`)
+            const sockJs = new SockJS(`https://server.tiktaktok.site/connect`)
             this.stompClient = Stomp.over(sockJs);
             this.token = localStorage.getItem("token");
             this.stompClient.connect({

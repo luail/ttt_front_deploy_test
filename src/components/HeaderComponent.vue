@@ -215,7 +215,7 @@ export default {
         }
       };
 
-      this.eventSource = new EventSourcePolyfill('http://localhost:8080/subscribe', options);
+      this.eventSource = new EventSourcePolyfill('https://server.tiktaktok.site/subscribe', options);
 
       this.eventSource.onopen = () => {
         console.log('SSE 연결됨');

@@ -241,7 +241,7 @@ export default {
             }
 
             try {
-                const response = await axios.post("http://localhost:8080/sms/send-auth", { phoneNumber: this.phoneNumber });
+                const response = await axios.post("https://server.tiktaktok.site/sms/send-auth", { phoneNumber: this.phoneNumber });
                 console.log("인증번호 전송 결과:", response.data);
                 this.authSent = true;
             } catch (error) {
@@ -253,7 +253,7 @@ export default {
         // 인증번호 검증
         async verifyAuthCode() {
             try {
-                const response = await axios.post("http://localhost:8080/sms/verify-auth", {
+                const response = await axios.post("https://server.tiktaktok.site/sms/verify-auth", {
                     phoneNumber: this.phoneNumber,
                     authCode: this.authCode
                 });
