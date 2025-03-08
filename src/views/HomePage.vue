@@ -159,7 +159,7 @@
                           <div class="author-info">
                             <v-avatar size="24">
                               <v-img 
-                                :src="post.authorImage || 'https://ttt-image.s3.ap-northeast-2.amazonaws.com/기본이미지.png'"
+                                :src="post.authorImage || 'https://tiktaktok-images.s3.ap-northeast-2.amazonaws.com/B8EBB89DEBB8A7%2580.webp'"
                                 @error="handleImageError"
                               ></v-img>
                             </v-avatar>
